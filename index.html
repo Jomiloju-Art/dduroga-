@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DDUROGA Safety: Personal Protective Equipment</title>
+    <meta
+      name="description"
+      content="DDUROGA Safety supplies certified PPE for head, hand, body and feet protection, trusted by industry across the country."
+    />
+
+    <!-- Canonical: every filter URL (?cat=, ?industry=, ?page=) resolves here -->
+    <link rel="canonical" href="https://dduroga.vercel.app/" />
+
+    <!-- Branding + installable app -->
+    <meta name="theme-color" content="#0E1216" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/png" href="/favicon-dduroga.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!--
+      Social share tags. STATIC on purpose: WhatsApp, Facebook and LinkedIn fetch
+      the HTML and do not execute JavaScript, so anything React sets at runtime is
+      invisible to them. Update these (and seo.js) when the domain changes.
+    -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="DDUROGA Safety" />
+    <meta property="og:locale" content="en_NG" />
+    <meta property="og:url" content="https://dduroga.vercel.app/" />
+    <meta property="og:title" content="DDUROGA Safety: Personal Protective Equipment" />
+    <meta
+      property="og:description"
+      content="Certified PPE for head, hand, body and feet protection. Stocked in Lagos, delivered to industry nationwide. Part of the Mallcom group."
+    />
+    <meta property="og:image" content="https://dduroga.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="DDUROGA Safety" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="DDUROGA Safety: Personal Protective Equipment" />
+    <meta
+      name="twitter:description"
+      content="Certified PPE for head, hand, body and feet protection. Stocked in Lagos, delivered to industry nationwide."
+    />
+    <meta name="twitter:image" content="https://dduroga.vercel.app/og-image.png" />
+
+    <!--
+      Static security + caching posture for any host that does not rewrite
+      headers (Vercel does, via vercel.json; this covers opening the built
+      index.html directly or serving dist/ from a plain static file server).
+      The CSP is deliberately permissive on style-src: the boot loader in this
+      file and Google Fonts both inject <style>, and tightening it without a
+      nonce pipeline would break the first paint it exists to protect.
+    -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+    <!--
+      Organization schema, static for the same reason. Deliberately no
+      contactPoint: the phone and email in brand.js are still placeholders, and
+      publishing fabricated contact details as machine-readable schema is worse
+      than omitting them.
+    -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "DDUROGA Safety",
+        "url": "https://dduroga.vercel.app/",
+        "logo": "https://dduroga.vercel.app/brand-logo.png",
+        "description": "Nigerian supplier of certified personal protective equipment for head, hand, body and feet protection, and the wholly owned Nigerian subsidiary of Mallcom.",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "44 Jimoh Odutola Street, Off Eric Moore Road, Warehouse 7",
+          "addressLocality": "Surulere",
+          "addressRegion": "Lagos",
+          "addressCountry": "NG"
+        },
+        "parentOrganization": { "@type": "Organization", "name": "Mallcom" }
+      }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!--
+      Exo 2, on client direction: "Can we change the font please?", followed by
+      a reference to pandasafety.com — which runs Exo 2 as its single face.
+
+      One family for both roles, matching how the reference is set: their 69
+      @font-face rules are all Exo 2 weights and unicode ranges, with no second
+      family. It carries body copy at 400 and display headings at 700/800, so it
+      replaces the previous two-face split (Hanken Grotesk + Barlow).
+
+      SIL Open Font License 1.1 — free for commercial use and self-hosting, so
+      unlike the licensed faces this one can be bundled locally later if the
+      Google round-trip ever matters.
+
+      Weights kept to what the stylesheet actually uses:
+        400  body, statement copy, feature titles, tab labels
+        500  mega-menu links and the colour label
+        600  emphasis, buttons
+        700  display headings, eyebrows, nav
+        800  hero tagline, stat figures
+    -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Hero photo is the largest contentful paint; fetch it early. -->
+    <link rel="preload" as="image" href="/hero.jpg" media="(min-width: 901px)" fetchpriority="high" />
+    <link rel="preload" as="image" href="/hero-mobile.jpg" media="(max-width: 900px)" fetchpriority="high" />
+
+    <!--
+      Boot loader, inlined on purpose.
+
+      This markup is the entire first paint. Until the JS bundle arrives there is
+      nothing else to show — the shell is a 4.5 kB document with an empty root —
+      so a cold visit used to be a blank white screen for several seconds. A
+      React component cannot fix that, because React has not mounted yet; this
+      has to be static HTML and inline CSS with no network round-trip.
+
+      It is dismissed in src/main.jsx once the app has rendered, and it fades
+      rather than cutting, so a fast load never flashes.
+    -->
+    <style>
+      #boot {
+        position: fixed; inset: 0; z-index: 9999;
+        display: grid; place-content: center; justify-items: center; gap: 22px;
+        background: #fff;
+        transition: opacity 280ms ease;
+      }
+      #boot.is-done { opacity: 0; pointer-events: none; }
+      #boot .boot__mark { width: 132px; height: 132px; display: block; }
+      #boot .boot__shield { fill: none; stroke: #2F3974; stroke-width: 1.4; opacity: 0.38; }
+      #boot .boot__draw {
+        fill: none; stroke: #F28A1A; stroke-width: 2.4;
+        stroke-linecap: round; stroke-linejoin: round;
+        stroke-dasharray: 100; stroke-dashoffset: 100;
+        animation: bootDraw 1500ms cubic-bezier(0.65, 0, 0.35, 1) infinite;
+      }
+      @keyframes bootDraw {
+        0%   { stroke-dashoffset: 100; }
+        55%  { stroke-dashoffset: 0; opacity: 1; }
+        85%  { stroke-dashoffset: 0; opacity: 1; }
+        100% { stroke-dashoffset: 0; opacity: 0; }
+      }
+      #boot .boot__word {
+        margin: 0; font: 700 15px/1 'Exo 2', 'Segoe UI', system-ui, sans-serif;
+        letter-spacing: 0.4em; text-indent: 0.4em; text-transform: uppercase; color: #2F3974;
+        animation: bootBreathe 1900ms ease-in-out infinite;
+      }
+      @keyframes bootBreathe {
+        0%, 100% { opacity: 0.72; }
+        50% { opacity: 1; }
+      }
+      #boot .boot__sr {
+        position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+        overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+      }
+      @media (max-width: 640px) {
+        #boot .boot__mark { width: 104px; height: 104px; }
+      }
+
+      /* Slow/never-loading state. Zero JS, on purpose: the case it covers is
+         the bundle not arriving. If the app boots normally the whole #boot
+         element is removed before this delay elapses. */
+      #boot .boot__slow {
+        position: fixed; left: 0; right: 0; bottom: 40px; margin: 0;
+        text-align: center; opacity: 0;
+        animation: bootSlow 0s linear 9000ms forwards;
+        font: 400 13px/1.55 Roboto, 'Segoe UI', system-ui, sans-serif;
+        color: rgba(14, 18, 22, 0.62);
+      }
+      #boot .boot__slow a { color: #2F3974; font-weight: 600; }
+      @keyframes bootSlow { to { opacity: 1; } }
+      @media (prefers-reduced-motion: reduce) {
+        #boot .boot__draw { animation: none; stroke-dashoffset: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <!-- Removed by src/main.jsx once React has rendered. -->
+    <div id="boot" role="status" aria-live="polite">
+      <span class="boot__sr">Loading DDUROGA Safety</span>
+      <svg class="boot__mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path class="boot__shield" d="M12 3 20 6v6c0 4.6-3.2 7.9-8 9-4.8-1.1-8-4.4-8-9V6z" />
+        <path class="boot__draw" pathLength="100" d="M12 3 20 6v6c0 4.6-3.2 7.9-8 9-4.8-1.1-8-4.4-8-9V6z" />
+      </svg>
+      <p class="boot__word">DDUROGA</p>
+      <p class="boot__slow">Still loading&hellip; <a href="./">Reload the page</a></p>
+    </div>
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

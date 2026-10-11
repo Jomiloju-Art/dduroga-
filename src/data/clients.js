@@ -1,0 +1,87 @@
+/**
+ * Client / social-proof entries.
+ *
+ * NAMES SUPPLIED BY DDUROGA, 13 of them, each now paired with a mark.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * PROVENANCE — five different routes, because no single one worked
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * Own site, static scrape
+ *   Guinness                     guinness-nigeria.com
+ *   Dangote Petroleum & Refinery refinery.dangote.com
+ *   NIPCO                        nipcoplc.com
+ *   Quantum Group                quantumgroupnigeria.com
+ *   Olam Group                   olamgroup.com
+ *   Saket Agro                   saketgroup.com
+ *   Bua Group                    buagroup.com — Cloudflare blocks a browser here
+ *                                but not curl, and the site served a 59x62
+ *                                WordPress crop that had to be swapped for the
+ *                                uncropped original
+ * Own site, rendered DOM
+ *   Mantrac                      mantracgroup.com — an inline SVG that only
+ *                                exists after JS runs
+ * Parent brand site
+ *   DuFil / Indomie              indomie.com; dufil.com never finishes rendering
+ *
+ * THIRD-PARTY SOURCES — these four could not be taken from the brands at all,
+ * so they come from elsewhere and are worth confirming before launch:
+ *
+ *   Kelloggs Tolaram     Wikimedia Commons, File:Kellogg's-Logo.svg.
+ *                        kelloggs.com answers "Access Denied" and .co.uk
+ *                        returns 405, so the brand site was never readable.
+ *   Colgate Tolaram      uplead logo API. Their own CDN serves only
+ *                        colgate-smile-badge-white, a white mark that is
+ *                        invisible on a light strip; every other colourway
+ *                        returns 403.
+ *   7Up Bottling Company hunter.io logo API. 7up.com sits behind a Cloudflare
+ *                        interstitial and its /en page is a JS shell.
+ *   Tower Alloys Group   hunter.io logo API. No website exists — only
+ *                        business-directory listings.
+ *
+ * Note on style: Mantrac, Indomie, BUA, Colgate and 7UP publish block lockups
+ * with solid grounds. They read heavier in the row than the transparent
+ * wordmarks beside them. That is how the brands publish them.
+ *
+ * Note on shape: Tower Alloys is a portrait mark, so height-normalising leaves
+ * it narrow — it reads smaller than its neighbours at strip size.
+ *
+ * A logo is a trademark, and four of these came from neither the brand nor the
+ * client. For a "we supply them" strip this is the usual distributor use, but
+ * all thirteen want the same written confirmation the names need.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * SPELLINGS TO CONFIRM WITH THE CLIENT
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * Reproduced EXACTLY as sent, including the ones that look like they want a
+ * second look. Nothing has been tidied, because "the company name, exactly as
+ * it should appear" is a question only the client can answer:
+ *
+ *   'DuFil / Indomie'              one company, or two entries?
+ *   'Kelloggs Tolaram'             Kellogg's / Kellogg ?
+ *   'Dangote Petroleum & Refinery' their registered form? (their own site
+ *                                  renders it "Dangote Petroleum Refinery")
+ *   '7Up Bottling Company'         7UP ?
+ *   'Bua Group'                    BUA ? (their own site renders it "BUA Group")
+ *
+ * Their message also ended "And many more", which is not treated as an entry.
+ */
+export const clients = [
+  { name: 'Guinness', logo: '/clients/guinness.png' },
+  { name: 'DuFil / Indomie', logo: '/clients/dufil-indomie.png' },
+  { name: 'Kelloggs Tolaram', logo: '/clients/kelloggs-tolaram.png' },
+  { name: 'Colgate Tolaram', logo: '/clients/colgate-tolaram.png' },
+  { name: 'Dangote Petroleum & Refinery', logo: '/clients/dangote-refinery.png' },
+  { name: 'NIPCO', logo: '/clients/nipco.png' },
+  { name: '7Up Bottling Company', logo: '/clients/7up-bottling.png' },
+  { name: 'Quantum Group', logo: '/clients/quantum-group.png' },
+  { name: 'Tower Alloys Group', logo: '/clients/tower-alloys.png' },
+  { name: 'Olam Group', logo: '/clients/olam-group.png' },
+  { name: 'Bua Group', logo: '/clients/bua-group.png' },
+  { name: 'Mantrac', logo: '/clients/mantrac.png' },
+  { name: 'Saket Agro', logo: '/clients/saket-agro.png' },
+];
+
+/** Clients with a permissioned quote, shown alongside their entry. */
+export const testimonials = [];

@@ -1,0 +1,19 @@
+# Local-only artifacts that must not be uploaded to Vercel.
+_backup-originals
+node_modules
+.npm-cache
+dist
+dist-ssr
+tools
+*.log
+.env
+.env.local
+.env.*.local
+.vscode
+.idea
+
+# VP9/WebM is the smaller alternative source in <source> order; .mp4 covers
+# every one of the 70 videos for all current browsers, so shipping mp4 alone
+# loses only the size optimisation. Dropped because the upstream link sustains
+# ~0.45 MB/s and 240MB aborts the CLI upload stream mid-flight.
+public/products/video/*.webm

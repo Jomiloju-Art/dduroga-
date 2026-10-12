@@ -45,7 +45,6 @@
   ],
   "headers": [
     {
-      "comment": "Hashed build output is content-addressed: the filename changes whenever the bytes change, so it is safe to cache forever. This is what the hash is for. Was previously inheriting the document policy (max-age=0, must-revalidate), which made every repeat visit re-validate the 985 kB catalogue bundle.",
       "source": "/assets/(.*)",
       "headers": [
         {
@@ -55,7 +54,6 @@
       ]
     },
     {
-      "comment": "Static public/ assets keep their stable filenames across builds, so they get a long cache but NOT immutable - a logo or favicon replacement must be able to take effect. One day is a deliberate compromise: long enough to save the repeat fetch, short enough that a swap lands without a cache-bust query.",
       "source": "/(.*).(png|jpg|jpeg|webp|svg|ico|woff|woff2)",
       "headers": [
         {
@@ -65,7 +63,6 @@
       ]
     },
     {
-      "comment": "The document itself must never be cached: it is the only file whose name is stable while its contents (the asset hashes) change on every deploy. Caching it would pin a visitor to a build whose chunks no longer exist.",
       "source": "/(.*)",
       "headers": [
         {

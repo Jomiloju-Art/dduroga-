@@ -1,11 +1,14 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageHero from '../components/PageHero.jsx';
 import { useQuote, quoteKey } from '../quote/QuoteContext.jsx';
-import { sendEnquiry, mailtoHref } from '../lib/enquiry.js';
+import { sendEnquiry } from '../lib/enquiry.js';
 import { IconArrowRight, IconCheck } from '../components/Icons.jsx';
+import { usePageMeta } from '../lib/seo.js';
+import { brand } from '../data/brand.js';
 
-const EMPTY = { name: '', email: '', company: '', notes: '' };
+const EMPTY = { name: '', email: '', phone: '', company: '', notes: '' };
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function QuotePage() {
   const { items, remove, setQty, clear } = useQuote();
@@ -13,15 +16,25 @@ export default function QuotePage() {
   const [errors, setErrors] = useState({});
   const [sent, setSent] = useState(false);
   const [mailto, setMailto] = useState('');
+  const formRef = useRef(null);
+  usePageMeta({ title: 'Your quote list', canonical: '/quote', noindex: true });
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
   const validate = () => {
     const next = {};
     if (!form.name.trim()) next.name = 'Enter your name.';
-    if (!form.email.trim()) next.email = 'Enter your email.';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) next.email = 'That email looks invalid.';
+    // Many buyers here answer by phone or WhatsApp rather than email, so either
+    // one is enough to reply to.
+    const hasEmail = Boolean(form.email.trim());
+    const hasPhone = form.phone.replace(/\D/g, '').length >= 7;
+    if (!hasEmail && !hasPhone) next.email = 'Enter an email or a phone number so we can reply.';
+    else if (hasEmail && !EMAIL_RE.test(form.email.trim())) next.email = 'That email looks invalid.';
+    if (form.phone.trim() && !hasPhone) next.phone = 'That phone number looks too short.';
     setErrors(next);
+    // Move focus to the first problem so keyboard and screen-reader users land on it.
+    const first = ['name', 'email', 'phone'].find((k) => next[k]);
+    if (first) formRef.current?.querySelector(`#q-${first}`)?.focus();
     return Object.keys(next).length === 0;
   };
 
@@ -33,6 +46,7 @@ export default function QuotePage() {
         type: 'Quote request',
         name: form.name,
         email: form.email,
+        phone: form.phone,
         company: form.company,
         notes: form.notes,
         items: items.map((p) => ({ title: p.title, sku: p.sku, qty: p.qty || 1, option: p.option || '' })),
@@ -45,7 +59,8 @@ export default function QuotePage() {
     else clear();
   };
 
-  const subtotal = items.reduce((n, p) => n + (p.qty || 1), 0);
+  const units = items.reduce((n, p) => n + (p.qty || 1), 0);
+  const field = (id, err) => ({ 'aria-invalid': Boolean(err), 'aria-describedby': err ? `${id}-err` : undefined });
 
   return (
     <>
@@ -53,7 +68,7 @@ export default function QuotePage() {
 
       <section className="section" style={{ paddingBlock: '56px 84px' }}>
         <div className="container">
-          {items.length === 0 ? (
+          {items.length === 0 && !sent ? (
             <div style={{ textAlign: 'center', padding: '40px 0' }}>
               <h2 className="section-title" style={{ marginBottom: 10 }}>Your quote list is empty</h2>
               <p className="muted" style={{ marginBottom: 24, maxWidth: '46ch', marginInline: 'auto' }}>
@@ -74,14 +89,18 @@ export default function QuotePage() {
                       {p.sku && <em>SKU: {p.sku}</em>}
                     </span>
                     <span className="quote-item__qty">
-                      <button type="button" onClick={() => setQty(quoteKey(p), (p.qty || 1) - 1)} aria-label="Decrease">−</button>
+                      <button type="button" onClick={() => setQty(quoteKey(p), (p.qty || 1) - 1)} aria-label={`Decrease quantity of ${p.title}`}>−</button>
                       <b>{p.qty || 1}</b>
-                      <button type="button" onClick={() => setQty(quoteKey(p), (p.qty || 1) + 1)} aria-label="Increase">+</button>
+                      <button type="button" onClick={() => setQty(quoteKey(p), (p.qty || 1) + 1)} aria-label={`Increase quantity of ${p.title}`}>+</button>
                     </span>
                     <button type="button" className="quote-item__remove" onClick={() => remove(quoteKey(p))} aria-label={`Remove ${p.title}`}>×</button>
                   </div>
                 ))}
-                <p className="muted" style={{ marginTop: 14 }}>{items.length} product{items.length === 1 ? '' : 's'} · {subtotal} line item{subtotal === 1 ? '' : 's'}</p>
+                {items.length > 0 && (
+                  <p className="muted" style={{ marginTop: 14 }}>
+                    {items.length} product{items.length === 1 ? '' : 's'} · {units} unit{units === 1 ? '' : 's'} in total
+                  </p>
+                )}
               </div>
 
               {/* Form */}
@@ -90,36 +109,47 @@ export default function QuotePage() {
                   <div className="panel" role="status">
                     <div className="form-success" style={{ marginBottom: 14 }}>
                       <IconCheck width="18" height="18" style={{ display: 'inline', verticalAlign: -3, marginRight: 8 }} />
-                      Thank you. Your quote request is ready to send.
+                      {mailto ? 'Your quote request is ready to send.' : 'Thank you. Your quote request has been sent.'}
                     </div>
                     {mailto ? (
                       <>
-                        <p className="muted" style={{ fontSize: '0.95rem' }}>An email endpoint isn't configured yet, so open it in your email client:</p>
-                        <a className="btn hx-btn" style={{ marginTop: 16 }} href={mailto}>Open in email client</a>
-                        <p className="muted" style={{ fontSize: '0.82rem', marginTop: 14 }}>Developer note: set <code>enquiryEndpoint</code> in src/data/brand.js to send automatically.</p>
+                        <p className="muted" style={{ fontSize: '0.95rem' }}>
+                          Send it from your email app to finish, or call or WhatsApp us on {brand.phone} and give your name.
+                        </p>
+                        <a className="btn hx-btn" style={{ marginTop: 16 }} href={mailto}>Open in email app</a>
                       </>
                     ) : (
-                      <p className="muted" style={{ fontSize: '0.95rem' }}>Your request has been submitted. We'll get back to you within one business day.</p>
+                      <p className="muted" style={{ fontSize: '0.95rem' }}>
+                        Our team will reply with pricing and lead times. For anything urgent, call or WhatsApp {brand.phone}.
+                      </p>
                     )}
                   </div>
                 ) : (
-                  <form className="form" onSubmit={submit} noValidate>
+                  <form className="form" onSubmit={submit} noValidate ref={formRef}>
                     <div className="form-row">
                       <div className="field">
                         <label htmlFor="q-name">Full name <span className="req">*</span></label>
-                        <input id="q-name" value={form.name} onChange={set('name')} autoComplete="name" />
-                        {errors.name && <p className="form-error">{errors.name}</p>}
+                        <input id="q-name" value={form.name} onChange={set('name')} autoComplete="name" {...field('q-name', errors.name)} />
+                        {errors.name && <p className="form-error" id="q-name-err">{errors.name}</p>}
                       </div>
                       <div className="field">
                         <label htmlFor="q-company">Company</label>
                         <input id="q-company" value={form.company} onChange={set('company')} autoComplete="organization" />
                       </div>
                     </div>
-                    <div className="field">
-                      <label htmlFor="q-email">Work email <span className="req">*</span></label>
-                      <input id="q-email" type="email" value={form.email} onChange={set('email')} autoComplete="email" />
-                      {errors.email && <p className="form-error">{errors.email}</p>}
+                    <div className="form-row">
+                      <div className="field">
+                        <label htmlFor="q-email">Work email</label>
+                        <input id="q-email" type="email" value={form.email} onChange={set('email')} autoComplete="email" {...field('q-email', errors.email)} />
+                        {errors.email && <p className="form-error" id="q-email-err">{errors.email}</p>}
+                      </div>
+                      <div className="field">
+                        <label htmlFor="q-phone">Phone / WhatsApp</label>
+                        <input id="q-phone" type="tel" inputMode="tel" value={form.phone} onChange={set('phone')} autoComplete="tel" placeholder="+234…" {...field('q-phone', errors.phone)} />
+                        {errors.phone && <p className="form-error" id="q-phone-err">{errors.phone}</p>}
+                      </div>
                     </div>
+                    <p className="form-note" style={{ marginTop: -6, marginBottom: 14 }}>Give an email or a phone number, or both, so we can send your quote.</p>
                     <div className="field">
                       <label htmlFor="q-notes">Notes (volumes, deadlines, specifications)</label>
                       <textarea id="q-notes" value={form.notes} onChange={set('notes')} placeholder="e.g. 500 pairs, need ISO certificates…" />

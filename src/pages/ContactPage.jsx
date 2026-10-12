@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import PageHero from '../components/PageHero.jsx';
 import { brand } from '../data/brand.js';
 import { categories } from '../data/products.js';
 import { IconPhone, IconMail, IconMapPin, IconClock, IconCheck } from '../components/Icons.jsx';
-import { sendEnquiry, mailtoHref } from '../lib/enquiry.js';
+import { sendEnquiry } from '../lib/enquiry.js';
 import { usePageMeta } from '../lib/seo.js';
 
 const EMPTY = {
@@ -31,13 +31,22 @@ export default function ContactPage() {
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
+  const formRef = useRef(null);
+
   const validate = () => {
     const next = {};
     if (!form.name.trim()) next.name = 'Please enter your name.';
-    if (!form.email.trim()) next.email = 'Please enter your email.';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) next.email = 'That email address looks invalid.';
+    // Email or phone: many buyers here prefer a call or WhatsApp.
+    const hasEmail = Boolean(form.email.trim());
+    const hasPhone = form.phone.replace(/\D/g, '').length >= 7;
+    if (!hasEmail && !hasPhone) next.email = 'Enter an email or a phone number so we can reply.';
+    else if (hasEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) next.email = 'That email address looks invalid.';
+    if (form.phone.trim() && !hasPhone) next.phone = 'That phone number looks too short.';
     if (productParam && !form.message.trim()) next.message = 'Please add a short message.';
     setErrors(next);
+    // Move focus to the first problem field.
+    const first = ['name', 'email', 'phone', 'message'].find((k) => next[k]);
+    if (first) formRef.current?.querySelector(`#cf-${first}`)?.focus();
     return Object.keys(next).length === 0;
   };
 
@@ -106,14 +115,11 @@ export default function ContactPage() {
                 {fallbackMailto ? (
                   <>
                     <p className="muted" style={{ fontSize: '0.95rem' }}>
-                      An email endpoint isn't configured yet. To keep your message now, open it in your email client:
+                      Send it from your email app to finish, or call or WhatsApp us on {brand.phone}.
                     </p>
                     <a className="btn btn--primary" style={{ marginTop: 16 }} href={fallbackMailto}>
-                      Open in email client
+                      Open in email app
                     </a>
-                    <p className="muted" style={{ fontSize: '0.85rem', marginTop: 16 }}>
-                      Developer note: set <code>enquiryEndpoint</code> in <code>src/data/brand.js</code> to send automatically.
-                    </p>
                   </>
                 ) : (
                   <p className="muted" style={{ fontSize: '0.95rem' }}>
@@ -122,12 +128,12 @@ export default function ContactPage() {
                 )}
               </div>
             ) : (
-              <form className="form" onSubmit={handleSubmit} noValidate>
+              <form className="form" onSubmit={handleSubmit} noValidate ref={formRef}>
                 <div className="form-row">
                   <div className="field">
                     <label htmlFor="cf-name">Full name <span className="req">*</span></label>
-                    <input id="cf-name" value={form.name} onChange={set('name')} autoComplete="name" />
-                    {errors.name && <p className="form-error">{errors.name}</p>}
+                    <input id="cf-name" value={form.name} onChange={set('name')} autoComplete="name" aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? 'cf-name-err' : undefined} />
+                    {errors.name && <p className="form-error" id="cf-name-err">{errors.name}</p>}
                   </div>
                   <div className="field">
                     <label htmlFor="cf-company">Company</label>
@@ -137,15 +143,17 @@ export default function ContactPage() {
 
                 <div className="form-row">
                   <div className="field">
-                    <label htmlFor="cf-email">Work email <span className="req">*</span></label>
-                    <input id="cf-email" type="email" value={form.email} onChange={set('email')} autoComplete="email" />
-                    {errors.email && <p className="form-error">{errors.email}</p>}
+                    <label htmlFor="cf-email">Work email</label>
+                    <input id="cf-email" type="email" value={form.email} onChange={set('email')} autoComplete="email" aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'cf-email-err' : undefined} />
+                    {errors.email && <p className="form-error" id="cf-email-err">{errors.email}</p>}
                   </div>
                   <div className="field">
-                    <label htmlFor="cf-phone">Phone</label>
-                    <input id="cf-phone" value={form.phone} onChange={set('phone')} autoComplete="tel" />
+                    <label htmlFor="cf-phone">Phone / WhatsApp</label>
+                    <input id="cf-phone" type="tel" inputMode="tel" placeholder="+234…" value={form.phone} onChange={set('phone')} autoComplete="tel" aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? 'cf-phone-err' : undefined} />
+                    {errors.phone && <p className="form-error" id="cf-phone-err">{errors.phone}</p>}
                   </div>
                 </div>
+                <p className="form-note" style={{ marginTop: -6, marginBottom: 14 }}>Give an email or a phone number, or both, so we can reply.</p>
 
                 <div className="field">
                   <label htmlFor="cf-interest">I am interested in</label>

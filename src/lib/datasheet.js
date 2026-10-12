@@ -22,7 +22,7 @@ export async function downloadDatasheet(product, specs) {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(11);
   doc.setTextColor(96, 100, 104);
-  doc.text(product.type || '', M, 104);
+  doc.text(specs.range || product.type || '', M, 104);
 
   // Product image
   let imageY = 116;
@@ -50,7 +50,8 @@ export async function downloadDatasheet(product, specs) {
   let y = 290;
   const rows = [
     ['Protection zone', specs.zone],
-    ['Product line', product.type || 'Not specified'],
+    ['Product line', specs.range || product.type || 'Not specified'],
+    ...(specs.sizes ? [['Sizes', specs.sizes]] : []),
     ['Colours', specs.colours],
     ['SKUs', specs.skus],
     ['Weight', specs.weight],

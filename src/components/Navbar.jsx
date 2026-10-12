@@ -210,7 +210,7 @@ export default function Navbar() {
                           </li>
                         ))}
                       </ul>
-                      <Link className="mega-col__all" to="/products">
+                      <Link className="mega-col__all" to="/products#facet-industry">
                         All {industryCatalog.length} industries
                       </Link>
                     </div>
@@ -226,7 +226,7 @@ export default function Navbar() {
                             </li>
                           ))}
                       </ul>
-                      <Link className="mega-col__all" to="/products">
+                      <Link className="mega-col__all" to="/products#facet-hazard">
                         All {Object.keys(hazardNames).length} hazards
                       </Link>
                     </div>

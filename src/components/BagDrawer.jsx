@@ -10,7 +10,7 @@ import { IconArrowRight } from './Icons.jsx';
  * request-quote CTA.
  */
 export default function BagDrawer() {
-  const { items, count, open, closeBag, remove, setQty } = useQuote();
+  const { items, count, open, closeBag, remove, setQty, notice } = useQuote();
 
   // Close on Escape and lock the page behind the drawer while it is open.
   useEffect(() => {
@@ -42,6 +42,12 @@ export default function BagDrawer() {
           </button>
         </header>
 
+        {notice && items.length > 0 && (
+          <p className="bag-drawer__notice" role="status">
+            <i className="fas fa-check" aria-hidden="true" /> {notice.text}
+          </p>
+        )}
+
         {items.length === 0 ? (
           <div className="bag-drawer__empty">
             <h3>Your bag is empty</h3>
@@ -53,7 +59,7 @@ export default function BagDrawer() {
         ) : (
           <div className="bag-drawer__items">
             {items.map((p) => (
-              <div className="bag-item" key={quoteKey(p)}>
+              <div className={`bag-item${notice?.key === quoteKey(p) ? ' is-new' : ''}`} key={quoteKey(p)}>
                 <span className="bag-item__img">
                   {p.img ? <img src={p.img} alt="" loading="lazy" /> : null}
                 </span>
@@ -80,6 +86,7 @@ export default function BagDrawer() {
               Request a quote · {count} {count === 1 ? 'item' : 'items'}
               <IconArrowRight width="14" height="14" />
             </Link>
+            <p className="bag-drawer__assure">No payment now. Stocked in Lagos, delivered nationwide.</p>
           </footer>
         )}
       </aside>

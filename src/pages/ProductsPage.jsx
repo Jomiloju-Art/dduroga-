@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { allProducts, zones, hazardNames, industryCatalog, byHazard, byIndustry, productsByZone } from '../data/products.js';
+import { useLocation, useSearchParams } from 'react-router-dom';
+import { allProducts, zones, hazardNames, industryCatalog, byHazard, byIndustry, productsByZone, productsByRange, rangeById, rangesForZone, rangeLabel, byFeatured } from '../data/products.js';
 import ProductCard from '../components/ProductCard.jsx';
 import Pagination from '../components/Pagination.jsx';
 import ProductFilters from '../components/ProductFilters.jsx';
@@ -9,7 +9,7 @@ import { usePageMeta } from '../lib/seo.js';
 
 const PER_PAGE = 24;
 
-/** Sort options. "Featured" keeps the curated catalogue order. */
+/** Sort options. "Featured": trending picks, then in stock, then 2025 catalogue order (byFeatured). */
 const SORTS = [
   { value: '', label: 'Featured' },
   { value: 'az', label: 'Name A–Z' },
@@ -19,23 +19,37 @@ const SORTS = [
 
 export default function ProductsPage() {
   const [params, setParams] = useSearchParams();
-  const cat = params.get('cat');
   const hazard = params.get('hazard');
   const industry = params.get('industry');
+  const range = rangeById(params.get('range'));
+  // A range implies its zone, so ?range=welder alone still highlights Hand.
+  const cat = params.get('cat') || range?.zone || null;
   const sort = params.get('sort') || '';
   const [filtersOpen, setFiltersOpen] = useState(false);
+  // /products#facet-industry (mega menu "All 17 industries"): open the filters
+  // on small screens and bring that group into view.
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (!hash.startsWith('#facet-')) return;
+    if (window.matchMedia('(max-width: 1023px)').matches) setFiltersOpen(true);
+    const t = setTimeout(() => document.querySelector(hash)?.scrollIntoView({ block: 'start' }), 120);
+    return () => clearTimeout(t);
+  }, [hash]);
 
   // Facets are mutually exclusive, so picking one replaces the whole query string.
   // `sort` is carried across because changing facet should not reset the order.
+  // The one exception is a range, which narrows its zone rather than replacing it.
   const setQuery = (obj) => {
     const next = new URLSearchParams();
     Object.entries({ sort, ...obj }).forEach(([k, v]) => { if (v && v !== 'all') next.set(k, v); });
     setParams(next, { replace: true });
   };
+  const pick = (key, value) => (key === 'range' ? setQuery({ cat, range: value }) : setQuery({ [key]: value }));
 
   const zone = zones.find((z) => z.id === cat);
   const hazardLabel = hazard ? hazardNames[hazard] : null;
   const industryLabel = industry ? industryCatalog.find((i) => i.slug === industry)?.label : null;
+  const zoneRanges = zone ? rangesForZone(zone.id) : [];
 
   let title = 'All products';
   let visible = allProducts;
@@ -46,6 +60,9 @@ export default function ProductsPage() {
   } else if (industry) {
     visible = byIndustry(industry);
     title = industryLabel || 'Industry';
+  } else if (range) {
+    visible = productsByRange(range.id);
+    title = range.label;
   } else if (zone) {
     visible = productsByZone(zone.id);
     title = zone.label;
@@ -55,7 +72,8 @@ export default function ProductsPage() {
   // 24 alphabetically, not the first 24 of the curated order re-sorted.
   if (sort === 'az') visible = [...visible].sort((a, b) => a.title.localeCompare(b.title));
   else if (sort === 'za') visible = [...visible].sort((a, b) => b.title.localeCompare(a.title));
-  else if (sort === 'type') visible = [...visible].sort((a, b) => (a.type || '').localeCompare(b.type || '') || a.title.localeCompare(b.title));
+  else if (sort === 'type') visible = [...visible].sort((a, b) => rangeLabel(a).localeCompare(rangeLabel(b)) || a.title.localeCompare(b.title));
+  else visible = [...visible].sort(byFeatured);
 
   const pageParam = parseInt(params.get('page') || '1', 10) || 1;
   const pageCount = Math.max(1, Math.ceil(visible.length / PER_PAGE));
@@ -89,7 +107,7 @@ export default function ProductsPage() {
   usePageMeta({
     title,
     description: `Browse the certified PPE range from DDUROGA Safety: ${title.toLowerCase()}.`,
-    canonical: `/products${cat ? `?cat=${cat}` : hazard ? `?hazard=${hazard}` : industry ? `?industry=${industry}` : ''}`,
+    canonical: `/products${range ? `?range=${range.id}` : cat ? `?cat=${cat}` : hazard ? `?hazard=${hazard}` : industry ? `?industry=${industry}` : ''}`,
   });
 
   return (
@@ -122,6 +140,30 @@ export default function ProductsPage() {
         )}
       </div>
 
+      {/* Product types within the chosen zone, from Mallcom's catalogue ranges. */}
+      {zone && !hazard && !industry && zoneRanges.length > 0 && (
+        <div className="plp-quick plp-quick--ranges" role="group" aria-label={`${zone.label} product types`}>
+          <span className="plp-quick__label">Type:</span>
+          <button
+            type="button"
+            className={`plp-quick__chip ${!range ? 'is-active' : ''}`}
+            onClick={() => setQuery({ cat: zone.id })}
+          >
+            All
+          </button>
+          {zoneRanges.map((r) => (
+            <button
+              key={r.id}
+              type="button"
+              className={`plp-quick__chip ${range?.id === r.id ? 'is-active' : ''}`}
+              onClick={() => setQuery({ cat: zone.id, range: r.id })}
+            >
+              {r.label} <span className="plp-quick__count">{r.count}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       <section className="plp">
         <div className="plp-layout">
           <aside id="filters" className={`plp-sidebar ${filtersOpen ? 'open' : ''}`} aria-label="Filters">
@@ -132,13 +174,15 @@ export default function ProductsPage() {
                   Clear All
                 </button>
               )}
+              {/* Phones: the drawer needs its own way out. */}
+              <button type="button" className="plp-sidebar__close" onClick={() => setFiltersOpen(false)} aria-label="Close filters">×</button>
             </div>
             <ProductFilters
-              active={{ cat, industry, hazard }}
-              onPick={(key, value) => setQuery({ [key]: value })}
+              active={{ cat, range: range?.id, industry, hazard }}
+              onPick={pick}
             />
             <button type="button" className="plp-sidebar__apply" onClick={() => setFiltersOpen(false)}>
-              Show results
+              {visible.length ? `Show ${visible.length} result${visible.length === 1 ? '' : 's'}` : 'No results'}
             </button>
           </aside>
 
@@ -173,6 +217,7 @@ export default function ProductsPage() {
                   onClick={() => setFiltersOpen(true)}
                 >
                   <i className="fas fa-sliders-h" aria-hidden="true" />
+                  <span className="plp-filter-toggle__label">Filters{hasFilter ? ' •' : ''}</span>
                 </button>
               </div>
             </div>

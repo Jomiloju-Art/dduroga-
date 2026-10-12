@@ -29,7 +29,7 @@ const tierTwoLinks = [
   { to: '/products', label: 'View catalogue' },
   { to: '/contact', label: 'Become a Dealer' },
   { to: '/contact', label: 'Request a Catalogue' },
-  { to: '/learning', label: 'ISO Certification' },
+  { to: '/certifications', label: 'Certifications' },
 ];
 
 export default function Footer() {

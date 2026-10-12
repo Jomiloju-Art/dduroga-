@@ -1,31 +1,20 @@
 import { Link } from 'react-router-dom';
 import {
-  categories,
-  productsByZone,
-  zoneOf,
-  industryCatalog,
-  hazardNames,
-  byIndustry,
-  byHazard,
-  typeLabel,
-} from '../data/products.js';
-import {
   homeIndustries,
-  homeHazards,
   homeResources,
 } from '../data/homeContent.js';
 import { IconArrowRight, IconCheck } from '../components/Icons.jsx';
 import { usePageMeta } from '../lib/seo.js';
 import Reveal from '../components/Reveal.jsx';
 import TrustBand from '../components/TrustBand.jsx';
+import TrendingShowcase from '../components/TrendingShowcase.jsx';
 import RangeStats from '../components/RangeStats.jsx';
 import ClientLogos from '../components/ClientLogos.jsx';
-import ZoneCard from '../components/ZoneCard.jsx';
-import IndustryIcon from '../components/IndustryIcon.jsx';
-import { useQuote } from '../quote/QuoteContext.jsx';
+import ZoneBento from '../components/ZoneBento.jsx';
+import SectorGrid from '../components/SectorGrid.jsx';
 import { catalogues } from '../data/catalogues.generated.js';
 
-/** "9 pages · PDF · 0.8 MB" — read from what tools/build-catalogues.mjs produced. */
+/** "147 pages · PDF · 24.9 MB", from src/data/catalogues.generated.js. */
 const catalogueMeta = (c) => `${c.pages} pages · PDF · ${(c.bytes / 1024 / 1024).toFixed(1)} MB`;
 
 /** What ships with an order — replaces repeating the badge set a second time. */
@@ -36,55 +25,12 @@ const documentation = [
   'Custom branding and private label',
 ];
 
-const trending = (() => {
-  const out = [];
-  for (const z of ['head', 'hand', 'body', 'feet']) {
-    const list = productsByZone(z).filter((p) => p.img).sort((a, b) => (b.imgs?.length || 0) - (a.imgs?.length || 0));
-    if (list[0]) out.push(list[0]);
-    if (list[1]) out.push(list[1]);
-  }
-  return out.slice(0, 8);
-})();
-
-/** One-line technical spec for a card: up to two short tags, else the type. */
-const specLine = (p) => (p.tags || []).filter((t) => t.length <= 18).slice(0, 2).join(' · ') || typeLabel(p) || '';
-
-function TrendingCard({ product }) {
-  const { add } = useQuote();
-  const zone = zoneOf(product);
-  return (
-    <Link to={`/products/${product.slug}`} className="hx-trend__card">
-      <span className="hx-trend__img"><img src={product.img} alt={product.title} loading="lazy" /></span>
-      {zone && <span className="hx-trend__zone">{zone.label}</span>}
-      <span className="hx-trend__name">{product.title}</span>
-      <span className="hx-trend__spec">{specLine(product)}</span>
-      <span className="hx-trend__actions">
-        <button
-          type="button"
-          className="hx-trend__add"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            add(product);
-          }}
-        >
-          Add to quote
-        </button>
-      </span>
-    </Link>
-  );
-}
-
 export default function HomePage() {
   usePageMeta({
     title: 'Home',
     description:
       'DDUROGA Safety: certified head-to-toe PPE for industry. Gloves, footwear, head, eye and body protection, supplied in bulk across Nigeria.',
   });
-
-  const showTrending = trending.filter(Boolean);
-  const industries = homeIndustries.map((s) => industryCatalog.find((i) => i.slug === s)).filter(Boolean);
-  const hazards = homeHazards.map((id) => ({ id, label: hazardNames[id] })).filter((h) => h.label);
 
   return (
     <>
@@ -109,82 +55,18 @@ export default function HomePage() {
 
       {/* ================= 2. TRUST BAND ================= */}
       <TrustBand />
-      {/* Client logo strip. Self-hides until src/data/clients.js has
-          permissioned entries — see that file for what to request from the
-          client. The client's own line is its default heading. */}
-      <ClientLogos />
 
-      {/* ================= 3. PROTECTION ZONES ================= */}
-      <section className="hx-section hx-section--bleed" id="zones">
-        <div className="hx-bleed">
-          <Reveal className="hx-section__head hx-section__head--left">
-            <h2>Browse by protection zone</h2>
-            <p>Head-to-toe coverage. Start with the zone you need to kit out.</p>
-          </Reveal>
-          <Reveal className="zc-grid reveal-stagger">
-            {categories.map((cat) => (
-              <ZoneCard
-                key={cat.id}
-                id={cat.id}
-                label={cat.label}
-                count={productsByZone(cat.id).length}
-              />
-            ))}
-          </Reveal>
-        </div>
-      </section>
+      {/* ================= 3. PROTECTION ZONES (bento, from the homepage concept) ================= */}
+      <ZoneBento />
 
-      {/* ================= 4. TRENDING PRODUCTS ================= */}
-      <section className="hx-section hx-section--soft hx-section--bleed">
-        <div className="hx-bleed">
-          <Reveal className="hx-section__head hx-section__head--left hx-section__head--split">
-            <h2>Trending products</h2>
-            <p>What safety teams are standardising on right now.</p>
-            <Link to="/products" className="hx-trend__all">
-              View all products
-              <IconArrowRight />
-            </Link>
-          </Reveal>
-          <Reveal className="hx-trend reveal-stagger">
-            {showTrending.map((p) => <TrendingCard product={p} key={p.slug} />)}</Reveal>
-        </div>
-      </section>
+      {/* ================= 4. TRENDING (client-picked, see data/trending.js) ================= */}
+      <TrendingShowcase />
 
       {/* ================= 5. FIND YOUR RANGE =================
-          Industry and hazard used to be two consecutive sections of identical
-          plain text tiles, which read as the same block twice. They are one
-          section now, and the two groups are deliberately styled differently:
-          sectors get icons and become browsable at a glance, hazards stay
-          compact chips because there are 22 of them. */}
-      <section className="hx-section hx-section--bleed">
-        <div className="hx-bleed">
-          <Reveal className="hx-section__head hx-section__head--left">
-            <h2>Find your range</h2>
-            <p>Pick the sector you work in, or the hazard you&rsquo;re protecting against.</p>
-          </Reveal>
-
-          <h3 className="hp-group__title">By industry</h3>
-          <Reveal className="hp-sectors reveal-stagger">
-            {industries.map((i) => (
-              <Link to={`/products?industry=${i.slug}`} className="hp-sector" key={i.slug}>
-                <span className="hp-sector__icon"><IndustryIcon slug={i.slug} /></span>
-                <span className="hp-sector__label">{i.label}</span>
-                <span className="hp-sector__count">{byIndustry(i.slug).length} products</span>
-              </Link>
-            ))}
-          </Reveal>
-
-          <h3 className="hp-group__title hp-group__title--spaced">By hazard</h3>
-          <Reveal className="hp-hazards reveal-stagger">
-            {hazards.map((h) => (
-              <Link to={`/products?hazard=${h.id}`} className="hp-hazard" key={h.id}>
-                {h.label}
-                <span className="hp-hazard__count">{byHazard(h.id).length}</span>
-              </Link>
-            ))}
-          </Reveal>
-        </div>
-      </section>
+          Browse by industry (SectorGrid.jsx). The "By hazard" chips that used to follow were
+          removed at the client's request (Oct 2026); hazards remain a filter
+          on the catalogue page. */}
+      <SectorGrid slugs={homeIndustries} />
 
       {/* ================= 7. COMPLIANCE ================= */}
       <section className="hp-compliance">
@@ -215,33 +97,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ================= 8b. WHY ORDER FROM US =================
-          Four reasons, corner-icon cards — the Netflix "More reasons to join"
-          anatomy: navy card, copy top-left, one orange icon parked bottom-right
-          with no container. */}
-      <section className="hx-section hx-section--bleed" id="why-us">
-        <div className="hx-bleed">
-          <Reveal className="hx-section__head hx-section__head--left">
-            <h2>Why order from us</h2>
-            <p>What you get on every line, not just the big ones.</p>
-          </Reveal>
-          <Reveal className="why-grid reveal-stagger">
-            {[
-              { t: 'Bulk pricing', b: 'Volume rates on request, with samples and full test documentation per line.' },
-              { t: 'EN-certified stock', b: 'Every product ships with its declaration of conformity and batch test certificates.' },
-              { t: 'Stocked in Lagos', b: 'Warehouse stock dispatched nationwide, lead times confirmed against your list.' },
-              { t: 'One quote, every zone', b: 'Head-to-toe PPE shortlisted from a single supplier instead of four.' },
-            ].map((r) => (
-              <div className="why-card" key={r.t}>
-                <h3 className="why-card__title">{r.t}</h3>
-                <p className="why-card__body">{r.b}</p>
-                <span className="why-card__icon" aria-hidden="true"><IconCheck width="20" height="20" /></span>
-              </div>
-            ))}
-          </Reveal>
-        </div>
-      </section>
-
       {/* ================= 8. PROMO / WHERE TO BUY ================= */}
       <section className="hx-section hx-section--bleed">
         <div className="hx-bleed">
@@ -266,61 +121,56 @@ export default function HomePage() {
           catalogues so the counts introduce the PDFs below. */}
       <RangeStats />
 
-      {/* ================= 10. CATALOGUES =================
-          Two downloads. The mini is generated by tools/build-catalogues.mjs
-          from Mallcom's catalogue pages plus the live product data, and is real
-          text — searchable, selectable, 0.8 MB. The full one is Mallcom's own
-          Private Label Brochure, supplied as-is: it has no text layer at all, so
-          it is the authoritative document rather than the findable one. Keep
-          both; they do different jobs. */}
+      {/* ================= 10. CATALOGUE =================
+          One download: Mallcom's 2025 catalogue, the source every product page
+          on this site is built from. It replaced the mini catalogue and the
+          2022 collection (Oct 2026). The PDF is the catalogue as printed, with
+          its photos recompressed for the web (97 MB to 24.9 MB); text and
+          layout are untouched, so it stays searchable. "View online" opens it
+          in the browser's own viewer, which is kinder than a 25 MB download on
+          a phone. */}
       <section className="hx-section hx-section--bleed" id="catalogues">
         <div className="hx-bleed">
           <Reveal className="hx-section__head hx-section__head--left">
-            <h2>Catalogues</h2>
-            <p>Take the range away with you — a quick overview, or the full specification.</p>
+            <h2>Catalogue</h2>
+            <p>The full 2025 range, with the sizes, colours and standards each product is tested to.</p>
           </Reveal>
 
-          <div className="cat-grid">
-            <a className="cat-card" href={catalogues.mini.file} download>
-              <span className="cat-card__cover">
-                <img src={catalogues.mini.cover} alt="" loading="lazy" decoding="async" />
-              </span>
-              <span className="cat-card__body">
-                <span className="cat-card__eyebrow">Mini catalogue</span>
-                <strong className="cat-card__title">The range at a glance</strong>
-                <span className="cat-card__desc">
-                  Company profile, manufacturing credentials and a product overview across all four
-                  protection zones.
-                </span>
-                <span className="cat-card__meta">{catalogueMeta(catalogues.mini)}</span>
-                <span className="cat-card__cta">
-                  Download <IconArrowRight width="14" height="14" />
-                </span>
-              </span>
-            </a>
-
-            <a className="cat-card" href={catalogues.full.file} download>
-              <span className="cat-card__cover">
+          <div className="cat-grid cat-grid--single">
+            <article className="cat-card cat-card--feature">
+              <a className="cat-card__cover" href={catalogues.full.file} target="_blank" rel="noopener" aria-label="View the 2025 catalogue online">
                 <img src={catalogues.full.cover} alt="" loading="lazy" decoding="async" />
-              </span>
-              <span className="cat-card__body">
-                <span className="cat-card__eyebrow">Full catalogue</span>
-                <strong className="cat-card__title">The complete collection</strong>
-                <span className="cat-card__desc">
-                  Mallcom's own product book — every glove, boot, helmet and garment in the range,
-                  with the sizes, colours and standards each is tested to.
-                </span>
+              </a>
+              <div className="cat-card__body">
+                <span className="cat-card__eyebrow">Product catalogue · 2025</span>
+                <h3 className="cat-card__title">The complete collection</h3>
+                <p className="cat-card__desc">
+                  Every glove, boot, helmet and garment in the range, with the sizes, colours and
+                  standards each is tested to.
+                </p>
                 <span className="cat-card__meta">{catalogueMeta(catalogues.full)}</span>
-                <span className="cat-card__cta">
-                  Download <IconArrowRight width="14" height="14" />
-                </span>
-              </span>
-            </a>
+                <div className="cat-card__actions">
+                  <a className="hx-btn" href={catalogues.full.file} target="_blank" rel="noopener">
+                    View online <IconArrowRight width="14" height="14" />
+                  </a>
+                  <a className="cat-card__cta" href={catalogues.full.file} download="DDUROGA-Catalogue-2025.pdf">
+                    Download PDF
+                  </a>
+                </div>
+              </div>
+            </article>
           </div>
         </div>
       </section>
 
-      {/* ================= 11. GUIDES & INSIGHTS ================= */}
+      {/* ================= 11. CLIENTS =================
+          The client logo strip sits near the end, after the catalogues and before
+          the guides: proof is read just before a visitor decides to get in touch,
+          and the top of the page goes straight from the accreditation marks to
+          the products. Self-hides until src/data/clients.js has entries. */}
+      <ClientLogos />
+
+      {/* ================= 12. GUIDES & INSIGHTS ================= */}
       <section className="hx-section hx-section--soft hx-section--bleed">
         <div className="hx-bleed">
           <Reveal className="hx-section__head hx-section__head--left">

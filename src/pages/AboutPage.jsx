@@ -57,7 +57,7 @@ export default function AboutPage() {
         <div className="about-block__grid">
           <div>
             <div className="section-head">
-              <h2>About us</h2>
+              <h1>About us</h1>
             </div>
             <p>
               DDUROGA Safety exists to put certified protective equipment on Nigerian workers, and to

@@ -19,6 +19,8 @@ export function QuoteProvider({ children }) {
   /** Whether the "Your bag" drawer is open. `add` opens it, like Gymshark's
    *  add-to-bag opening the mini-cart. */
   const [open, setOpen] = useState(false);
+  /** What the last add did, shown at the top of the bag: { key, text }. */
+  const [notice, setNotice] = useState(null);
   const seq = useRef(0);
 
   useEffect(() => {
@@ -30,7 +32,7 @@ export function QuoteProvider({ children }) {
   }, [items]);
 
   const openBag = () => setOpen(true);
-  const closeBag = () => setOpen(false);
+  const closeBag = () => { setOpen(false); setNotice(null); };
 
   /**
    * Adds the product (and, when given, the selected size/colour option) to the
@@ -40,11 +42,17 @@ export function QuoteProvider({ children }) {
     const amount = Math.max(1, Math.round(Number(qty)) || 1);
     const opt = option || (product && product.option) || '';
     const key = product.slug + (opt ? '|' + opt : '');
-    setItems((prev) =>
-      prev.some((p) => quoteKey(p) === key)
-        ? prev
-        : [...prev, { slug: product.slug, title: product.title, sku: product.sku || '', img: product.img || '', qty: amount, option: opt }]
-    );
+    // Adding a product that is already listed raises its quantity and says so;
+    // it used to do nothing, which read as a broken button.
+    const existing = items.find((p) => quoteKey(p) === key);
+    if (existing) {
+      const total = (existing.qty || 1) + amount;
+      setItems((prev) => prev.map((p) => (quoteKey(p) === key ? { ...p, qty: total } : p)));
+      setNotice({ key, text: `Already in your quote. Quantity is now ${total}.` });
+    } else {
+      setItems((prev) => [...prev, { slug: product.slug, title: product.title, sku: product.sku || '', img: product.img || '', qty: amount, option: opt }]);
+      setNotice({ key, text: 'Added to your quote.' });
+    }
     setOpen(true);
   };
 
@@ -58,9 +66,9 @@ export function QuoteProvider({ children }) {
   const clear = () => setItems([]);
 
   const value = useMemo(
-    () => ({ items, count: items.length, add, remove, setQty, clear, open, openBag, closeBag }),
+    () => ({ items, count: items.length, add, remove, setQty, clear, open, openBag, closeBag, notice }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [items, open]
+    [items, open, notice]
   );
 
   return <QuoteContext.Provider value={value}>{children}</QuoteContext.Provider>;

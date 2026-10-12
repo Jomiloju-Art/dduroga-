@@ -1,47 +1,60 @@
-import CertBadges from './CertBadges.jsx';
+import { useCallback, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { facilityAccreditations, productAccreditations } from '../data/accreditations.js';
+import { brandPartners } from '../data/brand.js';
+import AccreditationDrawer from './AccreditationDrawer.jsx';
 
 /**
  * Certification strip sitting directly under the hero.
  *
- * The 524 / 17 / 4 metrics row and its "What each mark means" link were
- * removed on client feedback — she circled that row specifically, so the
- * certification badges and the Mallcom endorsement stay where they are.
- * Nothing is lost site-wide: the same counts still appear on the catalogue
- * covers, which are generated from the live catalogue rather than typed in.
+ * One slim strip of every mark (facility then product), as in the approved
+ * homepage concept (Oct 2026). Each logo opens a drawer with what the mark means and
+ * the certificate details. It replaced three generic shield badges
+ * ("ISO 9001 · CE Certified · EN / IS standards") at the client's request to
+ * show the marks as they appear in the catalogue.
+ *
+ * The brand line beside the heading names the brands DDUROGA distributes
+ * (brandPartners in brand.js); it replaced the earlier "Made by Mallcom".
  *
  * There are deliberately no order counts or "X clients served" numbers — we do
  * not hold those, and inventing them on the page whose whole job is credibility
  * would be self-defeating.
  */
 export default function TrustBand() {
+  const [active, setActive] = useState(null);
+  const close = useCallback(() => setActive(null), []);
+  const marks = [...facilityAccreditations, ...productAccreditations];
+
   return (
-    <section className="hp-trust" aria-labelledby="trust-heading">
-      <div className="container">
-        <h2 className="sr-only" id="trust-heading">Certifications</h2>
-
-        <div className="hp-trust__row">
-          <span className="hp-trust__label">Certified &amp; marked to</span>
-          <CertBadges />
-
-          {/* Parent-brand endorsement. Mallcom manufactures the range; DDUROGA
-              supplies it. Not a link — it is a credential, not a destination.
-              Label is "Made by" rather than "Manufactured by": measured against
-              the row, "Manufactured by" overran the 1180px container by 11px and
-              pushed the whole lockup onto a second line. */}
-          <span className="hp-trust__maker">
-            <span className="hp-trust__label">Made by</span>
-            <img
-              className="hp-trust__mallcom"
-              src="/brand/mallcom-logo.png"
-              alt="Mallcom"
-              width="96"
-              height="36"
-              loading="lazy"
-              decoding="async"
-            />
-          </span>
+    <section className="hp-marks" aria-labelledby="trust-heading">
+      <div className="hp-marks__inner">
+        <div className="hp-marks__row">
+          <h2 className="hp-marks__label" id="trust-heading">Certified &amp; accredited</h2>
+          {/* One slim row, as in the approved homepage concept: greyscale at
+              rest, full colour on hover. Each mark still opens its drawer. */}
+          <ul className="hp-marks__logos">
+            {marks.map((a) => (
+              <li key={a.id}>
+                <button type="button" className="hp-mark" onClick={() => setActive(a)} aria-label={`${a.name}: view certificate details`} title={a.short}>
+                  <img src={a.logo} alt="" loading="lazy" decoding="async" />
+                </button>
+              </li>
+            ))}
+          </ul>
+          <Link to="/certifications" className="hp-marks__all">All certifications <span aria-hidden="true">→</span></Link>
         </div>
+        {/* The brands DDUROGA distributes. Deliberately small and muted: DDUROGA
+            is the umbrella brand and this line must not compete with it. */}
+        <p className="brand-line hp-marks__brands">
+          <span className="hp-trust__label">Exclusive distributor in Nigeria for</span>
+          <span className="brand-line__logos">
+            {brandPartners.map((b) => (b.logo
+              ? <img key={b.name} className="brand-line__logo" src={b.logo} alt={b.name} loading="lazy" decoding="async" />
+              : <span key={b.name} className="brand-line__word">{b.name}</span>))}
+          </span>
+        </p>
       </div>
+      <AccreditationDrawer item={active} onClose={close} />
     </section>
   );
 }

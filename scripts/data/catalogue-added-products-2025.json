@@ -1,0 +1,991 @@
+[
+ {
+  "name": "JASPER I",
+  "slug": "jasper-i",
+  "page": 11,
+  "section": "head",
+  "desc": [
+   "Non ventilated UV-resistant HDPE shell",
+   "LDPE harness lining with 2 bands and 4 attachment points",
+   "Zip adjustment and sweat absorbent sweatband"
+  ],
+  "sizes": "52–60 cm",
+  "colours": [],
+  "img": "/products/catalogue/jasper-i.webp"
+ },
+ {
+  "name": "JASPER II",
+  "slug": "jasper-ii",
+  "page": 11,
+  "section": "head",
+  "desc": [
+   "Non ventilated UV-resistant HDPE shell",
+   "LDPE harness lining with 4 attachment points",
+   "Ratchet adjustment and sweat absorbent sweatband"
+  ],
+  "sizes": "52–60 cm",
+  "colours": [],
+  "img": "/products/catalogue/jasper-ii.webp"
+ },
+ {
+  "name": "JASPER IV",
+  "slug": "jasper-iv",
+  "page": 11,
+  "section": "head",
+  "desc": [
+   "Non ventilated UV-resistant HDPE shell",
+   "Textile harness lining with 2 bands and 4 attachment points",
+   "Ratchet adjustment and sweat absorbent sweatband"
+  ],
+  "sizes": "52–60 cm",
+  "colours": [],
+  "img": "/products/catalogue/jasper-iv.webp",
+  "slugClashesWithHiddenStorefrontProduct": true
+ },
+ {
+  "name": "DIAMOND IV HI-VIS",
+  "slug": "diamond-iv-hi-vis",
+  "page": 13,
+  "section": "head",
+  "desc": [
+   "Non ventilated UV-resistant HDPE shell",
+   "LDPE harness with 3 bands and 8 attachment points",
+   "Reflective tape on the side and back",
+   "Equipped with a sweatband and adjustable ratchet"
+  ],
+  "sizes": "53–63 cm",
+  "colours": [],
+  "img": "/products/catalogue/diamond-iv-hi-vis.webp"
+ },
+ {
+  "name": "DIAMOND V",
+  "slug": "diamond-v",
+  "page": 13,
+  "section": "head",
+  "desc": [
+   "Non ventilated UV-resistant ABS shell",
+   "Textile nylon harness with 3 bands and 8 attachment points",
+   "Sweatband and shock pad with ratchet adjustment"
+  ],
+  "sizes": "53–63 cm",
+  "colours": [],
+  "img": "/products/catalogue/diamond-v.webp"
+ },
+ {
+  "name": "M1202P",
+  "slug": "m1202p",
+  "page": 16,
+  "section": "head",
+  "desc": [
+   "Disposable FFP2 half face mask",
+   "Foldable type nose clip for a better fit",
+   "Head loop elastic fastening system"
+  ],
+  "sizes": null,
+  "colours": [
+   "White",
+   "Yellow",
+   "Grey"
+  ],
+  "img": "/products/catalogue/m1202p.webp"
+ },
+ {
+  "name": "M3102PV",
+  "slug": "m3102pv",
+  "page": 17,
+  "section": "head",
+  "desc": [
+   "Disposable FFP1 half face mask",
+   "Ultrasonically sealed with foldable nose clip",
+   "Head loop elastic fastening system",
+   "Available with/without valve"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/m3102pv.webp"
+ },
+ {
+  "name": "M1202PV",
+  "slug": "m1202pv",
+  "page": 17,
+  "section": "head",
+  "desc": [
+   "Disposable FFP2 half face mask",
+   "Ultrasonically sealed with foldable nose clip",
+   "Head loop elastic fastening system",
+   "Available with/without valve"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/m1202pv.webp"
+ },
+ {
+  "name": "L1202PV",
+  "slug": "l1202pv",
+  "page": 18,
+  "section": "head",
+  "desc": [
+   "Aesthetically designed foldable FFP2 face mask",
+   "Particulate matter filtering half mask with valve",
+   "Ultrasonically sealed mask with/without valve"
+  ],
+  "sizes": null,
+  "colours": [
+   "White",
+   "Yellow",
+   "Grey"
+  ],
+  "img": "/products/catalogue/l1202pv.webp"
+ },
+ {
+  "name": "L1102P",
+  "slug": "l1102p",
+  "page": 19,
+  "section": "head",
+  "desc": [
+   "Aesthetically designed foldable FFP1 face mask",
+   "Particulate matter filtering half mask",
+   "Ultrasonically sealed mask with/without valve"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/l1102p.webp"
+ },
+ {
+  "name": "L3202P",
+  "slug": "l3202p",
+  "page": 19,
+  "section": "head",
+  "desc": [
+   "Aesthetically designed foldable FFP2 face mask",
+   "Particulate matter filtering half mask",
+   "Ultrasonically sealed mask with/without valve"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/l3202p.webp"
+ },
+ {
+  "name": "L3103P",
+  "slug": "l3103p",
+  "page": 20,
+  "section": "head",
+  "desc": [
+   "Aesthetically designed foldable FFP1 face mask",
+   "Particulate matter filtering half mask without valve",
+   "Concealed nose clip and ultrasonically sealed"
+  ],
+  "sizes": null,
+  "colours": [
+   "Grey",
+   "Yellow",
+   "White"
+  ],
+  "img": "/products/catalogue/l3103p.webp"
+ },
+ {
+  "name": "L1203PV",
+  "slug": "l1203pv",
+  "page": 21,
+  "section": "head",
+  "desc": [
+   "Aesthetically designed foldable FFP2 face mask",
+   "Particulate matter filtering half mask with valve",
+   "Concealed nose clip and ultrasonically sealed"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/l1203pv.webp"
+ },
+ {
+  "name": "L1203P",
+  "slug": "l1203p",
+  "page": 21,
+  "section": "head",
+  "desc": [
+   "Aesthetically designed foldable FFP2 face mask",
+   "Particulate matter filtering half mask without valve",
+   "Concealed nose clip and ear loop fastening"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/l1203p.webp"
+ },
+ {
+  "name": "L3302PV",
+  "slug": "l3302pv",
+  "page": 22,
+  "section": "head",
+  "desc": [
+   "Aesthetically designed foldable FFP3 face mask",
+   "Particulate matter filtering half mask with valve",
+   "Concealed nose clip and ultrasonically sealed"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/l3302pv.webp"
+ },
+ {
+  "name": "L2302P",
+  "slug": "l2302p",
+  "page": 22,
+  "section": "head",
+  "desc": [
+   "Aesthetically designed foldable FFP3 face mask",
+   "Particulate matter filtering half mask without valve",
+   "Concealed nose clip and ultrasonically sealed"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/l2302p.webp"
+ },
+ {
+  "name": "L2302PV",
+  "slug": "l2302pv",
+  "page": 22,
+  "section": "head",
+  "desc": [
+   "Aesthetically designed foldable FFP3 face mask",
+   "Particulate matter filtering half mask with valve",
+   "Concealed nose clip and ultrasonically sealed"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/l2302pv.webp"
+ },
+ {
+  "name": "CM86P3",
+  "slug": "cm86p3",
+  "page": 23,
+  "section": "head",
+  "desc": [
+   "Pleated disposable 3-layered surgical mask",
+   "Concealed nose clip offers snuggly fitting",
+   "Ultrasonic sealing and elastic ear loops"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/cm86p3.webp"
+ },
+ {
+  "name": "ALTAIR",
+  "slug": "altair",
+  "page": 25,
+  "section": "head",
+  "desc": [
+   "Safety goggles with polycarbocate frame",
+   "Two interchangeable lenses with colour option",
+   "Temples can be replaced with elastic headband"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/altair.webp"
+ },
+ {
+  "name": "ORION",
+  "slug": "orion",
+  "page": 25,
+  "section": "head",
+  "desc": [
+   "Safety goggles with polycarbocate frame",
+   "Removable eyebrow protector",
+   "Temples can be replaced with elastic headband"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/orion.webp"
+ },
+ {
+  "name": "PLUTO",
+  "slug": "pluto",
+  "page": 25,
+  "section": "head",
+  "desc": [
+   "Clear polycarbonate single lens glasses",
+   "Adjustable and fitting nylon arms",
+   "Arms with holes for neck cord"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/pluto.webp"
+ },
+ {
+  "name": "LEPUS",
+  "slug": "lepus",
+  "page": 26,
+  "section": "head",
+  "desc": [
+   "IR3.0 polished welding glasses",
+   "Speciality 3.0 ultraviolet infrared protective glasses",
+   "Can be used during welding gas cutting operation"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/lepus.webp"
+ },
+ {
+  "name": "MONOCEROS",
+  "slug": "monoceros",
+  "page": 26,
+  "section": "head",
+  "desc": [
+   "IR5.0 polished welding glasses",
+   "Speciality 5.0 ultraviolet infrared protective glasses",
+   "Can be used during welding gas cutting operation"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/monoceros.webp"
+ },
+ {
+  "name": "ORBIT",
+  "slug": "orbit",
+  "page": 27,
+  "section": "head",
+  "desc": [
+   "Clear polycarbonate body",
+   "Single lens glasses",
+   "Soft and flat spatula-type arms"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/orbit.webp"
+ },
+ {
+  "name": "AVIATOR",
+  "slug": "aviator",
+  "page": 29,
+  "section": "head",
+  "desc": [
+   "Sweat absorbent headband earmuffs for enhanced comfort",
+   "SNR value of 28 ensures effective noise reduction"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/aviator.webp"
+ },
+ {
+  "name": "COMFY MUFF",
+  "slug": "comfy-muff",
+  "page": 29,
+  "section": "head",
+  "desc": [
+   "Sweat absorbent headband earmuffs for enhanced comfort",
+   "SNR value of 32 ensures effective noise reduction"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/comfy-muff.webp"
+ },
+ {
+  "name": "BE22J1",
+  "slug": "be22j1",
+  "page": 33,
+  "section": "hand",
+  "desc": [
+   "High performance natural grain driver gloves",
+   "Filament steel blended para-aramid lining",
+   "Elasticised back",
+   "Synthetic binding tape"
+  ],
+  "sizes": "7–11",
+  "colours": [],
+  "img": "/products/catalogue/be22j1.webp"
+ },
+ {
+  "name": "BE2258",
+  "slug": "be2258",
+  "page": 33,
+  "section": "hand",
+  "desc": [
+   "High performance natural grain driver gloves",
+   "Fibreglass blended para-aramid lining inside",
+   "Impact resistant padding is stitched on back",
+   "Elasticised back for snuggly fitting"
+  ],
+  "sizes": "7–11",
+  "colours": [],
+  "img": "/products/catalogue/be2258.webp"
+ },
+ {
+  "name": "TM554",
+  "slug": "tm554",
+  "page": 37,
+  "section": "hand",
+  "desc": [
+   "Yellow grain leather mechanical gloves",
+   "Black synthetic fabric back",
+   "Velcro adjusted knitted cuff",
+   "Flexible impact resistant 'SIMUM' stitched on back"
+  ],
+  "sizes": "7–11",
+  "colours": [],
+  "img": "/products/catalogue/tm554.webp"
+ },
+ {
+  "name": "SLJB01",
+  "slug": "sljb01",
+  "page": 44,
+  "section": "hand",
+  "desc": [
+   "100% natural grain/split leather welder jacket",
+   "Sewn with para-aramid thread",
+   "Velcro fastening on front placket",
+   "Heat-resistant up to 180°C"
+  ],
+  "sizes": "M–XL",
+  "colours": [],
+  "img": "/products/catalogue/sljb01.webp"
+ },
+ {
+  "name": "SLHE01",
+  "slug": "slhe01",
+  "page": 45,
+  "section": "hand",
+  "desc": [
+   "100% natural grain/split leather welding hood",
+   "Sewn with para-aramid thread",
+   "Front velcro closure",
+   "Heat-resistant up to 180°C"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/slhe01.webp"
+ },
+ {
+  "name": "SLGE01",
+  "slug": "slge01",
+  "page": 45,
+  "section": "hand",
+  "desc": [
+   "100% natural grain/split leather welding leg guard",
+   "Sewn with para-aramid thread",
+   "Velcro closure",
+   "Heat-resistant up to 180°C"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/slge01.webp"
+ },
+ {
+  "name": "SLAS01",
+  "slug": "slas01",
+  "page": 45,
+  "section": "hand",
+  "desc": [
+   "Natural split leather apron",
+   "Leather belts and string for comfortable wear",
+   "Sewn with polyester thread",
+   "Ideal for welding operations"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/slas01.webp"
+ },
+ {
+  "name": "C1025D",
+  "slug": "c1025d",
+  "page": 49,
+  "section": "hand",
+  "desc": [
+   "Cotton knitted 10 gauge seamless gloves",
+   "Block patterned PVC dotting on palm side",
+   "Elasticised rib for snuggly fitting",
+   "Sky blue dotting over off-white colored lining"
+  ],
+  "sizes": "9–11",
+  "colours": [],
+  "img": "/products/catalogue/c1025d.webp"
+ },
+ {
+  "name": "P1308D",
+  "slug": "p1308d",
+  "page": 51,
+  "section": "hand",
+  "desc": [
+   "Polyester knitted 13 gauge seamless gloves",
+   "PVC dotting on palm side",
+   "Two side PVC dotting is also available",
+   "High tear resistance",
+   "Good abrasion resistance"
+  ],
+  "sizes": "7–11",
+  "colours": [],
+  "img": "/products/catalogue/p1308d.webp"
+ },
+ {
+  "name": "MHCB",
+  "slug": "mhcb",
+  "page": 56,
+  "section": "hand",
+  "desc": [
+   "Sustainable nitrile gloves",
+   "Medium dipped full coating on cut and stitch liner",
+   "100% cotton interlock lining",
+   "Safety cuff is available"
+  ],
+  "sizes": "7–11",
+  "colours": [],
+  "img": "/products/catalogue/mhcb.webp"
+ },
+ {
+  "name": "MHKB",
+  "slug": "mhkb",
+  "page": 56,
+  "section": "hand",
+  "desc": [
+   "Sustainable nitrile gloves",
+   "Medium dipped full coating on cut and stitch liner",
+   "100% cotton interlock lining",
+   "Knitted wrist is available"
+  ],
+  "sizes": "7–11",
+  "colours": [],
+  "img": "/products/catalogue/mhkb.webp"
+ },
+ {
+  "name": "MJCB",
+  "slug": "mjcb",
+  "page": 57,
+  "section": "hand",
+  "desc": [
+   "Sustainable nitrile gloves",
+   "Medium dipped full coating on cut and stitch liner",
+   "100% cotton interlock lining",
+   "Safety cuff is available"
+  ],
+  "sizes": "7–11",
+  "colours": [],
+  "img": "/products/catalogue/mjcb.webp"
+ },
+ {
+  "name": "MJKB",
+  "slug": "mjkb",
+  "page": 57,
+  "section": "hand",
+  "desc": [
+   "Sustainable nitrile gloves",
+   "Medium dipped full coating on cut and stitch liner",
+   "100% cotton interlock lining",
+   "Knitted wrist is available"
+  ],
+  "sizes": "7–11",
+  "colours": [],
+  "img": "/products/catalogue/mjkb.webp"
+ },
+ {
+  "name": "DFJB",
+  "slug": "dfjb",
+  "page": 58,
+  "section": "hand",
+  "desc": [
+   "High cut-resistant nitrile 40 cm gauntlet",
+   "Cotton interlock outer shell",
+   "Cut resistant glass and para-aramid inner shell",
+   "Blue coloured full dip NBR coating"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/dfjb.webp"
+ },
+ {
+  "name": "NIF LITE IL 30",
+  "slug": "nif-lite-il-30",
+  "page": 59,
+  "section": "hand",
+  "desc": [
+   "30 cm gauntlet style nitrile gloves",
+   "Blue coloured lite NBR full coating",
+   "300 gsm cotton interlock lining",
+   "Good for chemical resistance"
+  ],
+  "sizes": "7–11",
+  "colours": [],
+  "img": "/products/catalogue/nif-lite-il-30.webp"
+ },
+ {
+  "name": "NIF LITE IL 40",
+  "slug": "nif-lite-il-40",
+  "page": 59,
+  "section": "hand",
+  "desc": [
+   "40 cm gauntlet style nitrile gloves",
+   "Blue coloured lite NBR full coating",
+   "300 gsm cotton interlock lining",
+   "Ideal for chemical handling"
+  ],
+  "sizes": "7–11",
+  "colours": [],
+  "img": "/products/catalogue/nif-lite-il-40.webp"
+ },
+ {
+  "name": "NS5FHT",
+  "slug": "ns5fht",
+  "page": 60,
+  "section": "hand",
+  "desc": [
+   "Dual coated seamless nitrile gloves",
+   "15 gauge blue coloured nylon liner",
+   "Yellow coloured crotch reinforecment for better life",
+   "Black sandy palm coating over full smooth blue coating",
+   "Good chemcial resistant and extra life"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/ns5fht.webp"
+ },
+ {
+  "name": "P35RHK",
+  "slug": "p35rhk",
+  "page": 61,
+  "section": "hand",
+  "desc": [
+   "Crotch reinforced Dual coated seamless nitrile gloves",
+   "15 gauge grey polyester liner",
+   "Black sandy finish over 3/4th blue smooth coating",
+   "Sturdy gloves ideal for chemical handling"
+  ],
+  "sizes": "7–11",
+  "colours": [],
+  "img": "/products/catalogue/p35rhk.webp"
+ },
+ {
+  "name": "P35NBC",
+  "slug": "p35nbc",
+  "page": 62,
+  "section": "hand",
+  "desc": [
+   "Grey polyester knitted seamless nitrile gloves",
+   "15 gauge knitted liner",
+   "Full coated with black NBR",
+   "Smooth finish"
+  ],
+  "sizes": "7–11",
+  "colours": [],
+  "img": "/products/catalogue/p35nbc.webp"
+ },
+ {
+  "name": "PJ4NBC",
+  "slug": "pj4nbc",
+  "page": 62,
+  "section": "hand",
+  "desc": [
+   "13 gauge seamless anti-slip gloves with NBR coating",
+   "100% polyester lining",
+   "Full coated black NBR",
+   "Smooth finish"
+  ],
+  "sizes": "7–11",
+  "colours": [],
+  "img": "/products/catalogue/pj4nbc.webp"
+ },
+ {
+  "name": "P94NBB",
+  "slug": "p94nbb",
+  "page": 62,
+  "section": "hand",
+  "desc": [
+   "13 gauge seamless anti-slip gloves with NBR coating",
+   "100% red polyester lining",
+   "3/4th coated black NBR",
+   "Smooth finish"
+  ],
+  "sizes": "7–11",
+  "colours": [],
+  "img": "/products/catalogue/p94nbb.webp"
+ },
+ {
+  "name": "H33DBG",
+  "slug": "h33dbg",
+  "page": 65,
+  "section": "hand",
+  "desc": [
+   "Crotch reinforced cut resistant seamless NBR gloves",
+   "HPPE and fibreglass blended 13 gauge liner",
+   "Palm coated sandy finish",
+   "Elasticised knitted wrist"
+  ],
+  "sizes": "7–11",
+  "colours": [],
+  "img": "/products/catalogue/h33dbg.webp"
+ },
+ {
+  "name": "P213AS",
+  "slug": "p213as",
+  "page": 69,
+  "section": "hand",
+  "desc": [
+   "White PU coated anti-static gloves",
+   "Carbon fibre blended seamless liner",
+   "13 gauge knitting",
+   "Suitable for electronics"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/p213as.webp"
+ },
+ {
+  "name": "P318G",
+  "slug": "p318g",
+  "page": 69,
+  "section": "hand",
+  "desc": [
+   "Blue polyester knitted 18 gauge PU coated glove",
+   "Black PU coating on the palm",
+   "Highly dexterous gloves",
+   "Compatible for various applications"
+  ],
+  "sizes": "7–11",
+  "colours": [],
+  "img": "/products/catalogue/p318g.webp"
+ },
+ {
+  "name": "L152O",
+  "slug": "l152o",
+  "page": 70,
+  "section": "hand",
+  "desc": [
+   "Light weight unchlorinated natural latex gloves",
+   "Perfect for the food handling",
+   "Ideal for handling bio waste",
+   "Patterned grip for enhanced dexterity",
+   "Also available in grey colour"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/l152o.webp"
+ },
+ {
+  "name": "L152P",
+  "slug": "l152p",
+  "page": 70,
+  "section": "hand",
+  "desc": [
+   "Light weight unchlorinated natural latex gloves",
+   "Perfect for the food handling",
+   "Ideal for handling bio waste",
+   "Patterned grip for enhanced dexterity",
+   "Also available in yellow colour"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/l152p.webp"
+ },
+ {
+  "name": "VS38TL",
+  "slug": "vs38tl",
+  "page": 70,
+  "section": "hand",
+  "desc": [
+   "High durable gauntlet style PVC gloves",
+   "Polyester knitted lining inside",
+   "27 cm in length",
+   "Chemical resistant gloves",
+   "Sandy coated over smooth finishing"
+  ],
+  "sizes": "9–11",
+  "colours": [],
+  "img": "/products/catalogue/vs38tl.webp"
+ },
+ {
+  "name": "VP29TR",
+  "slug": "vp29tr",
+  "page": 71,
+  "section": "hand",
+  "desc": [
+   "High durable gauntlet style PVC gloves",
+   "Polyester knitted lining inside",
+   "27 cm in length",
+   "Chemical resistant gloves",
+   "Rough surface coating"
+  ],
+  "sizes": "9–11",
+  "colours": [],
+  "img": "/products/catalogue/vp29tr.webp"
+ },
+ {
+  "name": "CRAI",
+  "slug": "crai",
+  "page": 72,
+  "section": "hand",
+  "desc": [
+   "Waterproof multi-layered cryogenic apron",
+   "Laminated blue nylon woven fabric",
+   "Adjustable straps with buckle fastener at the neck and waist",
+   "Extreme cold applications down to -196°C"
+  ],
+  "sizes": "24”x42”",
+  "colours": [],
+  "img": "/products/catalogue/crai.webp"
+ },
+ {
+  "name": "CGMI",
+  "slug": "cgmi",
+  "page": 73,
+  "section": "hand",
+  "desc": [
+   "Waterproof multi-layered mid arm cryogenic gloves",
+   "Laminated blue nylon woven fabric",
+   "Available length is 33 - 38 cm",
+   "Extreme cold applications down to -196°C"
+  ],
+  "sizes": "33–38 cm",
+  "colours": [],
+  "img": "/products/catalogue/cgmi.webp"
+ },
+ {
+  "name": "CGSI",
+  "slug": "cgsi",
+  "page": 73,
+  "section": "hand",
+  "desc": [
+   "Waterproof multi-layered shoulder length cryogenic gloves",
+   "Laminated blue nylon woven fabric",
+   "Available length is 60 - 68 cm",
+   "Extreme cold applications down to -196°C"
+  ],
+  "sizes": "60 - 68 cm",
+  "colours": [],
+  "img": "/products/catalogue/cgsi.webp"
+ },
+ {
+  "name": "FLORIAD",
+  "slug": "floriad",
+  "page": 76,
+  "section": "body",
+  "desc": [
+   "Composition: 65% Cotton 35% Polyester, 240 gsm",
+   "Coverall with zip closure",
+   "Left chest pocket with gusset and flap",
+   "Closed by buttons and 1 sleeve pocket on the left side"
+  ],
+  "sizes": null,
+  "colours": [
+   "Orange",
+   "Navy Blue"
+  ],
+  "img": "/products/catalogue/floriad.webp"
+ },
+ {
+  "name": "LUBECK",
+  "slug": "lubeck",
+  "page": 79,
+  "section": "body",
+  "desc": [
+   "Composition: 100% cotton, 210 gsm",
+   "Trouser with front zipper closure and 1 side pocket on each side",
+   "2 pleats and welt pockets and 1 side pocket",
+   "Elasticised waistband along with the provision of a belt"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/lubeck.webp"
+ },
+ {
+  "name": "BREMEN",
+  "slug": "bremen",
+  "page": 79,
+  "section": "body",
+  "desc": [
+   "Composition: 100% cotton, 210 gsm",
+   "Long coat with snap button closure",
+   "Comfortable design with short sleeve",
+   "No pockets are available"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/bremen.webp"
+ },
+ {
+  "name": "TRIER",
+  "slug": "trier",
+  "page": 79,
+  "section": "body",
+  "desc": [
+   "Composition: 100% cotton, 210 gsm",
+   "Short coat with snap button closure and long sleeves",
+   "2 reinforced button pockets",
+   "1 chest pocket with a pen holder"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/trier.webp"
+ },
+ {
+  "name": "BUCHAREST",
+  "slug": "bucharest",
+  "page": 83,
+  "section": "body",
+  "desc": [
+   "Composition: Option 1: 100% Cotton FR Treated 220 gsm",
+   "Option 2: 50% Modacrylic, 38% Cotton, 10% m-Aramide",
+   "2% Antistatic, 180 gsm",
+   "Trouser with elasticised waist and zipper",
+   "Concealed button closure and 1 back pocket",
+   "1 thigh pocket on left side and 1 ruler pocket on right side"
+  ],
+  "sizes": null,
+  "colours": [
+   "Navy Blue"
+  ],
+  "img": "/products/catalogue/bucharest.webp"
+ },
+ {
+  "name": "PROCLO K382",
+  "slug": "proclo-k382",
+  "page": 89,
+  "section": "body",
+  "desc": [
+   "Composition: 115 gsm warp knitted",
+   "100% polyester fabric",
+   "Hi-vis vest with velcro closure",
+   "Hanger loop attached to the main fabric"
+  ],
+  "sizes": "XS–XXL",
+  "colours": [],
+  "img": "/products/catalogue/proclo-k382.webp"
+ },
+ {
+  "name": "KC2HZ",
+  "slug": "kc2hz",
+  "page": 93,
+  "section": "body",
+  "desc": [
+   "Composition: 40 gsm non woven polypropylene fabric",
+   "Disposable bouffant cap with elasticated fastener",
+   "Lightweight disposable bouffant cap for health care applications",
+   "Protects from bio-hazard risks"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/kc2hz.webp"
+ },
+ {
+  "name": "YODDHA",
+  "slug": "yoddha",
+  "page": 118,
+  "section": "feet",
+  "desc": [
+   "Ankle boot with PU foam laminated canvas upper",
+   "Synthetic lining",
+   "Removable polyester laminated EVA insocks"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/yoddha.webp"
+ },
+ {
+  "name": "CYPRUS",
+  "slug": "cyprus",
+  "page": 119,
+  "section": "feet",
+  "desc": [
+   "Knee boot with barton grain apollo print DIN leather upper",
+   "Non woven synthetic lining",
+   "Direct injected dual density PU sole"
+  ],
+  "sizes": null,
+  "colours": [],
+  "img": "/products/catalogue/cyprus.webp"
+ }
+]

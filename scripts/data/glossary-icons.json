@@ -1,0 +1,290 @@
+[
+ {
+  "name": "Head Impact",
+  "slug": "head-impact"
+ },
+ {
+  "name": "Shock",
+  "slug": "shock"
+ },
+ {
+  "name": "Electrical Hazard",
+  "slug": "electrical-hazard"
+ },
+ {
+  "name": "Bump",
+  "slug": "bump"
+ },
+ {
+  "name": "Puncture",
+  "slug": "puncture"
+ },
+ {
+  "name": "Light & Comfortable",
+  "slug": "light-and-comfortable"
+ },
+ {
+  "name": "High visibility",
+  "slug": "high-visibility"
+ },
+ {
+  "name": "Snuggly Fitting",
+  "slug": "snuggly-fitting"
+ },
+ {
+  "name": "Dust",
+  "slug": "dust"
+ },
+ {
+  "name": "Indoor & Outdoor",
+  "slug": "indoor-and-outdoor"
+ },
+ {
+  "name": "Anti Scratch",
+  "slug": "anti-scratch"
+ },
+ {
+  "name": "Anti Fog",
+  "slug": "anti-fog"
+ },
+ {
+  "name": "Projectiles",
+  "slug": "projectiles"
+ },
+ {
+  "name": "Welding",
+  "slug": "welding"
+ },
+ {
+  "name": "Noise Reduction",
+  "slug": "noise-reduction"
+ },
+ {
+  "name": "UV",
+  "slug": "uv"
+ },
+ {
+  "name": "Microbe",
+  "slug": "microbe"
+ },
+ {
+  "name": "Splash",
+  "slug": "splash"
+ },
+ {
+  "name": "Infrared",
+  "slug": "infrared"
+ },
+ {
+  "name": "Cold Insulation",
+  "slug": "cold-insulation"
+ },
+ {
+  "name": "Water Repellent",
+  "slug": "water-repellent"
+ },
+ {
+  "name": "Abrasion",
+  "slug": "abrasion"
+ },
+ {
+  "name": "Cut Proof",
+  "slug": "cut-proof"
+ },
+ {
+  "name": "Tear",
+  "slug": "tear"
+ },
+ {
+  "name": "Dexterity",
+  "slug": "dexterity"
+ },
+ {
+  "name": "Hygienic",
+  "slug": "hygienic"
+ },
+ {
+  "name": "Flexible",
+  "slug": "flexible"
+ },
+ {
+  "name": "Antistatic",
+  "slug": "antistatic"
+ },
+ {
+  "name": "Breathable",
+  "slug": "breathable"
+ },
+ {
+  "name": "Low visibility",
+  "slug": "low-visibilty"
+ },
+ {
+  "name": "Particle resistant",
+  "slug": "particle-resistant"
+ },
+ {
+  "name": "Multi Utility",
+  "slug": "multi-utility"
+ },
+ {
+  "name": "Dotting",
+  "slug": "dotting"
+ },
+ {
+  "name": "Reinforce",
+  "slug": "reinforce"
+ },
+ {
+  "name": "High Cut",
+  "slug": "high-cut"
+ },
+ {
+  "name": "Bio Hazard",
+  "slug": "bio-hazard"
+ },
+ {
+  "name": "Micro organism",
+  "slug": "micro-organism"
+ },
+ {
+  "name": "Cryogenic",
+  "slug": "cryogenic"
+ },
+ {
+  "name": "Rough",
+  "slug": "rough"
+ },
+ {
+  "name": "Extensive Length",
+  "slug": "extensive-length"
+ },
+ {
+  "name": "Chemical Protection",
+  "slug": "chemical-protection"
+ },
+ {
+  "name": "Thermal Insulation",
+  "slug": "thermal-insulation"
+ },
+ {
+  "name": "Hand Impact",
+  "slug": "hand-impact"
+ },
+ {
+  "name": "E-com",
+  "slug": "e-com"
+ },
+ {
+  "name": "Sparks",
+  "slug": "sparks"
+ },
+ {
+  "name": "Flame",
+  "slug": "flame"
+ },
+ {
+  "name": "Heat",
+  "slug": "heat"
+ },
+ {
+  "name": "Rain",
+  "slug": "rain"
+ },
+ {
+  "name": "Wear",
+  "slug": "wear"
+ },
+ {
+  "name": "Washable",
+  "slug": "washable"
+ },
+ {
+  "name": "Ergonomics",
+  "slug": "ergonomics"
+ },
+ {
+  "name": "Durability",
+  "slug": "durability"
+ },
+ {
+  "name": "Recycled",
+  "slug": "recycled"
+ },
+ {
+  "name": "Steel Toecap",
+  "slug": "steel-toecap"
+ },
+ {
+  "name": "PU/PU",
+  "slug": "pu-pu"
+ },
+ {
+  "name": "Composite Toecap",
+  "slug": "composite-toecap"
+ },
+ {
+  "name": "Fibreglass Toecap",
+  "slug": "fibreglass-toecap"
+ },
+ {
+  "name": "Flyknit",
+  "slug": "flyknit"
+ },
+ {
+  "name": "Thermo plastic Toecap",
+  "slug": "thermo-plastic-toecap"
+ },
+ {
+  "name": "Microfibre",
+  "slug": "microfibre"
+ },
+ {
+  "name": "Wide Toecap",
+  "slug": "wide-toecap"
+ },
+ {
+  "name": "PU",
+  "slug": "pu"
+ },
+ {
+  "name": "PU/Rubber",
+  "slug": "pu-rubber"
+ },
+ {
+  "name": "Impact Resistant",
+  "slug": "impact-resistant"
+ },
+ {
+  "name": "Energy Absorbent",
+  "slug": "energy-absorbent"
+ },
+ {
+  "name": "Anti Static",
+  "slug": "anti-static"
+ },
+ {
+  "name": "Puncture Resistant",
+  "slug": "puncture-resistant"
+ },
+ {
+  "name": "Oil Resistant",
+  "slug": "oil-resistant"
+ },
+ {
+  "name": "Slip Resistant",
+  "slug": "slip-resistant"
+ },
+ {
+  "name": "Hydrocarbon Resistant",
+  "slug": "hydrocarbon-resistant"
+ },
+ {
+  "name": "Ladder Grip",
+  "slug": "ladder-grip"
+ },
+ {
+  "name": "Food Grade",
+  "slug": "food-grade"
+ }
+]

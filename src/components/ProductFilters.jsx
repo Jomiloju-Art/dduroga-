@@ -4,17 +4,13 @@ import { zones, industryCatalog, hazardNames, byHazard, byIndustry, productsByZo
  * Facet groups shown in the catalogue sidebar / mobile offcanvas.
  *
  * Counts come from the live catalogue, and options that would return nothing are
- * disabled rather than clickable. Four hazard ids (Gas & Vapour, UV Radiation,
- * Static Electric, Low Visibility) match no product tags, so they used to be
- * offered as normal links and led straight to an empty grid with no explanation.
+ * disabled rather than clickable. Gas & Vapour still matches no product, so it
+ * stays visible but disabled instead of leading to an empty grid.
+ *
+ * Product types are not repeated here: they are the chip row above the grid
+ * (ProductsPage), which appears once a zone is chosen.
  */
-const GROUPS = [
-  {
-    key: 'cat',
-    label: 'Protection zone',
-    all: 'All zones',
-    items: zones.map((z) => ({ value: z.id, label: z.label, count: productsByZone(z.id).length })),
-  },
+const STATIC_GROUPS = [
   {
     key: 'industry',
     label: 'Industry',
@@ -29,12 +25,21 @@ const GROUPS = [
   },
 ];
 
+const ZONE_GROUP = {
+  key: 'cat',
+  label: 'Protection zone',
+  all: 'All zones',
+  items: zones.map((z) => ({ value: z.id, label: z.label, count: productsByZone(z.id).length })),
+};
+
 /** Facet list. `active` maps group key → selected value; `onPick(key, value)` applies it. */
 export default function ProductFilters({ active, onPick }) {
+  const groups = [ZONE_GROUP, ...STATIC_GROUPS];
+
   return (
     <>
-      {GROUPS.map((g) => (
-        <div className="facet-group" key={g.key}>
+      {groups.map((g) => (
+        <div className="facet-group" key={g.key} id={`facet-${g.key}`}>
           {/* h2: these sit directly under the page h1, so h3 skipped a level */}
           <h2 className="facet-heading">{g.label}</h2>
           <ul className="facet-list">

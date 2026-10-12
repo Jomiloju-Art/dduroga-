@@ -1,0 +1,13 @@
+{
+  "_about": "Performance ratings read by eye from the Mallcom 2025 catalogue for products the automatic extraction missed or misassigned. Symbol names are from the page-142 Glossary of icons. Applied by scripts/build-product-ranges.mjs over the extracted data. 'Fibreglass Toecap' for the solid-toe boot icon follows the mapping used for the other 58 footwear rows (e.g. page 99).",
+  "FREDDIE G21": { "page": 108, "ce": true, "symbols": ["Fibreglass Toecap", "Impact Resistant", "Energy Absorbent", "Anti Static", "Puncture Resistant", "Oil Resistant", "Slip Resistant", "Hydrocarbon Resistant"], "standards": [{ "code": "EN 20345" }, { "code": "IS 15298" }], "note": "Hero product of p108; the page's ratings row was extracted under the small FREDDIE H21 inset." },
+  "LEO B": { "page": 106, "ce": true, "symbols": ["E-com", "Fibreglass Toecap", "PU/PU", "Impact Resistant", "Energy Absorbent", "Anti Static", "Puncture Resistant", "Oil Resistant", "Slip Resistant", "Hydrocarbon Resistant"], "standards": [{ "code": "EN 20345" }, { "code": "IS 15298" }], "note": "Hero product of p106; ratings row was extracted under the MENNEC inset." },
+  "SCAR B": { "page": 116, "ce": true, "symbols": ["Fibreglass Toecap", "PU/PU", "E-com", "Impact Resistant", "Energy Absorbent", "Anti Static", "Puncture Resistant", "Oil Resistant", "Slip Resistant", "Hydrocarbon Resistant"], "standards": [{ "code": "EN 20345" }, { "code": "IS 15298" }], "note": "Hero product of p116; ratings row was extracted under the SCAR W inset." },
+  "MACH 22": { "page": 36, "ce": true, "symbols": ["Reinforce", "Light & Comfortable", "E-com", "Multi Utility"], "standards": [{ "code": "EN 388", "rating": "2121XP" }] },
+  "P151A": { "page": 50, "symbols": ["Breathable", "Anti Scratch", "Sparks", "Flexible"], "note": "Catalogue prints no CE or EN rating for this row." },
+  "P153S": { "page": 51, "symbols": ["Breathable", "Rough", "Flexible"], "note": "Catalogue prints no CE or EN rating for this row." },
+  "PARIS": { "page": 82, "ce": true, "symbols": ["Sparks", "Chemical Protection", "Flame"], "standards": [{ "code": "EN 11611" }, { "code": "EN 11612" }, { "code": "EN 61482" }, { "code": "EN 13688" }, { "code": "NFPA 2112" }] },
+  "L210B": { "page": 70, "symbols": ["Dexterity", "Anti Scratch"], "note": "Catalogue prints no CE or EN rating for this row." },
+  "L152O": { "page": 70, "symbols": ["Chemical Protection", "Bio Hazard", "Micro organism"], "note": "Catalogue prints no CE or EN rating for this row." },
+  "L152P": { "page": 70, "symbols": ["Chemical Protection", "Bio Hazard", "Micro organism"], "note": "Catalogue prints no CE or EN rating for this row." }
+}

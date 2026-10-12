@@ -98,6 +98,8 @@ export function usePageMeta({
   image = '/og-image.png',
   product = null,
   crumbs = null,
+  /** Keep utility pages (search, quote list, not found) out of search engines. */
+  noindex = false,
 }) {
   const crumbsKey = crumbs ? JSON.stringify(crumbs) : '';
   const productKey = product ? JSON.stringify({ s: product.slug, t: product.title }) : '';
@@ -124,10 +126,11 @@ export function usePageMeta({
     setMeta('name', 'twitter:card', 'summary_large_image');
     setMeta('name', 'twitter:image', img);
     setLink('canonical', url);
+    setMeta('name', 'robots', noindex ? 'noindex, follow' : 'index, follow');
 
     if (product) setSchema('schema-product', productSchema(product, url));
     if (crumbs && crumbs.length) setSchema('schema-breadcrumb', breadcrumbSchema(crumbs));
 
     return () => SCHEMA_IDS.forEach((id) => document.getElementById(id)?.remove());
-  }, [title, description, canonical, image, crumbsKey, productKey]);
+  }, [title, description, canonical, image, crumbsKey, productKey, noindex]);
 }

@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams, Navigate } from 'react-router-dom';
-import { findProduct, zoneOf, productsByZone, hazardNames, industryCatalog, typeLabel } from '../data/products.js';
+import { findProduct, zoneOf, productsByZone, productsByRange, byFeatured, hazardNames, industryCatalog, industryLabel, typeLabel, rangeById } from '../data/products.js';
+import CertifiedTo, { standardStrings } from '../components/CertifiedTo.jsx';
 import PageHero from '../components/PageHero.jsx';
 import ProductArt from '../components/ProductArt.jsx';
 import ProductGallery from '../components/ProductGallery.jsx';
-import DesignedForSection from '../components/DesignedForSection.jsx';
+import ProductVideo from '../components/ProductVideo.jsx';
+import { toSentences, splitFeature } from '../lib/productCopy.js';
 import RecommendRow from '../components/RecommendRow.jsx';
-import ReviewsSection from '../components/ReviewsSection.jsx';
 import { IconArrowRight, IconCheck, IconDocument } from '../components/Icons.jsx';
 import { brand } from '../data/brand.js';
 import { useQuote } from '../quote/QuoteContext.jsx';
@@ -14,6 +15,9 @@ import { downloadDatasheet } from '../lib/datasheet.js';
 import { usePageMeta } from '../lib/seo.js';
 import { addRecent, useRecentlyViewed } from '../lib/recent.js';
 import Reveal from '../components/Reveal.jsx';
+import NotFoundPage from './NotFoundPage.jsx';
+import SizeGuide from '../components/SizeGuide.jsx';
+import { sizingFor } from '../data/sizes.js';
 import PerformanceRatings, { hazardIcon, standardIcon } from '../components/PerformanceRatings.jsx';
 import { videoForProduct } from '../lib/productVideo.js';
 
@@ -69,6 +73,23 @@ function variantKind(variants) {
 }
 const KIND_LABEL = { size: 'size', colour: 'colour', 'size-colour': 'size / colour' };
 
+/* Variant values hold a size, a colour, or "size / colour". Split them so size
+   and colour can be picked separately (sizes now come from data/sizes.js). */
+const SIZE_RE = /^(\d+(\.\d+)?|XS|S|M|L|XL|XXL|XXXL|\dXL)$/i;
+const sizePart = (c) => { const v = String(c || '').split('/')[0].trim(); return SIZE_RE.test(v) ? v.toUpperCase() : null; };
+const colourPart = (c) => {
+  const parts = String(c || '').split('/').map((x) => x.trim()).filter(Boolean);
+  if (parts.length > 1) return parts.slice(1).join(' / ');
+  return parts[0] && !SIZE_RE.test(parts[0]) ? parts[0] : null;
+};
+/* Storefront footwear variants are UK sizes; the size offered is EU. Map EU to
+   the usual UK size so a matching variant (and its SKU) can still be found. */
+const EU_TO_UK = { 38: '5', 39: '6', 40: '6.5', 41: '7', 42: '8', 43: '9', 44: '9.5', 45: '10.5', 46: '11', 47: '12', 48: '13' };
+const sameLetterSize = (a, b) => {
+  const n = (x) => String(x).toUpperCase().replace(/^XXXL$/, '3XL').replace(/^XXL$/, '2XL');
+  return n(a) === n(b);
+};
+
 /** "About the design" section - only rendered when the product has a baked banner (matches Mallcom's own pages). */
 function FeatureDiagram({ img, title, features, banner }) {
   if (!banner) return null;
@@ -87,12 +108,23 @@ export default function ProductDetailPage() {
   const product = findProduct(slug);
   const [failedMain, setFailedMain] = useState(false);
   const [colorIdx, setColorIdx] = useState(0);
+  /** Chosen size. No default: a quote for the wrong size is worse than a prompt. */
+  const [size, setSize] = useState(null);
+  const [sizeError, setSizeError] = useState(false);
+  const sizeGroupRef = useRef(null);
   const [copied, setCopied] = useState(false);
   /** Quantity for the single quote action. */
   const [qty, setQty] = useState(1);
   /** Sticky product bar, shown once the top of the page scrolls away. */
   const [showSticky, setShowSticky] = useState(false);
+  /** Whether the main "Add to quote" button is on screen; the phone action bar
+   *  only appears once it is not, so the two never show at the same time. */
+  const [buyVisible, setBuyVisible] = useState(true);
+  const buyRef = useRef(null);
   const topRef = useRef(null);
+
+  // A new product starts with nothing picked.
+  useEffect(() => { setColorIdx(0); setSize(null); setSizeError(false); }, [slug]);
 
   useEffect(() => {
     const el = topRef.current;
@@ -105,9 +137,28 @@ export default function ProductDetailPage() {
     return () => io.disconnect();
   }, [product?.slug]);
 
+  useEffect(() => {
+    const el = buyRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([entry]) => setBuyVisible(entry.isIntersecting));
+    io.observe(el);
+    return () => io.disconnect();
+  }, [product?.slug]);
+
   const zone = zoneOf(product);
+  const range = rangeById(product?.range);
+  // Spec data, diagrams, banners, reviews and videos are keyed by the original
+  // storefront slug, which differs from the URL for renamed products.
+  const dataKey = product?.key || slug;
   const tags = useMemo(() => (product ? groupTags(product) : null), [product]);
-  const standards = useMemo(() => (product ? findStandards(product.desc || '') : []), [product]);
+  // Catalogue standards carry their rating ("EN 388 3132X"); the description scan
+  // adds anything else the copy mentions.
+  const standards = useMemo(() => {
+    if (!product) return [];
+    const fromCatalogue = standardStrings(product.catalogueStandards);
+    const seen = new Set(product.catalogueStandards.map((s) => s.code));
+    return [...fromCatalogue, ...findStandards(product.desc || '').filter((s) => !seen.has(s))];
+  }, [product]);
 
   // Rating tiles - real data only: protection areas (product tags) + standards.
   const ratingItems = useMemo(() => {
@@ -118,7 +169,8 @@ export default function ProductDetailPage() {
       value: '',
       icon: hazardIcon(h),
     }));
-    const standardTiles = standards.map((s) => {
+    // Catalogue standards render in <CertifiedTo>; tiles only cover the rest.
+    const standardTiles = standards.slice(product?.catalogueStandards?.length || 0).map((s) => {
       const m = s.match(/^((?:EN|IS|ISO|ANSI|NFPA|ASTM|AS\/NZS)\s?\d{2,6})(?::(\d{4}))?/i);
       return m
         ? { name: s, title: m[1].toUpperCase(), value: m[2] || '', icon: standardIcon(s) }
@@ -138,24 +190,25 @@ export default function ProductDetailPage() {
     Promise.all([import('../data/productDetails.js'), import('../data/diagramImages.js'), import('../data/calloutBanners.js')])
       .then(([d, di, cb]) => {
         if (!alive) return;
-        setRich(d.productDetails?.[slug] || null);
-        setDiagramImg(di.diagramImages?.[slug] || null);
-        setBannerImg(cb.calloutBanners?.[slug] || null);
+        setRich(d.productDetails?.[dataKey] || null);
+        setDiagramImg(di.diagramImages?.[dataKey] || null);
+        setBannerImg(cb.calloutBanners?.[dataKey] || null);
         setDetailsLoaded(true);
       })
       .catch(() => {
         if (alive) { setRich(null); setDiagramImg(null); setBannerImg(null); setDetailsLoaded(true); }
       });
     return () => { alive = false; };
-  }, [slug]);
+  }, [dataKey]);
 
-  useEffect(() => { addRecent(slug); }, [slug]);
-  const recent = useRecentlyViewed().filter((p) => p.slug !== slug);
+  useEffect(() => { if (product) addRecent(product.slug); }, [product?.slug]);
+  const recent = useRecentlyViewed().filter((p) => p.slug !== product?.slug);
 
   usePageMeta({
-    title: product?.fullTitle || product?.title || 'Product',
+    title: product?.fullTitle || product?.title || 'Product not found',
+    noindex: !product,
     description: (product?.desc || '').slice(0, 160),
-    canonical: `/products/${slug}`,
+    canonical: `/products/${product?.slug || slug}`,
     image: product?.img,
     product: product
       ? { title: product.title, sku: product.variants?.[0]?.s || '', desc: product.desc, img: product.img }
@@ -165,25 +218,51 @@ export default function ProductDetailPage() {
           { name: 'Home', path: '/' },
           { name: 'Products', path: '/products' },
           ...(zone ? [{ name: zone.label, path: `/products?cat=${zone.id}` }] : []),
-          { name: product.title, path: `/products/${slug}` },
+          ...(range ? [{ name: range.label, path: `/products?range=${range.id}` }] : []),
+          { name: product.title, path: `/products/${product.slug}` },
         ]
       : null,
   });
 
-  if (!product) return <Navigate to="/products" replace />;
+  // Unknown product: say so and suggest close matches (was a silent redirect).
+  if (!product) return <NotFoundPage slug={slug} />;
+  // Old storefront slug (see SLUG_RENAMES): send it to the product's real URL.
+  if (product.slug !== slug) return <Navigate to={`/products/${product.slug}`} replace />;
 
   const variants = product.variants || [];
-  const selected = variants[Math.min(colorIdx, Math.max(variants.length - 1, 0))] || null;
+  const sizing = sizingFor(product);
+  // Colours: from colour or "size / colour" variants, each with its first photo.
+  const colourOptions = [];
+  for (const v of variants) {
+    const name = colourPart(v.c);
+    if (!name) continue;
+    const found = colourOptions.find((o) => o.name === name);
+    if (!found) colourOptions.push({ name, img: v.img || null });
+    else if (!found.img && v.img) found.img = v.img;
+  }
+  const colour = colourOptions[Math.min(colorIdx, Math.max(colourOptions.length - 1, 0))]?.name || null;
+  // Unsized products keep the old one-row picker over the raw variants.
+  const legacyPicker = !sizing && variants.length > 0 && !colourOptions.length;
   const variantType = variantKind(variants);
   const kindLabel = KIND_LABEL[variantType];
-  // Sizes render as TEXT chips. An image swatch per size just repeated the same
-  // product photo, so "select size" showed nine identical shoes. Colour keeps
-  // image swatches; size and size/colour use the label.
-  const isTextOptions = variantType !== 'colour';
+  const sizeMatches = (v) => {
+    const vs = sizePart(v.c);
+    if (!size || !vs) return !size;
+    if (sizing?.kind === 'footwear') return vs === size || vs === EU_TO_UK[size];
+    return sizing?.kind === 'garment' ? sameLetterSize(vs, size) : vs === size;
+  };
+  // The variant behind the current choice, for its SKU, stock and photo.
+  const selected = legacyPicker
+    ? variants[Math.min(colorIdx, variants.length - 1)]
+    : variants.find((v) => (!colour || colourPart(v.c) === colour) && sizeMatches(v) && (size || colourPart(v.c)))
+      || (colour ? variants.find((v) => colourPart(v.c) === colour) : null)
+      || null;
+  const selectedImg = selected?.img || colourOptions.find((o) => o.name === colour)?.img || null;
+  const sizeText = size ? (sizing?.kind === 'footwear' ? `EU ${size}` : size) : '';
 
   const gallery = [];
   const pushImg = (u) => { if (u && !gallery.includes(u)) gallery.push(u); };
-  if (selected?.img) pushImg(selected.img);
+  if (selectedImg) pushImg(selectedImg);
   pushImg(product.img);
   (product.imgs || []).forEach(pushImg);
 
@@ -194,15 +273,43 @@ export default function ProductDetailPage() {
   /* Product video, if we hold one. It renders in the buy column, under the
      datasheet button - not in the gallery, which stays photos only. Products
      with no clip get null and nothing is rendered. */
-  const video = videoForProduct(product.slug);
+  const video = videoForProduct(product.key);
 
-  const paragraphs = product.hasDesc ? sentenceSplit(product.desc) : [];
   const features = product.hasDesc ? featureBullets(product.desc) : [];
   const featList = rich?.keyFeatures?.length ? rich.keyFeatures : features;
+  const featureRows = featList.map(splitFeature).filter(Boolean);
+  // Overview copy, two sentences to a paragraph.
+  //  - Storefront descriptions were stored cut at 600 characters, often
+  //    mid-word ("a secure yet comfo"): drop that trailing fragment.
+  //  - Sentences end in full stops in some descriptions and run together with
+  //    only a capital in others (toSentences); split on both.
+  //  - A sentence the key features already state word for word is left out,
+  //    otherwise products whose description IS the feature list say it twice.
+  const overview = (() => {
+    if (!product.hasDesc) return [];
+    let text = String(product.desc).replace(/\s+/g, ' ').trim();
+    if (text.length >= 600 && !/[.!?)]$/.test(text) && text.lastIndexOf('. ') > 0) text = text.slice(0, text.lastIndexOf('. ') + 1);
+    const norm = (x) => x.toLowerCase().replace(/[^a-z0-9%]+/g, ' ').trim();
+    // Only once the spec data has loaded: before that, featList is a stand-in
+    // built from the description itself and is not shown.
+    const featText = detailsLoaded ? norm(featList.join(' ')) : '';
+    const sentences = text.split(/(?<=[.!?])\s+(?=[A-Z])/).flatMap(toSentences)
+      .filter((x) => !(featText && featText.includes(norm(x))));
+    const out = [];
+    for (let i = 0; i < sentences.length; i += 2) out.push(sentences.slice(i, i + 2).map((x) => (/[.!?]$/.test(x) ? x : x.replace(/[;,]?$/, '.'))).join(' '));
+    return out;
+  })();
 
-  const zoneProducts = productsByZone(zone?.id).filter((p) => p.slug !== product.slug && p.img);
-  const lookFor = zoneProducts.slice(0, 3);
-  const alsoBought = zoneProducts.slice(3, 6);
+  // Similar products: the same product type first, then products in the same
+  // zone used in the same industries, each in featured order. (This used to be
+  // the first six products of the zone, whatever they were.)
+  const others = (list) => list.filter((p) => p.slug !== product.slug && p.img);
+  const sameRange = product.range ? others(productsByRange(product.range)).sort(byFeatured) : [];
+  const myIndustries = new Set(product.industries || []);
+  const sameUse = others(productsByZone(zone?.id))
+    .filter((p) => !sameRange.includes(p) && (p.industries || []).some((i) => myIndustries.has(i)))
+    .sort(byFeatured);
+  const related = [...sameRange, ...sameUse].slice(0, 8);
 
   const productUrl = typeof window !== 'undefined' ? window.location.href : '';
   const onShare = async () => {
@@ -217,12 +324,29 @@ export default function ProductDetailPage() {
     } catch { /* clipboard unavailable */ }
   };
 
-  const enquiryHref = `/contact?product=${encodeURIComponent(product.fullTitle || product.title)}${selected && selected.c ? `&variant=${encodeURIComponent(selected.c)}` : ''}`;
   const { add } = useQuote();
-  const quoteItem = { slug: product.slug, title: product.title, sku: selected?.s || '', img: product.img, option: selected?.c || '' };
+  const quoteItem = {
+    slug: product.slug, title: product.title, img: product.img,
+    sku: (sizing ? size && selected?.s : selected?.s) || '',
+    option: legacyPicker ? selected?.c || '' : [sizeText, colour].filter(Boolean).join(' / '),
+  };
+  /** Every "add" path goes through here: a sized product needs a size first. */
+  const addToQuote = (n = qty) => {
+    if (sizing && !size) {
+      setSizeError(true);
+      sizeGroupRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      sizeGroupRef.current?.querySelector('[aria-labelledby="size-label"] button')?.focus({ preventScroll: true });
+      return false;
+    }
+    add(quoteItem, n);
+    setQty(1);
+    return true;
+  };
   const specs = {
     zone: zone?.label || 'Not specified',
-    colours: variants.map((v) => v.c).filter(Boolean).join(', ') || 'Not specified',
+    range: range?.label || '',
+    colours: colourOptions.map((o) => o.name).join(', ') || product.colours?.join(', ') || 'Not specified',
+    sizes: sizing ? sizing.label : product.sizes || '',
     skus: variants.map((v) => v.s).filter(Boolean).join(', ') || 'Not specified',
     weight: [...new Set(variants.map((v) => v.wgt).filter(Boolean))].map((g) => `${g} g`).join(', ') || 'Not specified',
     standards,
@@ -242,6 +366,12 @@ export default function ProductDetailPage() {
             <span>/</span>
             <Link to={`/products?cat=${zone?.id}`}>{zone?.label}</Link>
             <span>/</span>
+            {range && (
+              <>
+                <Link to={`/products?range=${range.id}`}>{range.label}</Link>
+                <span>/</span>
+              </>
+            )}
             <span aria-current="page">{product.title}</span>
           </nav>
 
@@ -262,16 +392,16 @@ export default function ProductDetailPage() {
 
             {/* ---------- Info column ---------- */}
             <div className="detail-info">
-              <span className="eyebrow">{zone?.label}</span>
+              <span className="eyebrow">{range ? range.label : zone?.label}</span>
               <h1 className="pdp-title">{product.title}</h1>
 
               {/* One grey meta line under the title (BBC pattern): SKU, then
                   stock as a dot pill. The buy column had no at-a-glance status
                   line at all before this. */}
               <div className="pdp-metaline">
-                {selected?.s && (
+                {quoteItem.sku && (
                   <>
-                    <span>SKU {selected.s}</span>
+                    <span>SKU {quoteItem.sku}</span>
                     <span className="pdp-metaline__sep" aria-hidden="true">·</span>
                   </>
                 )}
@@ -291,41 +421,101 @@ export default function ProductDetailPage() {
               </div>
 
               {/* The description used to be printed here AND again in the open
-                  "About the design" panel below, so the same two paragraphs
+                  "Overview" panel below, so the same two paragraphs
                   appeared twice on one screen. The panel keeps the full text
                   plus the tag chips; this column stays a buy column. */}
-              <PerformanceRatings items={ratingItems} />
-              {tags.industries.length > 0 && (
+              {/* Catalogue rows (symbols + CE + coded standards) replace the
+                  tag-derived tiles wherever the catalogue covers the product. */}
+              {product.catalogueSymbols.length || product.catalogueStandards.length ? (
+                <CertifiedTo symbols={product.catalogueSymbols} standards={product.catalogueStandards} ce={product.ce} />
+              ) : (
+                <PerformanceRatings items={ratingItems} />
+              )}
+              {/* product.industries (see productIndustries.js), not the raw storefront
+                  tags: those listed one sector under up to four spellings and were
+                  missing on half the range. Each chip opens that industry's listing,
+                  which is built from the same data, so the two always agree. */}
+              {product.industries.length > 0 && (
                 <div className="detail-taggroup">
                   <h2>Useful in these industries</h2>
-                  <div className="chip-row">{tags.industries.map((t) => <span key={t} className="chip">{t}</span>)}</div>
+                  <div className="chip-row">
+                    {product.industries.map((slug) => (
+                      <Link key={slug} to={`/products?industry=${slug}`} className="chip">{industryLabel(slug)}</Link>
+                    ))}
+                  </div>
                 </div>
               )}
 
-              {variants.length > 0 && (
+              {/* Colour, then size: two separate choices. Sizes are the ranges
+                  in data/sizes.js (gloves 6-11, footwear EU 38-48, garments
+                  S-XXXL). Size has no default, so "Add to quote" asks for one. */}
+              {legacyPicker && (
                 <div className="detail-taggroup">
-                  <h2>Select {kindLabel} <span style={{ color: '#6d6d6d', fontWeight: 500, textTransform: 'none' }}>{selected?.c || ''}</span></h2>
-                  <div className={`color-row${isTextOptions ? ' color-row--text' : ''}`}>
+                  <div className="detail-taggroup__head">
+                    <h2>Select {kindLabel} <span className="detail-pick">{selected?.c || ''}</span></h2>
+                  </div>
+                  <div className={`color-row${variantType !== 'colour' ? ' color-row--text' : ''}`}>
                     {variants.map((v, i) => (
-                      <button
-                        key={v.c + i}
-                        type="button"
-                        className={`color-swatch${isTextOptions ? ' color-swatch--text' : ''}${i === colorIdx ? ' active' : ''}`}
-                        onClick={() => { setColorIdx(i); setActiveImg(0); }}
-                        aria-label={`${kindLabel} ${v.c}`}
-                        title={v.c}
-                      >
-                        {isTextOptions
-                          ? String(v.c).split('/')[0].trim()
-                          : (v.img ? <img src={v.img} alt={v.c} loading="lazy" /> : <span>{String(v.c).slice(0, 1)}</span>)}
+                      <button key={v.c + i} type="button" className={`color-swatch color-swatch--text${i === colorIdx ? ' active' : ''}`} onClick={() => setColorIdx(i)} aria-pressed={i === colorIdx}>
+                        {String(v.c)}
                       </button>
                     ))}
                   </div>
-                  <p className="detail-sku muted" style={{ fontSize: '0.82rem', marginTop: 6 }}>
-                    {selected?.s ? <>SKU: <strong>{selected.s}</strong> · </> : null}
-                    {selected?.a ? 'In stock' : 'Lead time on request'}
-                  </p>
                 </div>
+              )}
+
+              {colourOptions.length > 0 && (
+                <div className="detail-taggroup">
+                  <div className="detail-taggroup__head">
+                    <h2>Select colour <span className="detail-pick">{colour || ''}</span></h2>
+                  </div>
+                  <div className={`color-row${colourOptions.some((o) => o.img) ? '' : ' color-row--text'}`}>
+                    {colourOptions.map((o, i) => (
+                      <button
+                        key={o.name}
+                        type="button"
+                        className={`color-swatch${o.img ? '' : ' color-swatch--text'}${o.name === colour ? ' active' : ''}`}
+                        onClick={() => { setColorIdx(i); setActiveImg(0); }}
+                        aria-label={`Colour ${o.name}`}
+                        aria-pressed={o.name === colour}
+                        title={o.name}
+                      >
+                        {o.img ? <img src={o.img} alt="" loading="lazy" /> : o.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {sizing && (
+                <div className={`detail-taggroup${sizeError ? ' has-error' : ''}`} ref={sizeGroupRef}>
+                  <div className="detail-taggroup__head">
+                    <h2 id="size-label">Select size <span className="detail-pick">{sizeText || (sizing.kind === 'footwear' ? '(EU)' : '')}</span></h2>
+                    <SizeGuide kind={sizing.kind} />
+                  </div>
+                  <div className="color-row color-row--text" role="group" aria-labelledby="size-label" aria-describedby={sizeError ? 'size-error' : undefined}>
+                    {sizing.sizes.map((sz) => (
+                      <button
+                        key={sz}
+                        type="button"
+                        className={`color-swatch color-swatch--text${sz === size ? ' active' : ''}`}
+                        onClick={() => { setSize(sz); setSizeError(false); }}
+                        aria-pressed={sz === size}
+                        aria-label={`Size ${sizing.kind === 'footwear' ? 'EU ' : ''}${sz}`}
+                      >
+                        {sz}
+                      </button>
+                    ))}
+                  </div>
+                  {sizeError && <p className="detail-size-error" id="size-error" role="alert">Choose a size to add this to your quote.</p>}
+                </div>
+              )}
+
+              {(legacyPicker || colourOptions.length > 0 || sizing) && (
+                <p className="detail-sku muted" style={{ fontSize: '0.82rem', marginTop: 6 }}>
+                  {quoteItem.sku ? <>SKU: <strong>{quoteItem.sku}</strong> · </> : null}
+                  {selected?.a ? 'In stock' : 'Lead time on request'}
+                </p>
               )}
 
               <div className="detail-aside" style={{ marginTop: 22 }}>
@@ -372,8 +562,9 @@ export default function ProductDetailPage() {
                   </div>
                   <button
                     type="button"
+                    ref={buyRef}
                     className="pdp-add"
-                    onClick={() => { add(quoteItem, qty); setQty(1); }}
+                    onClick={() => addToQuote()}
                   >
                     {qty > 1 ? `Add ${qty} to quote` : 'Add to quote'}
                   </button>
@@ -384,6 +575,13 @@ export default function ProductDetailPage() {
                   >
                     Download datasheet
                   </button>
+                  {/* Only claims the site already makes elsewhere; add lead times and
+                      minimum order here once the client confirms them. */}
+                  <ul className="pdp-assure">
+                    <li>Stocked in Lagos, delivered nationwide</li>
+                    <li>No payment to request a quote</li>
+                    <li>Test certificates and declarations of conformity on request</li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -398,128 +596,135 @@ export default function ProductDetailPage() {
           banner={bannerImg}
         />
 
-        {/* ---------- Designed For ----------
-            The Gymshark block: a two-tab strip whose "Designed For" panel is a
-            50/50 split - statement + feature rows on the left, the product video
-            filling the right column edge to edge. Sits below the buy area, which
-            is where they put it, not in the buy column. Products without a clip
-            fall back to their first image so the column is never empty. */}
-        <DesignedForSection product={product} video={video} rich={rich} />
+        {/* ---------- Product information ----------
+            One section. It replaced the "Designed For / Description" tab block
+            AND the accordions under it (Oct 2026), which showed the same
+            catalogue copy twice: the tab's statement was the description cut at
+            150 characters, its feature rows were the "Key features" list, and
+            its Description tab repeated the Design and Remarks under "Product
+            details". Its right column also repeated the main product photo.
 
-        {/* ---------- Reviews ----------
-            Gymshark's review layout, Mallcom's review data. The component
-            returns null for a product with no reviews, so nothing renders for
-            those - which is most of the catalogue: 200 of 522 have any. Each
-            review keeps its own author and date, and the block states the
-            reviews were collected by Mallcom rather than implying they are ours. */}
-        <div className="container">
-          <ReviewsSection slug={product.slug} />
-        </div>
-
-        {/* ---------- Accordion tabs ---------- */}
-        <div className="container detail-accordions" style={{ marginTop: 26 }}>
-          <details open>
-            <summary>About the design</summary>
-            <div className="acc-body">
-              {paragraphs.length ? paragraphs.map((p) => <p key={p.slice(0, 40)}>{p}</p>) : <p>Certified product within the {zone?.label.toLowerCase()} range.</p>}
-              {tags.misc.length > 0 && (
-                <div className="chip-row" style={{ marginTop: 8 }}>{tags.misc.slice(0, 12).map((t) => <span key={t} className="chip">{t}</span>)}</div>
-              )}
-            </div>
-          </details>
-
-          <details>
-            <summary>Key features</summary>
-            <div className="acc-body">
-              {!detailsLoaded ? (
-                /* Skeleton while the spec data loads. This slot previously
-                   showed the "available on request" line for an instant before
-                   swapping to real content, which was briefly untrue. */
-                <div aria-hidden="true">
-                  <span className="skeleton skeleton--text" style={{ width: '92%' }} />
-                  <span className="skeleton skeleton--text" style={{ width: '84%' }} />
-                  <span className="skeleton skeleton--text" style={{ width: '70%' }} />
+            Stacked sections rather than tabs: shoppers overlook content behind
+            horizontal tabs on product pages, while sections are scanned. The
+            Overview opens by default. The product video, where we hold one,
+            sits beside the text and stays in view; without one, the text keeps
+            a readable measure instead of a repeated photo. */}
+        <section className="container pinfo" aria-labelledby="pinfo-title">
+          <h2 id="pinfo-title" className="pinfo__title">Product information</h2>
+          <div className={`pinfo__grid${video ? ' has-media' : ''}`}>
+            <div className="detail-accordions pinfo__main">
+              <details open>
+                <summary>Overview</summary>
+                <div className="acc-body">
+                  {overview.length
+                    ? overview.map((p, i) => <p key={i} className="pinfo__lead">{p}</p>)
+                    : !featureRows.length && <p className="pinfo__lead">Certified product within the {zone?.label.toLowerCase()} range.</p>}
+                  {!detailsLoaded ? (
+                    /* Skeleton while the spec data loads, rather than a line
+                       that is briefly untrue. */
+                    <div aria-hidden="true" style={{ marginTop: 18 }}>
+                      <span className="skeleton skeleton--text" style={{ width: '92%' }} />
+                      <span className="skeleton skeleton--text" style={{ width: '84%' }} />
+                      <span className="skeleton skeleton--text" style={{ width: '70%' }} />
+                    </div>
+                  ) : featureRows.length > 0 && (
+                    <>
+                      <h3 className="acc-sub">Key features</h3>
+                      <ul className="pinfo__features">
+                        {featureRows.map((f, i) => (
+                          <li key={i}>
+                            <IconCheck width="18" height="18" aria-hidden="true" />
+                            <span>{f.title && <strong>{f.title}</strong>}{f.title ? ' ' : ''}{f.text}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                  {tags.misc.length > 0 && (
+                    <div className="chip-row" style={{ marginTop: 16 }}>{tags.misc.slice(0, 12).map((t) => <span key={t} className="chip">{t}</span>)}</div>
+                  )}
                 </div>
-              ) : featList.length ? (
-                <ul className="spec-list">
-                  {featList.map((f) => <li key={f.slice(0, 40)}><IconCheck width="17" height="17" /> {f}</li>)}
-                </ul>
-              ) : (
-                <p>Key feature details are loaded from the product spec sheet, available on request.</p>
-              )}
-            </div>
-          </details>
+              </details>
 
-          <details>
-            <summary>Product details</summary>
-            <div className="acc-body">
-              <dl className="acc-dl">
-                <dt>Zone</dt><dd>{zone?.label}</dd>
-                <dt>Product line</dt><dd>{typeLabel(product) || 'Not specified'}</dd>
-                {variants.length > 0 && (
-                  <>
-                    <dt>Colours</dt><dd>{variants.map((v) => v.c).join(', ')}</dd>
-                    <dt>SKUs</dt><dd>{variants.map((v) => v.s).filter(Boolean).join(', ') || 'Not specified'}</dd>
-                    <dt>Weight</dt><dd>{specs.weight}</dd>
-                  </>
-                )}
-                <dt>Order model</dt><dd>Enquiry / quotation, volume &amp; custom branding supported</dd>
-              </dl>
-              {rich?.design?.length > 0 && (
-                <>
-                  <h4 className="acc-sub">Design</h4>
-                  <ul className="spec-list">
-                    {rich.design.map((d) => <li key={d.slice(0, 40)}><IconCheck width="17" height="17" /> {d}</li>)}
-                  </ul>
-                </>
-              )}
-              {rich?.remarks?.length > 0 && (
-                <>
-                  <h4 className="acc-sub">Remarks</h4>
-                  <ul className="spec-list">
-                    {rich.remarks.map((r) => <li key={r.slice(0, 40)}><IconCheck width="17" height="17" /> {r}</li>)}
-                  </ul>
-                </>
-              )}
-            </div>
-          </details>
+              <details>
+                <summary>Specifications</summary>
+                <div className="acc-body">
+                  <dl className="acc-dl">
+                    <dt>Zone</dt><dd>{zone?.label}</dd>
+                    <dt>Product line</dt><dd>{range?.label || typeLabel(product) || 'Not specified'}</dd>
+                    {product.collection && (<><dt>Mallcom collection</dt><dd>{product.collection}</dd></>)}
+                    {/* Catalogue-only products carry sizes/colours as printed, not as variants. */}
+                    {sizing
+                      ? <><dt>Sizes</dt><dd>{sizing.kind === 'footwear' ? 'EU ' : ''}{sizing.sizes.join(', ')}</dd></>
+                      : product.sizes && <><dt>Sizes</dt><dd>{product.sizes}</dd></>}
+                    {colourOptions.length > 0
+                      ? <><dt>Colours</dt><dd>{colourOptions.map((o) => o.name).join(', ')}</dd></>
+                      : product.colours?.length > 0 && <><dt>Colours</dt><dd>{product.colours.join(', ')}</dd></>}
+                    {variants.length > 0 && (
+                      <>
+                        <dt>SKUs</dt><dd>{variants.map((v) => v.s).filter(Boolean).join(', ') || 'Not specified'}</dd>
+                        <dt>Weight</dt><dd>{specs.weight}</dd>
+                      </>
+                    )}
+                    <dt>Order model</dt><dd>Enquiry / quotation, volume &amp; custom branding supported</dd>
+                  </dl>
+                  {rich?.design?.length > 0 && (
+                    <>
+                      <h3 className="acc-sub">Design</h3>
+                      <ul className="spec-list">
+                        {rich.design.map((d, i) => <li key={i}><IconCheck width="17" height="17" /> {d}</li>)}
+                      </ul>
+                    </>
+                  )}
+                  {rich?.remarks?.length > 0 && (
+                    <>
+                      <h3 className="acc-sub">Remarks</h3>
+                      <ul className="spec-list">
+                        {rich.remarks.map((r, i) => <li key={i}><IconCheck width="17" height="17" /> {r}</li>)}
+                      </ul>
+                    </>
+                  )}
+                </div>
+              </details>
 
-          <details>
-            <summary>Standards &amp; tests</summary>
-            <div className="acc-body">
-              {standards.length ? (
-                <div className="chip-row">{standards.map((s) => <span key={s} className="chip chip--gold">{s}</span>)}</div>
-              ) : null}
-              {rich?.tests?.length > 0 && (
-                <>
-                  <h4 className="acc-sub">Tests conducted</h4>
-                  <ul className="spec-list">
-                    {rich.tests.map((t) => <li key={t.slice(0, 40)}><IconCheck width="17" height="17" /> {t}</li>)}
-                  </ul>
-                </>
-              )}
-              <p style={{ marginTop: 10 }}>Full test certificates, batch records and conformity documentation available on request from our quality team.</p>
-            </div>
-          </details>
+              <details>
+                <summary>Standards &amp; tests</summary>
+                <div className="acc-body">
+                  {standards.length ? (
+                    <div className="chip-row">{standards.map((s) => <span key={s} className="chip chip--gold">{s}</span>)}</div>
+                  ) : null}
+                  {rich?.tests?.length > 0 && (
+                    <>
+                      <h3 className="acc-sub">Tests conducted</h3>
+                      <ul className="spec-list">
+                        {rich.tests.map((t, i) => <li key={i}><IconCheck width="17" height="17" /> {t}</li>)}
+                      </ul>
+                    </>
+                  )}
+                  <p style={{ marginTop: 10 }}>Full test certificates, batch records and conformity documentation available on request from our quality team.</p>
+                </div>
+              </details>
 
-          {/* The Reviews tab was removed: we hold no review data, so it only
-              advertised "Customer reviews (0)" and told the visitor to "connect
-              your review app" — an internal build note shown to customers. Put
-              it back when there are real, verifiable reviews to display. */}
-        </div>
+              {/* The Reviews tab was removed: we hold no review data. Put it
+                  back when there are real, verifiable reviews to display. */}
+            </div>
+
+            {video && (
+              <aside className="pinfo__media" aria-label={`${product.title} video`}>
+                <ProductVideo mp4={video.mp4} webm={video.webm} poster={video.poster} title={product.title} fit="contain" />
+              </aside>
+            )}
+          </div>
+        </section>
       </section>
 
-      {/* ---------- We recommend ----------
+      {/* ---------- Similar products ----------
           The Gymshark carousel: a 4-up strip of frameless cards, one text size,
-          no chip, no button.
-
-          SCOPED TO ONE PRODUCT ON PURPOSE. This renders on diamond-iii only
-          while the treatment is being judged; every other PDP keeps the existing
-          card grid untouched. Widen the check once it is signed off. */}
-      {product.slug === 'diamond-iii' && ([...lookFor, ...alsoBought].length > 1) && (
+          no chip, no button. Trialled on DIAMOND III, now on every product. */}
+      {related.length > 1 && (
         <section className="section" style={{ paddingTop: 0, paddingBottom: 40 }}>
           <div className="container">
-            <RecommendRow products={[...lookFor, ...alsoBought]} title="We recommend" />
+            <RecommendRow products={related} title={sameRange.length >= 4 && range ? `More ${range.label.toLowerCase()}` : 'Similar products'} />
           </div>
         </section>
       )}
@@ -562,7 +767,7 @@ export default function ProductDetailPage() {
           </span>
           <span className="pdp-bar__meta">
             <strong>{product.title}</strong>
-            <span>{selected?.s ? `SKU ${selected.s}` : typeLabel(product) || zone?.label}</span>
+            <span>{quoteItem.sku ? `SKU ${quoteItem.sku}` : typeLabel(product) || zone?.label}</span>
           </span>
           <button
             type="button"
@@ -575,7 +780,7 @@ export default function ProductDetailPage() {
           <button
             type="button"
             className="btn hx-btn pdp-bar__cta"
-            onClick={() => { add(quoteItem, qty); setQty(1); }}
+            onClick={() => addToQuote()}
           >
             Request quote
           </button>
@@ -583,10 +788,11 @@ export default function ProductDetailPage() {
       </div>
 
       {/* ---------- Mobile sticky action bar ---------- */}
-      <div className="pdp-sticky">
-        <button type="button" className="btn hx-btn" onClick={() => { add(quoteItem, qty); }}>Add to quote</button>
-        <button type="button" className="btn btn--outline-dark" onClick={() => downloadDatasheet(product, specs)}>Datasheet</button>
-        <Link to={enquiryHref} className="btn btn--dark">Request quote</Link>
+      {/* Phone action bar: two actions only. "Request quote" was a third button
+          that did nearly the same as "Add to quote"; the quote list sends it. */}
+      <div className={`pdp-sticky${buyVisible ? '' : ' is-visible'}`} aria-hidden={buyVisible}>
+        <button type="button" className="btn hx-btn" tabIndex={buyVisible ? -1 : 0} onClick={() => addToQuote()}>Add to quote</button>
+        <button type="button" className="btn btn--outline-dark" tabIndex={buyVisible ? -1 : 0} onClick={() => downloadDatasheet(product, specs)}>Datasheet</button>
       </div>
     </>
   );

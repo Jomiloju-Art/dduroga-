@@ -56,10 +56,9 @@
     <meta name="referrer" content="strict-origin-when-cross-origin" />
 
     <!--
-      Organization schema, static for the same reason. Deliberately no
-      contactPoint: the phone and email in brand.js are still placeholders, and
-      publishing fabricated contact details as machine-readable schema is worse
-      than omitting them.
+      Organization schema, static for the same reason. contactPoint uses the
+      phone and email printed in the client's business profile (see brand.js);
+      keep the two in step.
     -->
     <script type="application/ld+json">
       {
@@ -75,6 +74,13 @@
           "addressLocality": "Surulere",
           "addressRegion": "Lagos",
           "addressCountry": "NG"
+        },
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "+234-907-225-4796",
+          "email": "sales@dduroga.com",
+          "contactType": "sales",
+          "areaServed": "NG"
         },
         "parentOrganization": { "@type": "Organization", "name": "Mallcom" }
       }

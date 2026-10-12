@@ -1,161 +1,144 @@
 /**
- * ProductGallery - the Gymshark-pattern PDP media section.
+ * ProductGallery - one large stage with a thumbnail rail (the Amazon pattern).
  *
- * Measured from their live PDP (uk.gymshark.com, 1584px viewport) rather than
- * guessed. The numbers that matter:
+ *   desktop (>900px)              phone / tablet (<=900px)
+ *   ┌────┬─────────────────┐      ┌─────────────────────┐
+ *   │ ▣  │                 │      │   swipeable stage   │
+ *   │ ▢  │      stage      │      └─────────────────────┘
+ *   │ ▢  │                 │      ▣ ▢ ▢ ▢ ▢  (strip, scrolls sideways)
+ *   └────┴─────────────────┘
  *
- *   gallery column   792px  = 50% of viewport
- *   buy column       410px  = 26%
- *   gap between      174px  (they simply do not fill it)
- *   tile gap           4px  (not 8/12 - the grid reads as one surface)
- *   tile radius        0px
- *   tile border        0
- *   tile shadow        none
- *   tile background   rgb(222,224,227)
- *   half tile        394px, aspect ~0.799 (4:5)
- *   full tile        792px
+ * The rail only appears when a product has more than one photo; a single photo
+ * gets the stage alone. The stage is one horizontal scroll-snap track for every
+ * screen size, so phones swipe natively and the rail simply drives scrollLeft.
  *
- * The layout is a two-up MOSAIC, not a single stack:
- *
- *   ┌──────────┬──────────┐
- *   │  half    │  half    │   two portraits side by side
- *   ├──────────┴──────────┤
- *   │       full          │   one full-width
- *   ├──────────┬──────────┤
- *   │  half    │  half    │   …and so on
- *   └──────────┴──────────┘
- *
- * Rules, applied to however many images a product has:
- *   - one image            -> single full-width tile
- *   - two images           -> two halves
- *   - three or more        -> halves, then a full, alternating
- *   - carousel mode (<=2)  -> halves are full-width so each gets the stage
- *
- * Behaviour kept from the earlier build, all of it verified by driving a browser:
- *   - sticky scroll region with a visible scrollbar and the left-edge pill
- *   - click a point to magnify that point, pointer tracking while magnified
- *   - the drawn +/- cursor, native cursor hidden over the media
- *   - horizontal scroll-snap on mobile
+ * Behaviour:
+ *   - hover a thumbnail (mouse only) or click / tap it to show that photo
+ *   - arrow keys move between thumbnails (roving focus), Home / End jump
+ *   - prev / next buttons on the stage, a "3 / 8" counter for orientation
+ *   - click the stage to magnify the point clicked; the drawn +/- cursor shows
+ *     which click will happen. Changing photo resets the zoom.
+ *   - the rail is as tall as the stage and scrolls; the active thumbnail is
+ *     kept in view without moving the page.
+ *   - a colour pick that changes the first photo returns the stage to it.
  */
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import ProductArt from './ProductArt.jsx';
 
 const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
-
-/**
- * Assign each image a column span. Gymshark's own arrangement puts two halves,
- * then a full-width, then repeats. Two images or fewer stay side by side so the
- * top of the page always shows a pair.
- */
-function spansFor(count) {
-  if (count === 1) return ['full'];
-  const spans = [];
-  for (let i = 0; i < count; i++) {
-    // every third tile is full width; the rest pair up
-    spans.push(i % 3 === 2 ? 'full' : 'half');
-  }
-  // a trailing single half looks broken, so widen it
-  if (spans[spans.length - 1] === 'half' && spans.length > 1) spans[spans.length - 1] = 'full';
-  return spans;
-}
+const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const finePointer = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
 export default function ProductGallery({ images = [], title = 'Product', zone }) {
-  const scrollRef = useRef(null);
-  const [zoomedIndex, setZoomedIndex] = useState(null);
+  const trackRef = useRef(null);
+  const railRef = useRef(null);
+  const [active, setActive] = useState(0);
+  const [zoomed, setZoomed] = useState(false);
   const [origin, setOrigin] = useState({ x: 50, y: 50 });
   const [cursor, setCursor] = useState({ x: 0, y: 0 });
   const [cursorOn, setCursorOn] = useState(false);
-  const [zoomIn, setZoomIn] = useState(true);
-  const [active, setActive] = useState(0);
-  const [atTop, setAtTop] = useState(true);
-  const [atBottom, setAtBottom] = useState(false);
+  const count = images.length;
+  const multi = count > 1;
 
-  const spans = useMemo(() => spansFor(images.length), [images.length]);
+  /* Show photo i. Desktop swaps instantly (a stage, not a slideshow); a tap on
+     the phone strip glides so the swipe direction stays legible. */
+  const show = useCallback((i, smooth = false) => {
+    const track = trackRef.current;
+    const next = clamp(i, 0, count - 1);
+    setActive(next);
+    setZoomed(false);
+    if (track) track.scrollTo({ left: next * track.clientWidth, behavior: smooth && !reducedMotion() ? 'smooth' : 'auto' });
+  }, [count]);
 
-  /* ---------- scroll position: counter, pill state ---------- */
+  // A colour pick puts its photo first: go back to it.
+  useEffect(() => { show(0); }, [images[0], show]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Swiping (or the browser restoring scroll) updates the active photo.
   useEffect(() => {
-    const root = scrollRef.current;
-    if (!root) return;
+    const track = trackRef.current;
+    if (!track) return;
+    let raf = 0;
     const onScroll = () => {
-      const vertical = root.scrollHeight > root.clientHeight + 4;
-      if (vertical) {
-        const max = root.scrollHeight - root.clientHeight;
-        setAtTop(root.scrollTop <= 2);
-        setAtBottom(Math.round(root.scrollTop) >= Math.round(max) - 2);
-        const tiles = [...root.querySelectorAll('[data-index]')];
-        let best = 0, bestDist = Infinity;
-        tiles.forEach((t, i) => {
-          const d = Math.abs(t.offsetTop - root.scrollTop);
-          if (d < bestDist) { bestDist = d; best = i; }
-        });
-        setActive(best);
-      } else {
-        const i = Math.round(root.scrollLeft / root.clientWidth);
-        setActive(i);
-        setAtTop(i <= 0);
-        setAtBottom(i >= images.length - 1);
-      }
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const i = clamp(Math.round(track.scrollLeft / Math.max(track.clientWidth, 1)), 0, count - 1);
+        if (i !== active) { setActive(i); setZoomed(false); }
+      });
     };
-    onScroll();
-    root.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
+    // Keep the current photo aligned when the stage is resized.
+    const onResize = () => { track.scrollLeft = active * track.clientWidth; };
+    track.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onResize);
     return () => {
-      root.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
+      cancelAnimationFrame(raf);
+      track.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onResize);
     };
-  }, [images.length]);
+  }, [count, active]);
 
-  const step = (dir) => {
-    const root = scrollRef.current;
-    if (!root) return;
-    const vertical = root.scrollHeight > root.clientHeight + 4;
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (vertical) root.scrollTo({ top: root.scrollTop + dir * 150, behavior: reduce ? 'auto' : 'smooth' });
-    else root.scrollTo({ left: root.scrollLeft + dir * root.clientWidth, behavior: reduce ? 'auto' : 'smooth' });
+  // Keep the active thumbnail visible inside the rail, without scrolling the page.
+  useEffect(() => {
+    const rail = railRef.current;
+    const thumb = rail?.children[active];
+    if (!thumb) return;
+    const vertical = rail.scrollHeight > rail.clientHeight + 1;
+    if (vertical) {
+      const top = thumb.offsetTop - rail.offsetTop;
+      if (top < rail.scrollTop) rail.scrollTop = top - 4;
+      else if (top + thumb.offsetHeight > rail.scrollTop + rail.clientHeight) rail.scrollTop = top + thumb.offsetHeight - rail.clientHeight + 4;
+    } else {
+      const left = thumb.offsetLeft - rail.offsetLeft;
+      if (left < rail.scrollLeft) rail.scrollLeft = left - 4;
+      else if (left + thumb.offsetWidth > rail.scrollLeft + rail.clientWidth) rail.scrollLeft = left + thumb.offsetWidth - rail.clientWidth + 4;
+    }
+  }, [active]);
+
+  /* Rail keyboard: one tab stop, arrows move (and show) like a listbox. */
+  const onRailKey = (e) => {
+    const map = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 };
+    let next = null;
+    if (e.key in map) next = clamp(active + map[e.key], 0, count - 1);
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = count - 1;
+    if (next === null) return;
+    e.preventDefault();
+    show(next);
+    railRef.current?.children[next]?.focus();
+  };
+
+  /* Hover preview, mouse only. Driven by real pointer movement rather than
+     mouseenter: when the rail scrolls itself (keyboard, End) a thumbnail slides
+     under a resting pointer, and mouseenter would steal the selection. */
+  const lastPointer = useRef({ x: -1, y: -1 });
+  const onRailHover = (e) => {
+    if (e.pointerType !== 'mouse' || !finePointer()) return;
+    if (e.clientX === lastPointer.current.x && e.clientY === lastPointer.current.y) return;
+    lastPointer.current = { x: e.clientX, y: e.clientY };
+    const thumb = e.target.closest('.gallery-thumb');
+    const i = thumb ? [...railRef.current.children].indexOf(thumb) : -1;
+    if (i >= 0 && i !== active) show(i);
   };
 
   /* ---------- zoom: click a point, magnify that point ---------- */
-  const handleImageClick = (i, e) => {
-    if (i === zoomedIndex) {
-      setZoomedIndex(null);
-      setZoomIn(true);
-      setOrigin({ x: 50, y: 50 });
-      return;
-    }
-    const rect = e.currentTarget.getBoundingClientRect();
-    setZoomedIndex(i);
-    setZoomIn(false);
-    setOrigin({
-      x: clamp(((e.clientX - rect.left) / rect.width) * 100, 0, 100),
-      y: clamp(((e.clientY - rect.top) / rect.height) * 100, 0, 100),
-    });
+  const pointAt = (el, e) => {
+    const r = el.getBoundingClientRect();
+    return { x: clamp(((e.clientX - r.left) / r.width) * 100, 0, 100), y: clamp(((e.clientY - r.top) / r.height) * 100, 0, 100) };
+  };
+  const onSlideClick = (e) => {
+    // A keyboard press has no pointer position: zoom on the centre.
+    if (zoomed) { setZoomed(false); return; }
+    setOrigin(e.detail === 0 ? { x: 50, y: 50 } : pointAt(e.currentTarget, e));
+    setZoomed(true);
+  };
+  const onStageMove = (e) => {
     setCursor({ x: e.clientX, y: e.clientY });
+    if (zoomed) {
+      const slide = trackRef.current?.children[active];
+      if (slide) setOrigin(pointAt(slide, e));
+    }
   };
 
-  useEffect(() => {
-    if (zoomedIndex === null) return;
-    const onMove = (e) => {
-      const root = scrollRef.current;
-      if (!root) return;
-      const tile = root.querySelector(`[data-index="${zoomedIndex}"]`);
-      if (!tile) return;
-      const rect = tile.getBoundingClientRect();
-      if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) return;
-      setCursor({ x: e.clientX, y: e.clientY });
-      setOrigin({
-        x: clamp(((e.clientX - rect.left) / rect.width) * 100, 0, 100),
-        y: clamp(((e.clientY - rect.top) / rect.height) * 100, 0, 100),
-      });
-    };
-    window.addEventListener('mousemove', onMove);
-    return () => window.removeEventListener('mousemove', onMove);
-  }, [zoomedIndex]);
-
-  const onMediaMove = (e) => setCursor({ x: e.clientX, y: e.clientY });
-  const onMediaEnter = (e) => { setCursor({ x: e.clientX, y: e.clientY }); setCursorOn(true); };
-  const onMediaLeave = () => setCursorOn(false);
-
-  if (!images.length) {
+  if (!count) {
     return (
       <div className="gallery-col">
         <div className="detail-art detail-art--bare" style={{ display: 'grid', placeItems: 'center', minHeight: 420 }}>
@@ -166,90 +149,84 @@ export default function ProductGallery({ images = [], title = 'Product', zone })
   }
 
   return (
-    <div className="gallery-col">
-      <div
-        /* `gallery-grid` is the mosaic; the earlier single-column class is gone. */
-        className="gallery-scroll gallery-grid"
-        ref={scrollRef}
-        onMouseMove={onMediaMove}
-        onMouseEnter={onMediaEnter}
-        onMouseLeave={onMediaLeave}
-      >
-        {images.map((src, i) => {
-          const zoomed = zoomedIndex === i;
-          return (
+    <div className={`gallery-col${multi ? ' has-rail' : ''}`}>
+      {multi && (
+        <div
+          className="gallery-rail"
+          ref={railRef}
+          role="group"
+          aria-label={`${title} photos`}
+          onKeyDown={onRailKey}
+          onPointerMove={onRailHover}
+        >
+          {images.map((src, i) => (
             <button
               type="button"
-              className={`gallery-slide gallery-slide--${spans[i]}${zoomed ? ' is-zoomed' : ''}`}
               key={src}
-              data-index={i}
-              aria-label={zoomed ? `Reset zoom on ${title} view ${i + 1}` : `Zoom ${title} view ${i + 1}`}
-              aria-pressed={zoomed}
-              onClick={(e) => handleImageClick(i, e)}
-              style={zoomed ? {
-                backgroundImage: `url(${src})`,
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: `${origin.x}% ${origin.y}%`,
-                backgroundSize: '250%',
-              } : undefined}
+              className={`gallery-thumb${i === active ? ' is-active' : ''}`}
+              aria-label={`Show photo ${i + 1} of ${count}`}
+              aria-current={i === active ? 'true' : undefined}
+              tabIndex={i === active ? 0 : -1}
+              onClick={() => show(i, true)}
             >
-              <img
-                src={src}
-                alt={`${title} - view ${i + 1}`}
-                loading={i < 2 ? 'eager' : 'lazy'}
-                decoding="async"
-                style={zoomed ? { opacity: 0 } : undefined}
-              />
+              <img src={src} alt="" loading={i < 8 ? 'eager' : 'lazy'} decoding="async" />
             </button>
-          );
-        })}
-      </div>
-
-      {/* Counter and the left-edge pill. The pill is the scroll affordance - it
-          sits over the media, centred vertically, exactly as theirs does. */}
-      {images.length > 1 && (
-        <>
-          <div className="gallery-pill" aria-hidden={false}>
-            <button
-              type="button"
-              className="gallery-pill__btn"
-              onClick={() => step(-1)}
-              disabled={atTop}
-              aria-label="Scroll up"
-            >
-              <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
-                <path d="M12 8l-6 6h12z" fill="currentColor" />
-              </svg>
-            </button>
-            <span className="gallery-pill__rail">
-              <span
-                className="gallery-pill__thumb"
-                style={{ transform: `translateY(${(active / Math.max(images.length - 1, 1)) * 100}%)` }}
-              />
-            </span>
-            <button
-              type="button"
-              className="gallery-pill__btn"
-              onClick={() => step(1)}
-              disabled={atBottom}
-              aria-label="Scroll down"
-            >
-              <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
-                <path d="M12 16l6-6H6z" fill="currentColor" />
-              </svg>
-            </button>
-          </div>
-
-          <p className="gallery-count" aria-live="polite">
-            <span className="gallery-count__now">{Math.min(active + 1, images.length)}</span>
-            <span className="gallery-count__sep">/</span>
-            <span>{images.length}</span>
-          </p>
-        </>
+          ))}
+        </div>
       )}
 
+      <div
+        className="gallery-stage"
+        onMouseMove={onStageMove}
+        onMouseEnter={(e) => { setCursor({ x: e.clientX, y: e.clientY }); setCursorOn(true); }}
+        onMouseLeave={() => { setCursorOn(false); setZoomed(false); }}
+      >
+        <div className="gallery-track" ref={trackRef}>
+          {images.map((src, i) => {
+            const isZoomed = zoomed && i === active;
+            return (
+              <button
+                type="button"
+                key={src}
+                className={`gallery-slide${isZoomed ? ' is-zoomed' : ''}`}
+                aria-label={isZoomed ? `Zoom out of photo ${i + 1}` : `Zoom in on photo ${i + 1} of ${count}`}
+                aria-hidden={i === active ? undefined : 'true'}
+                tabIndex={i === active ? 0 : -1}
+                onClick={onSlideClick}
+                style={isZoomed ? {
+                  backgroundImage: `url(${src})`,
+                  backgroundPosition: `${origin.x}% ${origin.y}%`,
+                } : undefined}
+              >
+                <img
+                  src={src}
+                  alt={`${title}, photo ${i + 1}`}
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                  fetchpriority={i === 0 ? 'high' : undefined}
+                  decoding="async"
+                />
+              </button>
+            );
+          })}
+        </div>
+
+        {multi && (
+          <>
+            <button type="button" className="gallery-nav gallery-nav--prev" onClick={() => show(active - 1, true)} disabled={active === 0} aria-label="Previous photo">
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </button>
+            <button type="button" className="gallery-nav gallery-nav--next" onClick={() => show(active + 1, true)} disabled={active === count - 1} aria-label="Next photo">
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </button>
+            <p className="gallery-count" aria-live="polite">
+              <span className="sr-only">Photo </span>{active + 1}<span className="gallery-count__sep">/</span>{count}
+            </p>
+          </>
+        )}
+      </div>
+
       <span
-        className={`gallery-cursor${cursorOn ? ' is-on' : ''}${zoomIn ? ' is-in' : ' is-out'}`}
+        className={`gallery-cursor${cursorOn ? ' is-on' : ''}${zoomed ? ' is-out' : ' is-in'}`}
         style={{ left: `${cursor.x}px`, top: `${cursor.y}px` }}
         aria-hidden="true"
       />

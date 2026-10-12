@@ -67,20 +67,22 @@
  *
  * Their message also ended "And many more", which is not treated as an entry.
  */
+/* w / h: the PNG's pixel size. ClientLogos sizes each mark from its aspect
+   ratio so wide wordmarks and square badges carry the same visual weight. */
 export const clients = [
-  { name: 'Guinness', logo: '/clients/guinness.png' },
-  { name: 'DuFil / Indomie', logo: '/clients/dufil-indomie.png' },
-  { name: 'Kelloggs Tolaram', logo: '/clients/kelloggs-tolaram.png' },
-  { name: 'Colgate Tolaram', logo: '/clients/colgate-tolaram.png' },
-  { name: 'Dangote Petroleum & Refinery', logo: '/clients/dangote-refinery.png' },
-  { name: 'NIPCO', logo: '/clients/nipco.png' },
-  { name: '7Up Bottling Company', logo: '/clients/7up-bottling.png' },
-  { name: 'Quantum Group', logo: '/clients/quantum-group.png' },
-  { name: 'Tower Alloys Group', logo: '/clients/tower-alloys.png' },
-  { name: 'Olam Group', logo: '/clients/olam-group.png' },
-  { name: 'Bua Group', logo: '/clients/bua-group.png' },
-  { name: 'Mantrac', logo: '/clients/mantrac.png' },
-  { name: 'Saket Agro', logo: '/clients/saket-agro.png' },
+  { name: 'Guinness', logo: '/clients/guinness.png', w: 144, h: 120 },
+  { name: 'DuFil / Indomie', logo: '/clients/dufil-indomie.png', w: 182, h: 120 },
+  { name: 'Kelloggs Tolaram', logo: '/clients/kelloggs-tolaram.png', w: 344, h: 120 },
+  { name: 'Colgate Tolaram', logo: '/clients/colgate-tolaram.png', w: 300, h: 120 },
+  { name: 'Dangote Petroleum & Refinery', logo: '/clients/dangote-refinery.png', w: 189, h: 120 },
+  { name: 'NIPCO', logo: '/clients/nipco.png', w: 464, h: 120 },
+  { name: '7Up Bottling Company', logo: '/clients/7up-bottling.png', w: 128, h: 120 },
+  { name: 'Quantum Group', logo: '/clients/quantum-group.png', w: 280, h: 120 },
+  { name: 'Tower Alloys Group', logo: '/clients/tower-alloys.png', w: 89, h: 120 },
+  { name: 'Olam Group', logo: '/clients/olam-group.png', w: 394, h: 120 },
+  { name: 'Bua Group', logo: '/clients/bua-group.png', w: 114, h: 120 },
+  { name: 'Mantrac', logo: '/clients/mantrac.png', w: 441, h: 120 },
+  { name: 'Saket Agro', logo: '/clients/saket-agro.png', w: 434, h: 120 },
 ];
 
 /** Clients with a permissioned quote, shown alongside their entry. */

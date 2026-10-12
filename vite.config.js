@@ -28,7 +28,9 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('catalog.generated')) return 'catalog';
+          // Product ranges are per-product data like the catalogue; keep them
+          // out of the entry bundle.
+          if (id.includes('catalog.generated') || id.includes('productRanges.generated') || id.includes('localImages.generated')) return 'catalog';
         },
       },
     },

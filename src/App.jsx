@@ -26,6 +26,7 @@ const QuotePage = lazy(() => import('./pages/QuotePage.jsx'));
 const SearchPage = lazy(() => import('./pages/SearchPage.jsx'));
 const LearningPage = lazy(() => import('./pages/LearningPage.jsx'));
 const GuideDetailPage = lazy(() => import('./pages/GuideDetailPage.jsx'));
+const CertificationsPage = lazy(() => import('./pages/CertificationsPage.jsx'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage.jsx'));
 
 export default function App() {
@@ -43,6 +44,7 @@ export default function App() {
             <Route path="contact" element={<ContactPage />} />
             <Route path="quote" element={<QuotePage />} />
             <Route path="search" element={<SearchPage />} />
+            <Route path="certifications" element={<CertificationsPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>

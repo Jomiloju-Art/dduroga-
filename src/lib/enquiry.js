@@ -11,8 +11,14 @@ export const mailtoHref = (subject, body) =>
 export async function sendEnquiry(payload, subject) {
   const ep = (brand.enquiryEndpoint || '').trim();
   if (!ep) {
+    // One line per product with quantity, size/colour and SKU: the earlier
+    // body listed titles only, so the quantities a buyer set were lost.
+    const line = (i) => (typeof i === 'object'
+      ? `- ${i.qty || 1} x ${i.title}${i.option ? ` (size/colour: ${i.option})` : ''}${i.sku ? ` [SKU ${i.sku}]` : ''}`
+      : `- ${i}`);
     const body = Object.entries(payload)
-      .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.map((i) => i.title || i).join(', ') : v}`)
+      .filter(([, v]) => v !== '' && v != null)
+      .map(([k, v]) => (Array.isArray(v) ? `${k}:\n${v.map(line).join('\n')}` : `${k}: ${v}`))
       .join('\n');
     return { ok: true, endpoint: false, mailto: mailtoHref(subject, body) };
   }

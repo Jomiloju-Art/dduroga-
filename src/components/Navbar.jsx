@@ -43,14 +43,26 @@ export default function Navbar() {
      hidden, and scrolling up 20px brings it back while still deep in the page.
      So the check is against the previous position, and a small dead zone stops
      a jittery trackpad flickering it in and out. */
+  /* Where the header stops being "over the hero". On the homepage that is the
+     hero's bottom edge less the header's height: until then the header stays
+     transparent and never hides. It used to switch at 8px, so the first scroll
+     painted a white bar over the dark hero and slid it away in the same moment,
+     a white flash. Other routes keep the 8px switch. */
   useEffect(() => {
+    const threshold = () => {
+      if (!transparentRoute) return 8;
+      const hero = document.querySelector('.hx-hero');
+      if (!hero) return 8;
+      const header = document.querySelector('.site-header');
+      return Math.max(8, hero.getBoundingClientRect().bottom + window.scrollY - (header?.offsetHeight || 74));
+    };
     const onScroll = () => {
       const y = window.scrollY;
-      const prev = lastY.current;
-      const delta = y - prev;
+      const delta = y - lastY.current;
+      const end = threshold();
 
-      setScrolled(y > 8);
-      if (y <= 8) {
+      setScrolled(y > end);
+      if (y <= end) {
         setHidden(false);
       } else if (Math.abs(delta) > 4) {
         setHidden(delta > 0);        // moving down hides, moving up reveals
@@ -59,8 +71,12 @@ export default function Navbar() {
     };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+    window.addEventListener('resize', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, [transparentRoute]);
 
   // Close the mobile drawer whenever the route changes.
   useEffect(() => {
@@ -116,7 +132,7 @@ export default function Navbar() {
         'site-header',
         transparentRoute ? 'site-header--transparent' : 'site-header--solid',
         scrolled ? 'site-header--scrolled' : '',
-        hidden && !open ? 'site-header--hidden' : '',
+        hidden && !open && !menuOpen ? 'site-header--hidden' : '',
         menuOpen ? 'is-menu-open' : '',
       ].filter(Boolean).join(' ')}
     >

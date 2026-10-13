@@ -3674,32 +3674,57 @@ img { decoding: async; }
 .logo-mark-white { display: none; }
 
 /* ---------- 01: at top, over the hero ---------- */
-.site-header--transparent:not(.site-header--scrolled):not(:hover):not(.is-keyboard-focused) .navbar {
+.site-header--transparent:not(.site-header--scrolled):not(:has(.mega-wrap:hover)):not(.is-keyboard-focused) .navbar {
   background: transparent;
 }
-.site-header--transparent:not(.site-header--scrolled):not(:hover):not(.is-keyboard-focused) .nav-links a,
-.site-header--transparent:not(.site-header--scrolled):not(:hover):not(.is-keyboard-focused) .nav-search {
+.site-header--transparent:not(.site-header--scrolled):not(:has(.mega-wrap:hover)):not(.is-keyboard-focused) .nav-links a,
+.site-header--transparent:not(.site-header--scrolled):not(:has(.mega-wrap:hover)):not(.is-keyboard-focused) .nav-search {
   color: #fff;
 }
 /* The logout/nav icons are Font Awesome glyphs inheriting currentColor. */
-.site-header--transparent:not(.site-header--scrolled):not(:hover):not(.is-keyboard-focused) .nav-search svg,
-.site-header--transparent:not(.site-header--scrolled):not(:hover):not(.is-keyboard-focused) .nav-links a svg {
+.site-header--transparent:not(.site-header--scrolled):not(:has(.mega-wrap:hover)):not(.is-keyboard-focused) .nav-search svg,
+.site-header--transparent:not(.site-header--scrolled):not(:has(.mega-wrap:hover)):not(.is-keyboard-focused) .nav-links a svg {
   color: #fff;
 }
-.site-header--transparent:not(.site-header--scrolled):not(:hover):not(.is-keyboard-focused) .logo-normal { display: none; }
-.site-header--transparent:not(.site-header--scrolled):not(:hover):not(.is-keyboard-focused) .logo-white { display: block; }
+/* The two wordmarks are stacked and crossfade, rather than one being switched
+   off with display: none, which made the logo snap. */
+.site-header .brand { position: relative; }
+.site-header .logo-normal { transition: opacity 280ms ease; }
+.site-header .logo-white { display: block; position: absolute; left: 0; top: 50%; transform: translateY(-50%); opacity: 0; pointer-events: none; transition: opacity 280ms ease; }
+.site-header--transparent:not(.site-header--scrolled):not(:has(.mega-wrap:hover)):not(.is-keyboard-focused) .logo-normal { opacity: 0; }
+.site-header--transparent:not(.site-header--scrolled):not(:has(.mega-wrap:hover)):not(.is-keyboard-focused) .logo-white { opacity: 1; }
 
 /* ---------- 02/05: hovered, or scrolled ---------- */
 .site-header--scrolled .navbar,
 .site-header:not(.site-header--transparent) .navbar,
-.site-header:hover .navbar,
 body.user-is-tabbing .site-header:focus-within .navbar { background: #fff; }
 
 /* ---------- 04: scrolled down - slide out ----------
    Their header sits at top:-124px when hidden, driven by a transition on `top`.
    76px is our header height. */
 .site-header {
-  transition: transform 300ms ease-in-out;
+  transition: transform 380ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+/* Scrolled past the hero: frosted glass rather than a flat white slab. The blur
+   sits on a pseudo-element behind the bar, NOT on .navbar itself:
+   backdrop-filter (like transform) would make the bar the containing block for
+   the fixed phone menu inside it and trap the menu in a 74px strip. */
+/* No isolation: isolate here. It made the bar its own stacking context, and the
+   phone menu inside it then sat under the page scrim. The ::before at z-index
+   -1 already stays behind the bar content inside the header (z-index 60). */
+.navbar { position: relative; transition: background 280ms ease; }
+.navbar::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: rgba(255, 255, 255, 0.86);
+  -webkit-backdrop-filter: blur(14px) saturate(1.6); backdrop-filter: blur(14px) saturate(1.6);
+  box-shadow: 0 1px 0 rgba(14, 18, 22, 0.06), 0 10px 30px rgba(14, 18, 22, 0.07);
+  opacity: 0; transition: opacity 280ms ease;
+}
+.site-header--scrolled:not(:has(.mega-wrap:hover)) .navbar { background: transparent; }
+.site-header--scrolled .navbar::before { opacity: 1; }
+.nav-search, .nav-bag, .nav-toggle { transition: color 280ms ease, background-color 280ms ease, border-color 280ms ease; }
+@media (prefers-reduced-motion: reduce) {
+  .site-header, .navbar, .navbar::before, .site-header .logo-normal, .site-header .logo-white { transition: none; }
 }
 .site-header--hidden {
   transform: translateY(-100%);
@@ -3906,7 +3931,7 @@ body:has(.site-header--transparent) main {
 
 /* On the transparent header the links are white, so currentColor keeps the
    underline white too - it follows the text automatically. */
-.site-header--transparent:not(.site-header--scrolled):not(:hover):not(.is-keyboard-focused) .nav-links > li > a {
+.site-header--transparent:not(.site-header--scrolled):not(:has(.mega-wrap:hover)):not(.is-keyboard-focused) .nav-links > li > a {
   background-image: linear-gradient(to right, #fff 0, #fff 100%);
 }
 

@@ -6,6 +6,7 @@ import Pagination from '../components/Pagination.jsx';
 import ProductFilters from '../components/ProductFilters.jsx';
 import CtaBand from '../components/CtaBand.jsx';
 import { usePageMeta } from '../lib/seo.js';
+import { lockScroll } from '../lib/scrollLock.js';
 
 const PER_PAGE = 24;
 
@@ -112,11 +113,10 @@ export default function ProductsPage() {
   useEffect(() => {
     if (!filtersOpen) return;
     const onKey = (e) => { if (e.key === 'Escape') setFiltersOpen(false); };
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    const unlock = lockScroll();
     document.addEventListener('keydown', onKey);
     return () => {
-      document.body.style.overflow = prev;
+      unlock();
       document.removeEventListener('keydown', onKey);
     };
   }, [filtersOpen]);
@@ -244,7 +244,9 @@ export default function ProductsPage() {
 
             {visible.length > 0 ? (
               <>
-                <div className="plp-grid" ref={gridRef}>
+                {/* Keeps the outline h1 > h2 > h3 on phones, where the filter heading is in a closed drawer. */}
+                <h2 className="sr-only">Products</h2>
+                <div className="plp-grid plp-grid--cascade" ref={gridRef} key={`${filterKey}|${page}`}>
                   {shown.map((p) => (
                     <ProductCard key={p.slug} product={p} />
                   ))}

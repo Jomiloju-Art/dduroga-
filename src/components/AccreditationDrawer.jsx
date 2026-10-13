@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { lockScroll } from '../lib/scrollLock.js';
 
 /**
  * Side drawer with the details behind one accreditation logo.
@@ -19,9 +20,8 @@ export default function AccreditationDrawer({ item, onClose }) {
   useEffect(() => {
     if (!open) return undefined;
     const opener = document.activeElement;
-    closeRef.current?.focus();
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    closeRef.current?.focus({ preventScroll: true });
+    const unlock = lockScroll();
     const onKey = (e) => {
       if (e.key === 'Escape') { onClose(); return; }
       if (e.key !== 'Tab') return;
@@ -34,8 +34,8 @@ export default function AccreditationDrawer({ item, onClose }) {
     document.addEventListener('keydown', onKey);
     return () => {
       document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = prevOverflow;
-      if (opener && opener.focus) opener.focus();
+      unlock();
+      if (opener && opener.focus) opener.focus({ preventScroll: true });
     };
   }, [open, onClose]);
 

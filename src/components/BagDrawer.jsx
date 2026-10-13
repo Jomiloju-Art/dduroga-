@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuote, quoteKey } from '../quote/QuoteContext.jsx';
 import { IconArrowRight } from './Icons.jsx';
+import { lockScroll } from '../lib/scrollLock.js';
 
 /**
  * "Your bag" drawer — the quote list presented the way Gymshark presents their
@@ -16,11 +17,10 @@ export default function BagDrawer() {
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => { if (e.key === 'Escape') closeBag(); };
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    const unlock = lockScroll();
     document.addEventListener('keydown', onKey);
     return () => {
-      document.body.style.overflow = prev;
+      unlock();
       document.removeEventListener('keydown', onKey);
     };
   }, [open, closeBag]);

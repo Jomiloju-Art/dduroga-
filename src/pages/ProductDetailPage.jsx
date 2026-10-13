@@ -511,13 +511,6 @@ export default function ProductDetailPage() {
                 </div>
               )}
 
-              {(legacyPicker || colourOptions.length > 0 || sizing) && (
-                <p className="detail-sku muted" style={{ fontSize: '0.82rem', marginTop: 6 }}>
-                  {quoteItem.sku ? <>SKU: <strong>{quoteItem.sku}</strong> · </> : null}
-                  {selected?.a ? 'In stock' : 'Lead time on request'}
-                </p>
-              )}
-
               <div className="detail-aside" style={{ marginTop: 22 }}>
                 <div className="panel">
                   <h2>Request this product</h2>

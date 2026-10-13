@@ -4,19 +4,20 @@ import AccreditationDrawer from '../components/AccreditationDrawer.jsx';
 import CtaBand from '../components/CtaBand.jsx';
 import { facilityAccreditations, productAccreditations } from '../data/accreditations.js';
 import { usePageMeta } from '../lib/seo.js';
+import { pageMeta } from '../data/pageMeta.js';
 
 /**
  * /certifications — every accreditation from the client's business profile,
  * one card each, opening the same drawer as the homepage strip.
  *
- * Cards whose certificate details are still missing say so ("Details pending")
- * rather than implying the paperwork is on hand.
+ * Certificate numbers and dates are not shown until the client supplies them;
+ * the lead says certificates are available on request rather than on hand.
+ * (A "Details pending" pill on all eleven cards made the page look unfinished.)
  */
 function Cards({ items, onPick }) {
   return (
     <div className="accr-cards">
       {items.map((a) => {
-        const pending = Object.values(a.facts).some((v) => v == null);
         return (
           <button type="button" className="accr-card" key={a.id} onClick={() => onPick(a)}>
             <span className="accr-card__logo"><img src={a.logo} alt={`${a.name} logo`} loading="lazy" /></span>
@@ -24,7 +25,7 @@ function Cards({ items, onPick }) {
               <span className="accr-card__name">{a.name}</span>
               <span className="accr-card__what">{a.what}</span>
               <span className="accr-card__meta">
-                {pending ? <span className="accr-pill accr-pill--todo">Details pending</span> : <span />}
+                <span />
                 <b>Details →</b>
               </span>
             </span>
@@ -39,11 +40,7 @@ export default function CertificationsPage() {
   const [active, setActive] = useState(null);
   const close = useCallback(() => setActive(null), []);
 
-  usePageMeta({
-    title: 'Certifications & accreditations',
-    description: 'Facility accreditations and product certification marks behind the DDUROGA Safety range, manufactured by the Mallcom group.',
-    canonical: '/certifications',
-  });
+  usePageMeta(pageMeta['/certifications']);
 
   return (
     <>
@@ -51,7 +48,7 @@ export default function CertificationsPage() {
         eyebrow="Quality & compliance"
         title="Certifications & accreditations"
         crumb="Certifications"
-        lead="Every DDUROGA product is made in Mallcom group facilities and tested to the standards below. Certificates and declarations of conformity are available for tenders and audits."
+        lead="Our Mallcom range is made in Mallcom group facilities and tested to the standards below. Certificates and declarations of conformity are available on request for tenders and audits."
       />
 
       <section className="section">

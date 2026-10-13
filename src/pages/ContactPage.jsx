@@ -6,6 +6,7 @@ import { categories } from '../data/products.js';
 import { IconPhone, IconMail, IconMapPin, IconClock, IconCheck } from '../components/Icons.jsx';
 import { sendEnquiry } from '../lib/enquiry.js';
 import { usePageMeta } from '../lib/seo.js';
+import { pageMeta } from '../data/pageMeta.js';
 
 const EMPTY = {
   name: '',
@@ -17,13 +18,14 @@ const EMPTY = {
 };
 
 export default function ContactPage() {
-  usePageMeta({ title: 'Contact us', description: 'Talk to a DDUROGA Safety specialist about PPE for your operation.' });
+  usePageMeta(pageMeta['/contact']);
   const [params] = useSearchParams();
   const productParam = params.get('product');
 
   const [form, setForm] = useState({
     ...EMPTY,
-    interest: productParam ? `Quote for: ${productParam}` : '',
+    // ?interest=dealer (footer "Become a dealer") preselects that option.
+    interest: productParam ? `Quote for: ${productParam}` : params.get('interest') === 'dealer' ? 'Becoming a dealer' : '',
     message: productParam ? `I would like a quote for ${productParam}.` : '',
   });
   const [errors, setErrors] = useState({});
@@ -123,7 +125,7 @@ export default function ContactPage() {
                   </>
                 ) : (
                   <p className="muted" style={{ fontSize: '0.95rem' }}>
-                    We'll get back to you within one business day.
+                    We'll get back to you as soon as we can.
                   </p>
                 )}
               </div>

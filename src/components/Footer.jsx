@@ -1,5 +1,8 @@
 import { Link } from 'react-router-dom';
-import { brand } from '../data/brand.js';
+import { brand, social } from '../data/brand.js';
+import { zones } from '../data/products.js';
+import { catalogues } from '../data/catalogues.generated.js';
+import { IconPhone } from './Icons.jsx';
 import Logo from './Logo.jsx';
 
 /** Same inline brand marks as before (no extra icon font needed). */
@@ -11,59 +14,76 @@ const socialPaths = {
   YouTube: 'M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z',
 };
 
-const socials = [
-  { label: 'YouTube', href: '#' },
-  { label: 'Facebook', href: '#' },
-  { label: 'LinkedIn', href: '#' },
-  { label: 'Instagram', href: '#' },
-  { label: 'X', href: '#' },
-];
+/** Only profiles with a real URL in brand.js are shown. */
+const socials = Object.entries(social).filter(([, href]) => href).map(([label, href]) => ({ label, href }));
 
-const tierOneLinks = [
-  { to: '/about', label: 'About Us' },
-  { to: '/learning', label: 'Learning Centre' },
-  { to: '/contact', label: 'Contact Us' },
-];
-
-const tierTwoLinks = [
-  { to: '/products', label: 'View catalogue' },
-  { to: '/contact', label: 'Become a Dealer' },
-  { to: '/contact', label: 'Request a Catalogue' },
-  { to: '/certifications', label: 'Certifications' },
+const columns = [
+  {
+    title: 'Products',
+    links: [
+      ...zones.map((z) => ({ to: `/products?cat=${z.id}`, label: z.label })),
+      { to: '/products', label: 'All products' },
+    ],
+  },
+  {
+    title: 'Company',
+    links: [
+      { to: '/about', label: 'About us' },
+      { to: '/certifications', label: 'Certifications' },
+      { to: '/learning', label: 'Learning centre' },
+      { to: '/contact', label: 'Contact us' },
+    ],
+  },
+  {
+    title: 'Buying',
+    links: [
+      { to: '/quote', label: 'Your quote list' },
+      { to: '/contact?interest=dealer', label: 'Become a dealer' },
+      { href: catalogues.full.file, label: '2025 catalogue (PDF)', download: 'DDUROGA-Catalogue-2025.pdf' },
+    ],
+  },
 ];
 
 export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer id="site-footer">
-      <div className="tier-1">
-        <div className="container">
-          <div className="footer-tier-1">
-            <div className="footer-logo">
-              <Logo href="/" />
-            </div>
-            <nav className="footer-links-wrap" aria-label="Footer">
-              {tierOneLinks.map((l) => (
-                <Link key={l.label} to={l.to}>{l.label}</Link>
-              ))}
-            </nav>
-          </div>
+    <footer id="site-footer" className="sf">
+      <div className="sf__inner">
+        <div className="sf__brand">
+          <Logo href="/" />
+          <p className="sf__blurb">
+            Certified PPE for head, hand, body and feet protection, stocked in Lagos and delivered to
+            industry across Nigeria. Part of the Mallcom group.
+          </p>
+          <ul className="sf__contact">
+            <li><a href={brand.phoneHref}><IconPhone width="16" height="16" /> {brand.phone}</a></li>
+            <li><a href={brand.emailHref}>{brand.email}</a></li>
+            <li>{brand.hours}</li>
+          </ul>
         </div>
+
+        {columns.map((col) => (
+          <nav className="sf__col" key={col.title} aria-label={col.title}>
+            <h2 className="sf__title">{col.title}</h2>
+            <ul>
+              {col.links.map((l) => (
+                <li key={l.label}>
+                  {l.to
+                    ? <Link to={l.to}>{l.label}</Link>
+                    : <a href={l.href} download={l.download}>{l.label}</a>}
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ))}
       </div>
 
-      <div className="tier-2">
-        <div className="container">
-          <div className="footer-tier-2">
-            <div className="footer-legal">
-              {tierTwoLinks.map((l) => (
-                <span key={l.label}>
-                  <Link to={l.to}>{l.label}</Link>
-                </span>
-              ))}
-            </div>
-
-            <div className="footer-links-social" aria-label="Follow DDUROGA Safety">
+      <div className="sf__bottom">
+        <div className="sf__bottom-inner">
+          <p className="sf__address">{brand.address}</p>
+          {socials.length > 0 && (
+            <div className="sf__social" aria-label="Follow DDUROGA Safety">
               {socials.map((s) => (
                 <a key={s.label} href={s.href} target="_blank" rel="noreferrer" aria-label={s.label}>
                   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -72,18 +92,8 @@ export default function Footer() {
                 </a>
               ))}
             </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="tier-3">
-        <div className="container">
-          <div className="footer-tier-3">
-            <div className="footer-address">{brand.address}</div>
-            <div className="footer-copy">
-              &copy; {year} {brand.legalName}
-            </div>
-          </div>
+          )}
+          <p className="sf__copy">&copy; {year} {brand.legalName}</p>
         </div>
       </div>
     </footer>

@@ -24,6 +24,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ProductArt from './ProductArt.jsx';
+import { sized } from '../lib/imageSizes.js';
 
 const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -169,7 +170,13 @@ export default function ProductGallery({ images = [], title = 'Product', zone })
               tabIndex={i === active ? 0 : -1}
               onClick={() => show(i, true)}
             >
-              <img src={src} alt="" loading={i < 8 ? 'eager' : 'lazy'} decoding="async" />
+              <img
+                src={sized(src, 160)}
+                alt=""
+                loading={i < 8 ? 'eager' : 'lazy'}
+                decoding="async"
+                onError={(e) => { if (e.currentTarget.src.endsWith('-160.webp')) e.currentTarget.src = src; }}
+              />
             </button>
           ))}
         </div>

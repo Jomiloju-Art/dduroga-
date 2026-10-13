@@ -35,6 +35,19 @@ export const brand = {
 };
 
 /**
+ * Social profiles. FILL: paste each full profile URL. The footer shows an
+ * icon only for a filled entry, so an empty one never renders a dead link
+ * (all five used to point at "#").
+ */
+export const social = {
+  YouTube: '',
+  Facebook: '',
+  LinkedIn: '',
+  Instagram: '',
+  X: '',
+};
+
+/**
  * Brands DDUROGA distributes, shown small on the homepage certification band
  * under "Exclusive distributor in Nigeria for" (client wording, Oct 2026).
  * DDUROGA is the umbrella brand; these must never outweigh it visually.

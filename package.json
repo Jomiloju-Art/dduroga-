@@ -6,7 +6,7 @@
   "description": "Corporate marketing site for an industrial safety equipment brand (React + Vite).",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node scripts/build-catalog.mjs && vite build && node scripts/postbuild.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -704,7 +704,7 @@ export default function ProductDetailPage() {
 
             {video && (
               <aside className="pinfo__media" aria-label={`${product.title} video`}>
-                <ProductVideo mp4={video.mp4} webm={video.webm} poster={video.poster} title={product.title} fit="contain" />
+                <ProductVideo mp4={video.mp4} poster={video.poster} title={product.title} fit="contain" />
               </aside>
             )}
           </div>

@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import {
   homeIndustries,
-  homeResources,
 } from '../data/homeContent.js';
 import { IconArrowRight, IconCheck } from '../components/Icons.jsx';
 import { usePageMeta } from '../lib/seo.js';
@@ -12,6 +11,7 @@ import RangeStats from '../components/RangeStats.jsx';
 import ClientLogos from '../components/ClientLogos.jsx';
 import ZoneBento from '../components/ZoneBento.jsx';
 import SectorGrid from '../components/SectorGrid.jsx';
+import GuidesSection from '../components/GuidesSection.jsx';
 import { catalogues } from '../data/catalogues.generated.js';
 
 /** "147 pages · PDF · 24.9 MB", from src/data/catalogues.generated.js. */
@@ -170,32 +170,8 @@ export default function HomePage() {
           the products. Self-hides until src/data/clients.js has entries. */}
       <ClientLogos />
 
-      {/* ================= 12. GUIDES & INSIGHTS ================= */}
-      <section className="hx-section hx-section--soft hx-section--bleed">
-        <div className="hx-bleed">
-          <Reveal className="hx-section__head hx-section__head--left">
-            <h2>Guides &amp; insights</h2>
-            <p>Choosing the right protection, explained in plain language.</p>
-          </Reveal>
-          <div className="hx-blogs">
-            {homeResources.map((r) => (
-              <Link to={`/learning/${r.slug}`} className="hx-blog" key={r.title}>
-                <span className="hx-blog__media">
-                  {r.image
-                    ? <img src={r.image} alt="" loading="lazy" />
-                    : <span className="hx-blog__ph">Article</span>}
-                </span>
-                <span className="hx-blog__meta">
-                  <span className="hx-blog__type">{r.type}</span>
-                  <span>{r.date}</span>
-                </span>
-                <h3>{r.title}</h3>
-                <span className="hx-blog__read">Read more <IconArrowRight width="14" height="14" /></span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ================= 12. GUIDES & INSIGHTS (GuidesSection.jsx) ================= */}
+      <GuidesSection />
     </>
   );
 }

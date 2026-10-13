@@ -1492,7 +1492,7 @@ i.performance-icon { font-size: 32px; line-height: 1; }
 .hx-trend__all svg { width: 15px; height: 15px; transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1); }
 .hx-trend__all:hover svg { transform: translateX(3px); }
 /* keep card tracks from blowing out their container on small screens */
-.hx-cat, .hx-trend__card, .hx-blog, .hp-tile { min-width: 0; }
+.hx-cat, .hx-trend__card, .hp-tile { min-width: 0; }
 @media (max-width: 520px) { .hx-trend { gap: 12px; } .hx-trend__img { padding: 18px; } .hx-section__head--split { grid-template-columns: 1fr; } .hx-trend__all { grid-column: 1; grid-row: auto; } }
 @media (prefers-reduced-motion: reduce) {
   .hx-trend__card, .hx-trend__img img, .hx-trend__all svg { transition: none; }
@@ -1587,6 +1587,93 @@ i.performance-icon { font-size: 32px; line-height: 1; }
   .sg-card:hover .sg-card__photos img { transform: none; }
 }
 
+/* ---------- "Guides & insights" (GuidesSection.jsx) ----------
+   Editorial layout: the newest guide as a full-bleed featured story on the
+   left, the next three as compact rows on the right. On the soft grey ground
+   that closes the page. */
+.gx { padding-block: clamp(56px, 6vw, 96px); background: #f4f5f7; }
+.gx__inner { max-width: var(--page-max); margin-inline: auto; padding-inline: var(--gutter); }
+.gx__grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px; align-items: stretch; }
+
+.gx-tag {
+  display: inline-flex; align-self: flex-start; align-items: center;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--orange-600, #C76D0C);
+}
+.gx-tag--light { color: #0E1216; background: #F28A1A; padding: 6px 12px; border-radius: 999px; }
+.gx-meta { font-size: 0.8rem; color: rgba(14, 18, 22, 0.58); font-variant-numeric: tabular-nums; }
+.gx-meta--light { color: rgba(255, 255, 255, 0.78); }
+
+/* Featured story: photo on top, a dark text panel underneath. Text is never
+   laid over the photo: several guide photos are cut-outs on white, where a
+   gradient turned the product grey and the title sat on top of it. */
+.gx-feature {
+  position: relative; display: flex; flex-direction: column; border-radius: 18px; overflow: hidden;
+  color: #fff; text-decoration: none; background: #0E1216; isolation: isolate;
+}
+.gx-feature__img { display: block; width: 100%; flex: 1 1 auto; min-height: 260px; aspect-ratio: 16 / 9; object-fit: cover; transition: transform 700ms var(--ease-out); }
+.gx-feature__shade { position: absolute; left: 0; right: 0; top: 0; height: 4px; background: #F28A1A; z-index: 1; }
+.gx-feature__body { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 14px; padding: clamp(24px, 3vw, 36px); background: #0E1216; }
+.gx-feature__title { margin: 0; font-family: var(--font-display); font-weight: 800; text-transform: none; font-size: clamp(1.6rem, 2.6vw, 2.3rem); line-height: 1.12; color: #fff; max-width: 22ch; }
+.gx-feature__summary { margin: 0; font-size: 1rem; line-height: 1.55; color: rgba(255, 255, 255, 0.84); max-width: 54ch; }
+.gx-feature__foot { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 4px; }
+.gx-btn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 10px;
+  background: #fff; color: #0E1216; font-weight: 700; font-size: 0.92rem;
+  transition: background var(--dur-base) var(--ease-out);
+}
+.gx-btn svg { transition: transform var(--dur-base) var(--ease-out); }
+.gx-feature:hover .gx-feature__img { transform: scale(1.05); }
+.gx-feature:hover .gx-btn { background: #F28A1A; }
+.gx-feature:hover .gx-btn svg { transform: translateX(4px); }
+.gx-feature:focus-visible { outline: 3px solid var(--ddu-orange); outline-offset: 3px; }
+
+/* Compact rows: square photo, tag, title, meta, arrow. */
+.gx-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-rows: repeat(3, 1fr); gap: 14px; }
+.gx-row {
+  height: 100%; display: grid; grid-template-columns: 148px minmax(0, 1fr) auto; align-items: center; gap: 20px;
+  padding: 14px; padding-right: 22px; border-radius: 16px; background: #fff; border: 1px solid rgba(14, 18, 22, 0.08);
+  text-decoration: none; color: inherit;
+  transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+}
+.gx-row__media { display: block; width: 148px; aspect-ratio: 1 / 1; border-radius: 12px; overflow: hidden; background: #e9ebee; }
+.gx-row__media img { width: 100%; height: 100%; object-fit: cover; transition: transform 600ms var(--ease-out); }
+.gx-row__body { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.gx-row__title { margin: 0; font-family: var(--font-display); font-weight: 700; text-transform: none; font-size: 1.08rem; line-height: 1.3; color: #0E1216; }
+.gx-row__arrow {
+  width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
+  border: 1px solid rgba(14, 18, 22, 0.14); color: #0E1216;
+  transition: background var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+}
+.gx-row:hover { border-color: rgba(14, 18, 22, 0.2); box-shadow: 0 14px 30px rgba(14, 18, 22, 0.08); transform: translateY(-2px); }
+.gx-row:hover .gx-row__media img { transform: scale(1.07); }
+.gx-row:hover .gx-row__arrow { background: #F28A1A; border-color: #F28A1A; transform: translateX(3px); }
+.gx-row:focus-visible { outline: 3px solid var(--ddu-orange); outline-offset: 3px; }
+
+/* Wide screens: a fixed-height photo keeps the featured story level with the
+   three rows beside it, instead of stretching them. */
+@media (min-width: 1024px) {
+  .gx-feature__img { aspect-ratio: auto; height: clamp(300px, 24vw, 380px); flex: none; }
+}
+@media (max-width: 1023px) {
+  .gx__grid { grid-template-columns: minmax(0, 1fr); }
+  .gx-list { grid-template-rows: none; }
+}
+@media (max-width: 600px) {
+  .gx-feature { border-radius: 14px; }
+  .gx-feature__img { min-height: 0; }
+  .gx-feature__summary { font-size: 0.92rem; }
+  .gx-row { grid-template-columns: 92px minmax(0, 1fr); gap: 14px; padding: 10px; }
+  .gx-row__media { width: 92px; border-radius: 10px; }
+  .gx-row__arrow { display: none; }
+  .gx-row__title { font-size: 0.98rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gx-feature__img, .gx-row, .gx-row__media img, .gx-row__arrow, .gx-btn svg { transition: none; }
+  .gx-feature:hover .gx-feature__img, .gx-row:hover .gx-row__media img { transform: none; }
+  .gx-row:hover { transform: none; }
+}
+
 /* What ships with an order, replacing a repeated badge set. */
 .hp-ships { list-style: none; margin: 0 0 22px; padding: 0; display: grid; gap: 12px; }
 .hp-ships li { display: flex; align-items: flex-start; gap: 10px; color: rgba(255, 255, 255, 0.86); font-size: 0.92rem; }
@@ -1635,16 +1722,6 @@ i.performance-icon { font-size: 32px; line-height: 1; }
 .hx-promo__card--accent .hx-promo__link { color: var(--ddu-black); }
 
 /* resources (shared with Learning) */
-.hx-blogs { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
-.hx-blog { border: 1px solid rgba(14, 18, 22, 0.12); border-radius: 14px; overflow: hidden; background: var(--ddu-white); text-decoration: none; color: inherit; transition: var(--dur-base); }
-.hx-blog:hover { transform: translateY(-5px); box-shadow: 0 16px 30px rgba(14, 18, 22, 0.12); }
-.hx-blog__media { display: flex; align-items: center; justify-content: center; height: 150px; background: #f6f6f6; overflow: hidden; }
-.hx-blog__media img { max-width: 100%; max-height: 150px; object-fit: contain; }
-.hx-blog__ph { color: rgba(14, 18, 22, 0.4); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; }
-.hx-blog__meta { display: flex; gap: 10px; padding: 14px var(--space-3) 0; color: rgba(14, 18, 22, 0.62); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; }
-.hx-blog__type { color: var(--ddu-blue); font-weight: 700; }
-.hx-blog h3 { font-size: 1.05rem; text-transform: none; margin: var(--space-2) 0; padding: 0 var(--space-3); }
-.hx-blog__read { display: flex; align-items: center; gap: 6px; color: var(--ddu-blue); font-weight: 700; padding: 0 var(--space-3) 18px; }
 
 /* closing CTA */
 .hx-cta { background: var(--ddu-black); color: var(--ddu-white); }
@@ -1695,7 +1772,6 @@ i.performance-icon { font-size: 32px; line-height: 1; }
 @media (max-width: 1024px) {
   .hx-hero__inner { grid-template-columns: 1fr; }
   .hx-catgrid, .hx-trend { grid-template-columns: repeat(2, 1fr); }
-  .hx-blogs { grid-template-columns: 1fr; }
   .hp-tiles { grid-template-columns: repeat(2, 1fr); }
   .hp-compliance__inner { grid-template-columns: 1fr; }
 }
@@ -3764,41 +3840,6 @@ body:has(.site-header--transparent) main {
    used to sit here were removed: they sat later in the file and won the
    cascade, so the intended radius printed as 0px. One definition, one owner. */
 
-/* ---------- the guides / insights cards ---------- */
-.hx-blog {
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-.hx-blog__media { height: auto; aspect-ratio: 16 / 9; background: #fff; }
-/* The photos sat at max-height 150px in a box now ~240px tall, leaving a white
-   margin round each one. Fill the frame instead, like the zone tiles. */
-.hx-blog__media img { width: 100%; height: 100%; max-height: none; object-fit: cover; }
-.hx-blog__meta {
-  padding: 12px 0 0;
-  font-size: 14px;
-  line-height: 19.6px;
-  text-transform: none;
-  letter-spacing: 0;
-  color: rgb(118, 122, 127);
-}
-.hx-blog__type { color: rgb(118, 122, 127); font-weight: 400; }
-.hx-blog h3 {
-  font-size: 14px;
-  line-height: 19.6px;
-  font-weight: 400;
-  color: rgb(13, 16, 18);
-  padding: 0;
-  margin: 4px 0 0;
-}
-.hx-blog__read {
-  padding: 6px 0 0;
-  font-size: 14px;
-  font-weight: 400;
-  color: rgb(118, 122, 127);
-}
-
 /* ---------- the two promo cards ---------- */
 /* These keep their fills: unlike the product tiles, their whole point is to be
    a coloured block. Only the radius and the type scale change. */
@@ -3807,8 +3848,6 @@ body:has(.site-header--transparent) main {
 .hx-promo__eyebrow { font-size: 14px; text-transform: none; letter-spacing: 0; }
 .hx-promo__link { font-size: 14px; font-weight: 400; }
 
-/* ---------- the blogs and trend grids: 4px gap ---------- */
-.hx-blogs { gap: 4px; }
 
 /* ============ NAV LINK UNDERLINE (Gymshark's mechanism) ============
    Copied from their stylesheet:
@@ -4709,10 +4748,14 @@ body:has(.site-header--transparent) main {
   display: flex;
   flex-direction: column;
   transform: translateX(100%);
-  transition: transform 0.4s ease;
+  /* Hidden once it has slid out: parked off-screen but visible, its shadow
+     bled a grey band down the right edge of every page, and its links stayed
+     in the keyboard tab order. */
+  visibility: hidden;
+  transition: transform 0.4s ease, visibility 0s linear 0.4s;
   box-shadow: -16px 0 34px rgba(0, 0, 0, 0.16);
 }
-.bag-drawer.is-open { transform: translateX(0); }
+.bag-drawer.is-open { transform: translateX(0); visibility: visible; transition: transform 0.4s ease, visibility 0s; }
 
 .bag-drawer__header {
   flex: none;

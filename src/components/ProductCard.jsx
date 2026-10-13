@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { sized } from '../lib/imageSizes.js';
 import { Link } from 'react-router-dom';
 import { zoneOf, rangeLabel } from '../data/products.js';
 import { NO_HOVER_IMAGE } from '../data/cardHoverExclusions.js';
@@ -59,7 +60,18 @@ export default function ProductCard({ product }) {
               onError={() => setFailed(true)}
             />
             {altImg && (
-              <img className="plp-card__img plp-card__img--alt" src={altImg} alt="" aria-hidden="true" loading="lazy" onError={() => setAltFailed(true)} />
+              <img
+                className="plp-card__img plp-card__img--alt"
+                src={sized(altImg, 480)}
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                onError={(e) => {
+                  // No reduced copy yet: fall back to the original before giving up.
+                  if (e.currentTarget.src.endsWith('-480.webp')) e.currentTarget.src = altImg;
+                  else setAltFailed(true);
+                }}
+              />
             )}
           </>
         ) : (

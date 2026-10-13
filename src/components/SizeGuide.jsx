@@ -1,4 +1,5 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
+import { useScrollLock } from '../lib/scrollLock.js';
 import { Link } from 'react-router-dom';
 
 /**
@@ -27,15 +28,18 @@ const TITLES = { glove: 'Glove size guide', footwear: 'Footwear size guide', gar
 
 export default function SizeGuide({ kind }) {
   const ref = useRef(null);
+  // A modal <dialog> blocks clicks behind it but not scrolling, so lock it.
+  const [isOpen, setIsOpen] = useState(false);
+  useScrollLock(isOpen);
   if (!TITLES[kind]) return null;
   const close = () => ref.current?.close();
 
   return (
     <>
-      <button type="button" className="size-guide__open" onClick={() => ref.current?.showModal()}>
+      <button type="button" className="size-guide__open" onClick={() => { ref.current?.showModal(); setIsOpen(true); }}>
         Size guide
       </button>
-      <dialog ref={ref} className="size-guide" aria-labelledby="size-guide-title" onClick={(e) => { if (e.target === ref.current) close(); }}>
+      <dialog ref={ref} className="size-guide" aria-labelledby="size-guide-title" onClose={() => setIsOpen(false)} onClick={(e) => { if (e.target === ref.current) close(); }}>
         <div className="size-guide__inner">
           <header className="size-guide__head">
             <h2 id="size-guide-title">{TITLES[kind]}</h2>

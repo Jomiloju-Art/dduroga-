@@ -18,6 +18,10 @@ import { brand } from '../data/brand.js';
  * All three are in the DOM and the stylesheet shows the right one, so there is
  * no loading flicker when the header changes state.
  *
+ * The header loads 640px copies (*-640.png): the 1444px originals are shown
+ * at 286px at most, so they cost four times the pixels for nothing. Keep the
+ * originals for print, share images and the schema logo.
+ *
  * `compactOnMobile` swaps the wide wordmark for the square brand mark below
  * 700px. The wordmark is 1444x212 (6.8:1) and cannot share a phone header row
  * with the search button, the quote CTA and the menu toggle — it was being
@@ -35,16 +39,16 @@ export default function Logo({ href, light = false, compactOnMobile = false }) {
   const img = compactOnMobile ? (
     <>
       {/* Wide wordmark, normal and white */}
-      <img src="/brand-logo.png" alt={brand.name} className={`${cls} logo-normal`} />
-      <img src="/brand-logo-white-accent.png" alt="" aria-hidden="true" className={`${cls} logo-white`} />
+      <img src="/brand-logo-640.png" width="640" height="94" alt={brand.name} className={`${cls} logo-normal`} />
+      <img src="/brand-logo-white-accent-640.png" width="640" height="94" alt="" aria-hidden="true" className={`${cls} logo-white`} />
       {/* Compact mark for phones, normal and white */}
       <img src="/logo-mark.png" alt="" aria-hidden="true" className={`${cls} logo-mark logo-mark-normal`} />
       <img src="/logo-mark-white.png" alt="" aria-hidden="true" className={`${cls} logo-mark logo-mark-white`} />
     </>
   ) : (
     <>
-      <img src="/brand-logo.png" alt={brand.name} className={`${cls} logo-normal`} />
-      <img src="/brand-logo-white-accent.png" alt="" aria-hidden="true" className={`${cls} logo-white`} />
+      <img src="/brand-logo-640.png" width="640" height="94" alt={brand.name} className={`${cls} logo-normal`} />
+      <img src="/brand-logo-white-accent-640.png" width="640" height="94" alt="" aria-hidden="true" className={`${cls} logo-white`} />
     </>
   );
 

@@ -6,6 +6,7 @@ import { guides } from '../data/guides.js';
 import { standards, standardHref, zoneLabels } from '../data/standards.js';
 import { IconArrowRight } from '../components/Icons.jsx';
 import { usePageMeta } from '../lib/seo.js';
+import { pageMeta } from '../data/pageMeta.js';
 
 const faqs = [
   { q: 'What standards do you test against?', a: 'Our PPE is tested against the relevant EN, ISO, IS and ANSI standards for each product line. Product pages list the applicable standards and certificates are available on request.' },
@@ -26,7 +27,7 @@ function GuideMeta({ g }) {
 }
 
 export default function LearningPage() {
-  usePageMeta({ title: 'Learning centre', description: 'Industry guides, standards explained and FAQs from DDUROGA Safety.' });
+  usePageMeta(pageMeta['/learning']);
 
   const [params, setParams] = useSearchParams();
   const active = topics.find((t) => topicSlug(t) === params.get('topic')) || null;

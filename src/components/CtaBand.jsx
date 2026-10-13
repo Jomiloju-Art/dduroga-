@@ -5,14 +5,12 @@ import { IconPhone } from './Icons.jsx';
 /**
  * Reusable conversion band placed above footers.
  *
- * The phone number is OFF by default. The number on file is still a placeholder
- * (`+91 00000 00000` on a Lagos address), and this band renders it large and
- * white in the most prominent CTA on the products page. Pass `showPhone` once a
- * real number is configured in `src/data/brand.js`.
+ * The phone number is OFF by default; pass `showPhone` to show the number from
+ * src/data/brand.js in the band.
  */
 export default function CtaBand({
   title = 'Need a tailored safety solution?',
-  text = 'Tell us your application and volumes, and our specialists will respond within one business day with certified options and pricing.',
+  text = 'Tell us your application and volumes, and our specialists will come back to you with certified options and pricing.',
   ctaLabel = 'Request a quote',
   ctaTo = '/contact',
   secondary,

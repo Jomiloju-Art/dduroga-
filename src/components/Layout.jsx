@@ -24,7 +24,13 @@ export default function Layout() {
             frame instead of unmounting the entire app. */}
         <ErrorBoundary resetKey={location.pathname}>
           <Suspense fallback={<Loader label="Loading page" />}>
-            <Outlet />
+            {/* Keyed by path so each new page plays the entrance in the
+                stylesheet (.route-enter). Opacity and translate only, with no
+                fill once it ends, so it never leaves a transform behind that
+                would trap the page's fixed bars. */}
+            <div className="route-enter" key={location.pathname}>
+              <Outlet />
+            </div>
           </Suspense>
         </ErrorBoundary>
       </main>

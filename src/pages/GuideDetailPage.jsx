@@ -13,7 +13,8 @@ export default function GuideDetailPage() {
 
   usePageMeta({
     title: guide ? `${guide.title} · Learning` : 'Guide',
-    description: guide ? guide.summary : '',
+    description: guide ? guide.summary : undefined,
+    image: guide ? `/guides/${guide.slug}.jpg` : undefined,
   });
 
   if (!guide) return <Navigate to="/learning" replace />;
@@ -23,6 +24,8 @@ export default function GuideDetailPage() {
 
   return (
     <article className="guide">
+      {/* Reading progress, driven by scroll in CSS (no JS). */}
+      <span className="guide-progress" aria-hidden="true" />
       <header className="guide-header">
         <Link to="/learning" className="guide-back">
           <IconArrowRight width="14" height="14" style={{ transform: 'rotate(180deg)' }} />

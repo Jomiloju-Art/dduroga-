@@ -4,6 +4,7 @@ import {
 } from '../data/homeContent.js';
 import { IconArrowRight, IconCheck } from '../components/Icons.jsx';
 import { usePageMeta } from '../lib/seo.js';
+import { pageMeta } from '../data/pageMeta.js';
 import Reveal from '../components/Reveal.jsx';
 import TrustBand from '../components/TrustBand.jsx';
 import TrendingShowcase from '../components/TrendingShowcase.jsx';
@@ -13,38 +14,44 @@ import ZoneBento from '../components/ZoneBento.jsx';
 import SectorGrid from '../components/SectorGrid.jsx';
 import GuidesSection from '../components/GuidesSection.jsx';
 import { catalogues } from '../data/catalogues.generated.js';
+import { zones, productsByZone } from '../data/products.js';
 
 /** "147 pages · PDF · 24.9 MB", from src/data/catalogues.generated.js. */
 const catalogueMeta = (c) => `${c.pages} pages · PDF · ${(c.bytes / 1024 / 1024).toFixed(1)} MB`;
 
 /** What ships with an order — replaces repeating the badge set a second time. */
 const documentation = [
-  'Declaration of conformity per product',
-  'Batch-level test certificates',
+  'Declarations of conformity on request',
+  'Test reports on request',
   'Specification sheets for tenders',
   'Custom branding and private label',
 ];
 
 export default function HomePage() {
-  usePageMeta({
-    title: 'Home',
-    description:
-      'DDUROGA Safety: certified head-to-toe PPE for industry. Gloves, footwear, head, eye and body protection, supplied in bulk across Nigeria.',
-  });
+  usePageMeta(pageMeta['/']);
 
   return (
     <>
       {/* ================= 1. HERO ================= */}
       <section className="hx-hero hx-hero--under-header hx-hero--blend" aria-label="DDUROGA Safety">
+        {/* The photo has a "head-to-toe protection" HUD graphic baked into its top
+            edge, right where the transparent header sits. This blurred shade
+            hides it and keeps the white menu readable. */}
+        <div className="hx-hero__topshade" aria-hidden="true" />
         <div className="hx-hero__inner">
           <div className="hx-hero__lockup">
             <h1 className="hx-hero__tagline">Certified Industrial PPE &amp; Safety Equipment Supplied Across Nigeria</h1>
             <p className="hx-hero__lead">
               Head-to-toe protection for oil &amp; gas, construction, manufacturing and ports, stocked in Lagos, delivered nationwide.
             </p>
-            <Link to="/products" className="hx-hero__cta">
-              View Product Catalogue <IconArrowRight width="14" height="14" />
-            </Link>
+            <div className="hx-hero__actions">
+              <Link to="/products" className="btn hx-btn hx-hero__primary">
+                Browse products <IconArrowRight width="16" height="16" />
+              </Link>
+              <a href={catalogues.full.file} target="_blank" rel="noopener" className="hx-hero__cta">
+                2025 catalogue (PDF) <IconArrowRight width="14" height="14" />
+              </a>
+            </div>
           </div>
         </div>
         {/* Fades the hero's bottom edge into the white band below, so the dark
@@ -74,14 +81,15 @@ export default function HomePage() {
           <div>
             <h2>Are you compliant?</h2>
             <p>
-              Every DDUROGA product ships with the standards documentation your auditors ask for.
-              Learn what each mark means and how to specify it correctly.
+              Ask for the standards documentation your auditors need with your order. Learn what
+              each mark means and how to specify it correctly.
             </p>
           </div>
           <div>
             {/* The four certification badges were repeated here from the trust
                 band directly under the hero. Rather than print the same four
-                marks twice, this lists what actually arrives with an order. */}
+                marks twice, this lists the documents buyers can ask for. Nothing here promises
+                more than "on request" until the client confirms what ships as standard. */}
             <ul className="hp-ships">
               {documentation.map((d) => (
                 <li key={d}>
@@ -104,11 +112,11 @@ export default function HomePage() {
             <Link to="/products" className="hx-promo__card hx-promo__card--accent">
               <span className="hx-promo__eyebrow">Full range</span>
               <h3>Browse the complete catalogue</h3>
-              <span className="hx-promo__link">View Product Catalogue <IconArrowRight width="14" height="14" /></span>
+              <span className="hx-promo__link">Browse products <IconArrowRight width="14" height="14" /></span>
             </Link>
             <Link to="/contact" className="hx-promo__card">
               <span className="hx-promo__eyebrow">Where to buy</span>
-              <h3>Find a stockist or request a program</h3>
+              <h3>Set up a supply programme for your sites</h3>
               <span className="hx-promo__link">Get in touch <IconArrowRight width="14" height="14" /></span>
             </Link>
           </div>
@@ -158,6 +166,16 @@ export default function HomePage() {
                   </a>
                 </div>
               </div>
+              <ul className="cat-card__zones" aria-label="Inside the catalogue">
+                {zones.map((z) => (
+                  <li key={z.id}>
+                    <Link to={`/products?cat=${z.id}`}>
+                      <span>{z.label}</span>
+                      <strong>{productsByZone(z.id).length}</strong>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </article>
           </div>
         </div>

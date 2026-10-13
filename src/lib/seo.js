@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 /**
  * Per-page SEO meta.
@@ -12,6 +13,10 @@ import { useEffect } from 'react';
  * (index.html and public/sitemap.xml need the same change).
  */
 const SITE = 'DDUROGA Safety';
+/** Used when a page sets no title (the homepage) and must match index.html. */
+const HOME_TITLE = 'DDUROGA Safety: Personal Protective Equipment';
+export const DEFAULT_DESCRIPTION =
+  'DDUROGA Safety supplies certified PPE for head, hand, body and feet protection, trusted by industry across the country.';
 export const SITE_URL = 'https://dduroga.vercel.app';
 
 const SCHEMA_IDS = ['schema-product', 'schema-breadcrumb'];
@@ -93,8 +98,9 @@ function breadcrumbSchema(items) {
  */
 export function usePageMeta({
   title,
-  description,
-  canonical = '/',
+  description = DEFAULT_DESCRIPTION,
+  /** Defaults to the current path, so a page that forgets it never claims to be the homepage. */
+  canonical,
   image = '/og-image.png',
   product = null,
   crumbs = null,
@@ -104,10 +110,13 @@ export function usePageMeta({
   const crumbsKey = crumbs ? JSON.stringify(crumbs) : '';
   const productKey = product ? JSON.stringify({ s: product.slug, t: product.title }) : '';
 
+  const { pathname } = useLocation();
+  const canonicalPath = canonical || pathname;
+
   useEffect(() => {
-    const url = abs(canonical);
+    const url = abs(canonicalPath);
     const img = abs(image);
-    const fullTitle = title ? `${title} | ${SITE}` : SITE;
+    const fullTitle = title ? `${title} | ${SITE}` : HOME_TITLE;
 
     document.title = fullTitle;
 
@@ -132,5 +141,5 @@ export function usePageMeta({
     if (crumbs && crumbs.length) setSchema('schema-breadcrumb', breadcrumbSchema(crumbs));
 
     return () => SCHEMA_IDS.forEach((id) => document.getElementById(id)?.remove());
-  }, [title, description, canonical, image, crumbsKey, productKey, noindex]);
+  }, [title, description, canonicalPath, image, crumbsKey, productKey, noindex]);
 }

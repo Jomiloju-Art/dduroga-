@@ -5,6 +5,7 @@ import SearchModal from './SearchModal.jsx';
 import { categories, industryCatalog, hazardNames } from '../data/products.js';
 import { IconArrowRight, IconSearch } from './Icons.jsx';
 import { useQuote } from '../quote/QuoteContext.jsx';
+import { useScrollLock } from '../lib/scrollLock.js';
 
 /** Entries shown per column in the Products mega panel before the "All …" link. */
 const MEGA_ITEMS = 6;
@@ -106,14 +107,7 @@ export default function Navbar() {
   }, [open]);
 
   // Lock the page behind the drawer so only the drawer scrolls.
-  useEffect(() => {
-    if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [open]);
+  useScrollLock(open);
 
   return (
     /* The four header states, as class modifiers on the header itself.

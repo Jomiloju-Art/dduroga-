@@ -39,11 +39,28 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!assets/).*)",
-      "destination": "/index.html"
+      "source": "/products/:slug",
+      "destination": "/_p/products/:slug.html"
+    },
+    {
+      "source": "/learning/:slug",
+      "destination": "/_p/learning/:slug.html"
+    },
+    {
+      "source": "/:page(products|about|learning|contact|certifications|search|quote)",
+      "destination": "/_p/:page.html"
     }
   ],
   "headers": [
+    {
+      "source": "/_p/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
     {
       "source": "/assets/(.*)",
       "headers": [

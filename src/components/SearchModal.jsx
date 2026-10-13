@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { searchProducts, zoneOf, allProducts, rangeLabel, popularSearches } from '../data/products.js';
 import { standardStrings } from './CertifiedTo.jsx';
 import { IconSearch, IconArrowRight } from './Icons.jsx';
+import { useScrollLock } from '../lib/scrollLock.js';
 
 /** Wrap the parts of `text` that match a query word in <mark>. */
 export function Highlight({ text, query }) {
@@ -19,7 +20,8 @@ export default function SearchModal({ open, onClose }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (open) { setQ(''); setTimeout(() => inputRef.current?.focus(), 20); }
+    // preventScroll: the page is locked behind the panel, so focusing must not scroll it.
+    if (open) { setQ(''); setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 20); }
   }, [open]);
 
   useEffect(() => { if (open) onClose(); /* close on route change */ }, [pathname]);
@@ -31,6 +33,9 @@ export default function SearchModal({ open, onClose }) {
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
   }, [open, onClose]);
+
+  // The page behind the search panel stays put.
+  useScrollLock(open);
 
   const results = searchProducts(q, 8);
   const total = q.trim() ? searchProducts(q, allProducts.length + 1).length : 0;

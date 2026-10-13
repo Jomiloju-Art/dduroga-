@@ -18,7 +18,10 @@
  *   prefers-reduced-motion          if the user asks for less motion we render
  *                                   the poster and a Play button instead. The
  *                                   observer never auto-starts.
- *   webm before mp4                 ~15% smaller here; Safari falls through to mp4.
+ *   mp4 only                        .vercelignore keeps the .webm copies off the
+ *                                   host (upload size), so offering them first
+ *                                   cost every visitor a 404 before the mp4.
+ *                                   Pass `webm` again only if they are deployed.
  *
  * The video is presented as a gallery slide, not an ambient background: on a PPE
  * page the buyer wants "show me the boot", so it belongs where the photos are.

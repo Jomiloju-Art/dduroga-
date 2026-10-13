@@ -36,6 +36,26 @@ export default function ProductsPage() {
     return () => clearTimeout(t);
   }, [hash]);
 
+  // Back to the top whenever the filter or sort changes. ScrollToTop only
+  // fires on a new pathname, and filters change just the query string, so a
+  // filter picked halfway down the page left the visitor in the middle of the
+  // new results. While the phone filter drawer is open this waits until it
+  // closes, so the drawer does not jump under the visitor's finger.
+  const filterKey = [params.get('cat'), params.get('range'), hazard, industry, sort].join('|');
+  const lastKey = useRef(filterKey);
+  const pendingTop = useRef(false);
+  useEffect(() => {
+    if (lastKey.current === filterKey) return;
+    lastKey.current = filterKey;
+    pendingTop.current = true;
+  }, [filterKey]);
+  useEffect(() => {
+    if (!pendingTop.current || filtersOpen) return;
+    pendingTop.current = false;
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+  });
+
   // Facets are mutually exclusive, so picking one replaces the whole query string.
   // `sort` is carried across because changing facet should not reset the order.
   // The one exception is a range, which narrows its zone rather than replacing it.

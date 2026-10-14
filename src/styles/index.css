@@ -4898,10 +4898,24 @@ body:has(.site-header--hidden) .pdp-bar { top: 0; }
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; font-size: 0.82rem;
 }
 .sf__address, .sf__copy { margin: 0; }
-.sf__social { display: flex; gap: 8px; }
-.sf__social a { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; color: var(--ddu-black); border: 1px solid rgba(14, 18, 22, 0.14); }
-.sf__social svg { width: 16px; height: 16px; }
-.sf__social a:hover { background: var(--ddu-orange); border-color: var(--ddu-orange); }
+/* Social links sit in the brand column under the contact lines (as small
+   outline circles in the bottom bar they were easy to miss). The bottom bar
+   keeps clear of the floating WhatsApp button on the right. */
+.sf__follow { margin-top: 20px; }
+.sf__follow-label { margin: 0 0 10px; font-family: var(--font-display); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ddu-black); }
+.sf__social { display: flex; flex-wrap: wrap; gap: 10px; }
+.sf__social a {
+  width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%;
+  color: #fff; background: var(--ddu-black);
+  transition: background-color var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+}
+.sf__social svg { width: 18px; height: 18px; }
+.sf__social a:hover { background: var(--ddu-orange); transform: translateY(-2px); }
+.sf__bottom-inner { padding-right: max(var(--gutter), 96px); }
+@media (prefers-reduced-motion: reduce) {
+  .sf__social a { transition: none; }
+  .sf__social a:hover { transform: none; }
+}
 @media (max-width: 1023px) {
   .sf__inner { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .sf__brand { grid-column: 1 / -1; }

@@ -61,6 +61,20 @@ export default function Footer() {
             <li><a href={brand.emailHref}>{brand.email}</a></li>
             <li>{brand.hours}</li>
           </ul>
+          {socials.length > 0 && (
+            <div className="sf__follow">
+              <p className="sf__follow-label">Follow us</p>
+              <div className="sf__social" aria-label="Follow DDUROGA Safety">
+                {socials.map((s) => (
+                  <a key={s.label} href={s.href} target="_blank" rel="noreferrer" aria-label={s.label} title={s.label}>
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d={socialPaths[s.label]} />
+                    </svg>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {columns.map((col) => (
@@ -82,17 +96,6 @@ export default function Footer() {
       <div className="sf__bottom">
         <div className="sf__bottom-inner">
           <p className="sf__address">{brand.address}</p>
-          {socials.length > 0 && (
-            <div className="sf__social" aria-label="Follow DDUROGA Safety">
-              {socials.map((s) => (
-                <a key={s.label} href={s.href} target="_blank" rel="noreferrer" aria-label={s.label}>
-                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d={socialPaths[s.label]} />
-                  </svg>
-                </a>
-              ))}
-            </div>
-          )}
           <p className="sf__copy">&copy; {year} {brand.legalName}</p>
         </div>
       </div>

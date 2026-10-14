@@ -39,6 +39,39 @@
   ],
   "rewrites": [
     {
+      "source": "/products",
+      "has": [
+        {
+          "type": "query",
+          "key": "range",
+          "value": "(?<v>[a-z0-9-]+)"
+        }
+      ],
+      "destination": "/_p/products-range/:v.html"
+    },
+    {
+      "source": "/products",
+      "has": [
+        {
+          "type": "query",
+          "key": "industry",
+          "value": "(?<v>[a-z0-9-]+)"
+        }
+      ],
+      "destination": "/_p/products-industry/:v.html"
+    },
+    {
+      "source": "/products",
+      "has": [
+        {
+          "type": "query",
+          "key": "cat",
+          "value": "(?<v>[a-z0-9-]+)"
+        }
+      ],
+      "destination": "/_p/products-cat/:v.html"
+    },
+    {
       "source": "/products/:slug",
       "destination": "/_p/products/:slug.html"
     },

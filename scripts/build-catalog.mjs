@@ -64,4 +64,32 @@ export const SLUG_RENAMES = ${JSON.stringify(SLUG_RENAMES)};
 export const catalog = ${JSON.stringify(slim)};
 `;
 fs.writeFileSync(path.join(root, 'src/data/catalog.slim.generated.js'), out);
+
+/*
+ * Per-product detail files: public/data/details/<key>.json with the key
+ * features, design, remarks and tests, plus the diagram and design-banner
+ * image. The product page used to import all of them at once (1.25 MB of
+ * JavaScript for one product's ~3 KB); it now fetches its own file.
+ * Generated on every build and gitignored. detailFile() in src/lib/details.js
+ * must name files the same way.
+ */
+const load = (p) => import(pathToFileURL(path.join(root, p)).href);
+const [{ productDetails }, { diagramImages }, { calloutBanners }] = await Promise.all([
+  load('src/data/productDetails.js'), load('src/data/diagramImages.js'), load('src/data/calloutBanners.js'),
+]);
+const detailDir = path.join(root, 'public/data/details');
+fs.rmSync(detailDir, { recursive: true, force: true });
+fs.mkdirSync(detailDir, { recursive: true });
+let detailFiles = 0;
+for (const p of Object.values(slim).flat()) {
+  const d = productDetails[p.key] || {};
+  const rec = {
+    keyFeatures: d.keyFeatures, design: d.design, remarks: d.remarks, tests: d.tests,
+    diagram: diagramImages[p.key], banner: calloutBanners[p.key],
+  };
+  if (!Object.values(rec).some((v) => v && (!Array.isArray(v) || v.length))) continue;
+  fs.writeFileSync(path.join(detailDir, p.key.replace(/[^a-z0-9_-]/gi, '_') + '.json'), JSON.stringify(rec));
+  detailFiles++;
+}
+console.log(`build-catalog: ${detailFiles} product detail files`);
 console.log(`build-catalog: ${count} products, ${removedPhotos} repeated photos dropped, ${(out.length / 1024).toFixed(0)} KB`);

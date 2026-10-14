@@ -12,6 +12,8 @@ import { IconArrowRight, IconCheck, IconDocument } from '../components/Icons.jsx
 import { brand } from '../data/brand.js';
 import { useQuote } from '../quote/QuoteContext.jsx';
 import { downloadDatasheet } from '../lib/datasheet.js';
+import { loadDetails } from '../lib/details.js';
+import { productTitle, productDescription } from '../lib/seoText.js';
 import QtyInput, { QTY_MAX } from '../components/QtyInput.jsx';
 import { usePageMeta } from '../lib/seo.js';
 import { addRecent, useRecentlyViewed } from '../lib/recent.js';
@@ -188,12 +190,14 @@ export default function ProductDetailPage() {
   useEffect(() => {
     let alive = true;
     setDetailsLoaded(false);
-    Promise.all([import('../data/productDetails.js'), import('../data/diagramImages.js'), import('../data/calloutBanners.js')])
-      .then(([d, di, cb]) => {
+    // One small JSON per product (src/lib/details.js) instead of three
+    // whole-catalogue modules (1.3 MB) for a few KB.
+    loadDetails(dataKey)
+      .then((d) => {
         if (!alive) return;
-        setRich(d.productDetails?.[dataKey] || null);
-        setDiagramImg(di.diagramImages?.[dataKey] || null);
-        setBannerImg(cb.calloutBanners?.[dataKey] || null);
+        setRich(d && (d.keyFeatures || d.design || d.remarks || d.tests) ? d : null);
+        setDiagramImg(d?.diagram || null);
+        setBannerImg(d?.banner || null);
         setDetailsLoaded(true);
       })
       .catch(() => {
@@ -206,9 +210,9 @@ export default function ProductDetailPage() {
   const recent = useRecentlyViewed().filter((p) => p.slug !== product?.slug);
 
   usePageMeta({
-    title: product?.fullTitle || product?.title || 'Product not found',
+    title: product ? productTitle(product) : 'Product not found',
     noindex: !product,
-    description: (product?.desc || '').slice(0, 160),
+    description: product ? productDescription(product) : undefined,
     canonical: `/products/${product?.slug || slug}`,
     image: product?.img,
     product: product

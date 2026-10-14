@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { HOME_TITLE } from './seoText.js';
 
 /**
  * Per-page SEO meta.
@@ -13,8 +14,6 @@ import { useLocation } from 'react-router-dom';
  * (index.html and public/sitemap.xml need the same change).
  */
 const SITE = 'DDUROGA Safety';
-/** Used when a page sets no title (the homepage) and must match index.html. */
-const HOME_TITLE = 'DDUROGA Safety: Personal Protective Equipment';
 export const DEFAULT_DESCRIPTION =
   'DDUROGA Safety supplies certified PPE for head, hand, body and feet protection, trusted by industry across the country.';
 export const SITE_URL = 'https://dduroga.vercel.app';

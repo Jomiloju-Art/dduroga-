@@ -6,6 +6,7 @@ import Pagination from '../components/Pagination.jsx';
 import ProductFilters from '../components/ProductFilters.jsx';
 import CtaBand from '../components/CtaBand.jsx';
 import { usePageMeta } from '../lib/seo.js';
+import { listingFor, listingTitle, listingDescription, listingIntro } from '../lib/seoText.js';
 import { lockScroll } from '../lib/scrollLock.js';
 
 const PER_PAGE = 24;
@@ -124,9 +125,12 @@ export default function ProductsPage() {
   const hasFilter = Boolean(cat || hazard || industry);
   const zoneShort = (z) => z.id.charAt(0).toUpperCase() + z.id.slice(1);
 
+  // Search title, description and intro come from lib/seoText.js, which the
+  // build script also uses for the static HTML crawlers read first.
+  const listing = listingFor({ cat, range: range?.id, industry, hazard });
   usePageMeta({
-    title,
-    description: `Browse the certified PPE range from DDUROGA Safety: ${title.toLowerCase()}.`,
+    title: listingTitle(listing),
+    description: listingDescription(listing),
     canonical: `/products${range ? `?range=${range.id}` : cat ? `?cat=${cat}` : hazard ? `?hazard=${hazard}` : industry ? `?industry=${industry}` : ''}`,
   });
 
@@ -135,6 +139,7 @@ export default function ProductsPage() {
       {/* Collection header — Gymshark's title + count, no hero band. */}
       <header className="plp-header">
         <h1>{title}</h1>
+        <p className="plp-header__intro">{listingIntro(listing)}</p>
         <p className="plp-header__count" role="status" aria-live="polite">
           {visible.length} Products
         </p>

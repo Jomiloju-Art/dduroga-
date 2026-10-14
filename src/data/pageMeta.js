@@ -9,22 +9,22 @@
 export const pageMeta = {
   '/': {
     title: null,
-    description: 'DDUROGA Safety: certified head-to-toe PPE for industry. Gloves, footwear, head, eye and body protection, supplied in bulk across Nigeria.',
+    description: 'Certified PPE supplier in Lagos, Nigeria: safety boots, gloves, helmets, hi-vis and workwear for oil & gas, construction and manufacturing. Request a quote online.',
   },
   '/products': {
     title: 'All products',
     description: 'Browse the certified PPE range from DDUROGA Safety: all products.',
   },
   '/about': {
-    title: 'About us',
+    title: 'About us: PPE supplier in Lagos, Nigeria',
     description: 'DDUROGA Safety is a Nigerian PPE supplier and the wholly owned Nigerian subsidiary of Mallcom, supplying certified protection to industry nationwide from our Lagos warehouse.',
   },
   '/learning': {
-    title: 'Learning centre',
+    title: 'PPE guides and safety standards explained',
     description: 'Industry guides, standards explained and FAQs from DDUROGA Safety.',
   },
   '/contact': {
-    title: 'Contact us',
+    title: 'Contact our PPE specialists in Lagos',
     description: 'Talk to our DDUROGA Safety specialists about PPE for your operation.',
   },
   '/certifications': {

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DDUROGA Safety: Personal Protective Equipment</title>
+    <title>DDUROGA Safety | PPE Supplier in Lagos, Nigeria</title>
     <meta
       name="description"
       content="DDUROGA Safety supplies certified PPE for head, hand, body and feet protection, trusted by industry across the country."
@@ -27,7 +27,7 @@
     <meta property="og:site_name" content="DDUROGA Safety" />
     <meta property="og:locale" content="en_NG" />
     <meta property="og:url" content="https://dduroga.vercel.app/" />
-    <meta property="og:title" content="DDUROGA Safety: Personal Protective Equipment" />
+    <meta property="og:title" content="DDUROGA Safety | PPE Supplier in Lagos, Nigeria" />
     <meta
       property="og:description"
       content="Certified PPE for head, hand, body and feet protection. Stocked in Lagos, delivered to industry nationwide. Part of the Mallcom group."
@@ -37,7 +37,7 @@
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="DDUROGA Safety" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="DDUROGA Safety: Personal Protective Equipment" />
+    <meta name="twitter:title" content="DDUROGA Safety | PPE Supplier in Lagos, Nigeria" />
     <meta
       name="twitter:description"
       content="Certified PPE for head, hand, body and feet protection. Stocked in Lagos, delivered to industry nationwide."
@@ -60,30 +60,82 @@
       phone and email printed in the client's business profile (see brand.js);
       keep the two in step.
     -->
+    <!--
+      Organization + LocalBusiness, static so crawlers read them without
+      JavaScript. Phone, email, address and hours match src/data/brand.js; keep
+      them in step. LocalBusiness is what Google uses for local results such
+      as "PPE supplier in Lagos".
+    -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "DDUROGA Safety",
-        "url": "https://dduroga.vercel.app/",
-        "logo": "https://dduroga.vercel.app/brand-logo.png",
-        "sameAs": ["https://www.linkedin.com/company/dduroga/"],
-        "description": "Nigerian supplier of certified personal protective equipment for head, hand, body and feet protection, and the wholly owned Nigerian subsidiary of Mallcom.",
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": "44 Jimoh Odutola Street, Off Eric Moore Road",
-          "addressLocality": "Surulere",
-          "addressRegion": "Lagos",
-          "addressCountry": "NG"
-        },
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "telephone": "+234-907-225-4796",
-          "email": "sales@dduroga.com",
-          "contactType": "sales",
-          "areaServed": "NG"
-        },
-        "parentOrganization": { "@type": "Organization", "name": "Mallcom" }
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://dduroga.vercel.app/#org",
+            "name": "DDUROGA Safety",
+            "url": "https://dduroga.vercel.app/",
+            "logo": "https://dduroga.vercel.app/brand-logo.png",
+            "sameAs": [
+              "https://www.linkedin.com/company/dduroga/"
+            ],
+            "description": "Nigerian supplier of certified personal protective equipment for head, hand, body and feet protection, and the wholly owned Nigerian subsidiary of Mallcom.",
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "telephone": "+234-907-225-4796",
+              "email": "sales@dduroga.com",
+              "contactType": "sales",
+              "areaServed": "NG"
+            },
+            "parentOrganization": {
+              "@type": "Organization",
+              "name": "Mallcom"
+            }
+          },
+          {
+            "@type": "LocalBusiness",
+            "@id": "https://dduroga.vercel.app/#lagos",
+            "name": "DDUROGA Safety",
+            "description": "PPE supplier in Lagos: safety boots, gloves, helmets, hi-vis and workwear, supplied to industry across Nigeria.",
+            "url": "https://dduroga.vercel.app/",
+            "image": "https://dduroga.vercel.app/og-image.png",
+            "logo": "https://dduroga.vercel.app/brand-logo.png",
+            "telephone": "+234-907-225-4796",
+            "email": "sales@dduroga.com",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "44 Jimoh Odutola Street, Off Eric Moore Road",
+              "addressLocality": "Surulere",
+              "addressRegion": "Lagos",
+              "addressCountry": "NG"
+            },
+            "openingHoursSpecification": [
+              {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": [
+                  "Monday",
+                  "Tuesday",
+                  "Wednesday",
+                  "Thursday",
+                  "Friday",
+                  "Saturday"
+                ],
+                "opens": "08:00",
+                "closes": "17:00"
+              }
+            ],
+            "areaServed": {
+              "@type": "Country",
+              "name": "Nigeria"
+            },
+            "parentOrganization": {
+              "@id": "https://dduroga.vercel.app/#org"
+            },
+            "sameAs": [
+              "https://www.linkedin.com/company/dduroga/"
+            ]
+          }
+        ]
       }
     </script>
 

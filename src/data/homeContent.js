@@ -14,7 +14,7 @@ export const heroLead =
 export const valueTicks = ['Head-to-toe PPE', 'Certified & compliant', 'Bulk & OEM supply', 'Nationwide delivery'];
 
 /** Industry slugs (from industryCatalog) shown as homepage tiles. */
-export const homeIndustries = ['construction', 'oil-gas', 'manufacturing', 'welding', 'logistics', 'chemicals'];
+export const homeIndustries = ['construction', 'oil-gas', 'manufacturing', 'mining', 'logistics', 'chemicals'];
 
 /** Hazard ids (from hazardNames) shown as homepage tiles. */
 export const homeHazards = ['cut', 'impact', 'chemical', 'heat', 'electric', 'slip'];

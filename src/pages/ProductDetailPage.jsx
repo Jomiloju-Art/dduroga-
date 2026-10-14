@@ -524,7 +524,7 @@ export default function ProductDetailPage() {
                     className="detail-ask muted"
                     style={{ fontSize: '0.9rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 14 }}
                   >
-                    Ask a specialist about this product <IconArrowRight width="14" height="14" />
+                    Ask our specialist about this product <IconArrowRight width="14" height="14" />
                   </Link>
                   {/* One action, not two. The separate "Request a quote" link
                       led to a blank contact form; the quote list IS the RFQ. */}

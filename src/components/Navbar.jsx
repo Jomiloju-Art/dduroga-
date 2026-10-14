@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import Logo from './Logo.jsx';
 import SearchModal from './SearchModal.jsx';
-import { categories, industryCatalog, hazardNames } from '../data/products.js';
+import { categories, industryCatalog } from '../data/products.js';
 import { IconArrowRight, IconSearch } from './Icons.jsx';
 import { useQuote } from '../quote/QuoteContext.jsx';
 import { useScrollLock } from '../lib/scrollLock.js';
@@ -166,7 +166,7 @@ export default function Navbar() {
                   <i className="fas fa-chevron-left" aria-hidden="true" />
                 </button>
                 <span className="nav-mobile-head__title">
-                  {sub === 'products' ? 'Products' : sub === 'industries' ? 'Industries' : 'Hazards'}
+                  {sub === 'products' ? 'Products' : 'Industries'}
                 </span>
               </div>
             )}
@@ -205,7 +205,8 @@ export default function Navbar() {
                       </ul>
                     </div>
 
-                    {/* Industry and hazard are capped at six. This panel is a
+                    {/* The "By hazard" column was removed at the client's request (Oct 2026);
+                        hazards remain a filter on /products. Industry is capped at six. This panel is a
                         shortcut into the catalogue, not an index of it — the
                         full sets of 17 and 26 live in the /products filters,
                         one click away via the "All …" link. Ten and eleven
@@ -222,22 +223,6 @@ export default function Navbar() {
                       </ul>
                       <Link className="mega-col__all" to="/products#facet-industry">
                         All {industryCatalog.length} industries
-                      </Link>
-                    </div>
-
-                    <div className="mega-col">
-                      <h4>By hazard</h4>
-                      <ul>
-                        {Object.entries(hazardNames)
-                          .slice(0, MEGA_ITEMS)
-                          .map(([id, label]) => (
-                            <li key={id}>
-                              <Link to={`/products?hazard=${id}`}>{label}</Link>
-                            </li>
-                          ))}
-                      </ul>
-                      <Link className="mega-col__all" to="/products#facet-hazard">
-                        All {Object.keys(hazardNames).length} hazards
                       </Link>
                     </div>
                   </div>
@@ -278,10 +263,6 @@ export default function Navbar() {
                     <span>Industries</span>
                     <i className="fas fa-chevron-right" aria-hidden="true" />
                   </button>
-                  <button type="button" className="nav-mobile-item" onClick={() => setSub('hazards')}>
-                    <span>Hazards</span>
-                    <i className="fas fa-chevron-right" aria-hidden="true" />
-                  </button>
                   <Link className="nav-mobile-item" to="/about">About Us</Link>
                   <Link className="nav-mobile-item" to="/learning">Learning</Link>
                   <Link className="nav-mobile-item" to="/contact">Contact</Link>
@@ -299,9 +280,6 @@ export default function Navbar() {
                   )}
                   {sub === 'industries' && industryCatalog.map((i) => (
                     <Link className="nav-mobile-item" to={`/products?industry=${i.slug}`} key={i.slug}>{i.label}</Link>
-                  ))}
-                  {sub === 'hazards' && Object.entries(hazardNames).map(([id, label]) => (
-                    <Link className="nav-mobile-item" to={`/products?hazard=${id}`} key={id}>{label}</Link>
                   ))}
                 </nav>
               )}

@@ -70,7 +70,7 @@ export default function ContactPage() {
     <>
       <PageHero
         eyebrow="Contact"
-        title="Talk to a safety specialist"
+        title="Talk to our safety specialist"
         lead="Whether you're kitting out a plant in Port Harcourt or a construction site in Lagos, tell us what you need and we'll quote it."
       />
 
@@ -100,7 +100,7 @@ export default function ContactPage() {
             <div className="panel">
               <h2>What happens next?</h2>
               <p className="muted" style={{ fontSize: '0.95rem' }}>
-                We match your enquiry to a specialist for your industry, confirm certified product
+                We match your enquiry to one of our specialists for your industry, confirm certified product
                 options, and send samples or documentation on request.
               </p>
             </div>

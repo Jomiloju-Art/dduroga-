@@ -35,16 +35,21 @@ export const brand = {
 };
 
 /**
- * Social profiles. FILL: paste each full profile URL. The footer shows an
- * icon only for a filled entry, so an empty one never renders a dead link
- * (all five used to point at "#").
+ * Social profiles. The footer shows an icon only for a filled entry, so an
+ * empty one never renders a dead link.
+ *
+ * LinkedIn is DDUROGA's own company page (Lagos, "Mallcom India and the owner
+ * of the Bragoxd brand"). YouTube and X are Mallcom's official accounts, as
+ * linked from mallcom.in, on the client's instruction (Oct 2026).
+ * FILL: Instagram and Facebook. No DDUROGA account could be found, and
+ * guessing a handle risks linking to someone else's.
  */
 export const social = {
-  YouTube: '',
+  YouTube: 'https://www.youtube.com/user/MallcomIndia',
   Facebook: '',
-  LinkedIn: '',
+  LinkedIn: 'https://www.linkedin.com/company/dduroga/',
   Instagram: '',
-  X: '',
+  X: 'https://x.com/mallcom_india',
 };
 
 /**

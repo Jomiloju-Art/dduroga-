@@ -5086,3 +5086,12 @@ body:has(.site-header--hidden) .pdp-bar { top: 0; }
 /* Not .search-overlay: the search panel sits inside it, and touch-action
    applies to descendants, so its results could not be swiped. */
 .nav-scrim, .menu-backdrop, .bag-backdrop, .facet-scrim, .accr-scrim { touch-action: none; }
+
+/* Typed quantity in the bag and on the quote list (QtyInput.jsx). */
+.bag-item__qty input, .quote-item__qty input {
+  width: 56px; height: 28px; padding: 0 4px; border: 1px solid #DEE0E3; border-radius: 4px;
+  text-align: center; font: inherit; font-size: 14px; font-weight: 600; color: #0E1216; background: #fff;
+  font-variant-numeric: tabular-nums;
+}
+.bag-item__qty input:focus-visible, .quote-item__qty input:focus-visible { outline: 2px solid var(--ddu-orange); outline-offset: 1px; border-color: var(--ddu-orange); }
+.bag-item__qty button, .quote-item__qty button { width: 28px; height: 28px; }

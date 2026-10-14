@@ -6,6 +6,7 @@ import { sendEnquiry } from '../lib/enquiry.js';
 import { IconArrowRight, IconCheck } from '../components/Icons.jsx';
 import { usePageMeta } from '../lib/seo.js';
 import { brand } from '../data/brand.js';
+import QtyInput from '../components/QtyInput.jsx';
 
 const EMPTY = { name: '', email: '', phone: '', company: '', notes: '' };
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -90,7 +91,7 @@ export default function QuotePage() {
                     </span>
                     <span className="quote-item__qty">
                       <button type="button" onClick={() => setQty(quoteKey(p), (p.qty || 1) - 1)} aria-label={`Decrease quantity of ${p.title}`}>−</button>
-                      <b>{p.qty || 1}</b>
+                      <QtyInput value={p.qty || 1} onChange={(n) => setQty(quoteKey(p), n)} label={`Quantity of ${p.title}`} />
                       <button type="button" onClick={() => setQty(quoteKey(p), (p.qty || 1) + 1)} aria-label={`Increase quantity of ${p.title}`}>+</button>
                     </span>
                     <button type="button" className="quote-item__remove" onClick={() => remove(quoteKey(p))} aria-label={`Remove ${p.title}`}>×</button>

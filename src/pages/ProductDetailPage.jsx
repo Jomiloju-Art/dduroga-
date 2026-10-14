@@ -12,6 +12,7 @@ import { IconArrowRight, IconCheck, IconDocument } from '../components/Icons.jsx
 import { brand } from '../data/brand.js';
 import { useQuote } from '../quote/QuoteContext.jsx';
 import { downloadDatasheet } from '../lib/datasheet.js';
+import QtyInput, { QTY_MAX } from '../components/QtyInput.jsx';
 import { usePageMeta } from '../lib/seo.js';
 import { addRecent, useRecentlyViewed } from '../lib/recent.js';
 import Reveal from '../components/Reveal.jsx';
@@ -539,16 +540,8 @@ export default function ProductDetailPage() {
                       >
                         &minus;
                       </button>
-                      <input
-                        type="number"
-                        min="1"
-                        step="1"
-                        inputMode="numeric"
-                        value={qty}
-                        onChange={(e) => setQty(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                        aria-label="Quantity"
-                      />
-                      <button type="button" onClick={() => setQty((q) => q + 1)} aria-label="Increase quantity">
+                      <QtyInput value={qty} onChange={setQty} />
+                      <button type="button" onClick={() => setQty((q) => Math.min(QTY_MAX, q + 1))} aria-label="Increase quantity">
                         +
                       </button>
                     </div>

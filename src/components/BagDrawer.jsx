@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useQuote, quoteKey } from '../quote/QuoteContext.jsx';
 import { IconArrowRight } from './Icons.jsx';
 import { lockScroll } from '../lib/scrollLock.js';
+import QtyInput from './QtyInput.jsx';
 
 /**
  * "Your bag" drawer — the quote list presented the way Gymshark presents their
@@ -68,7 +69,7 @@ export default function BagDrawer() {
                   {p.option && <em className="bag-item__option">Size / colour: {p.option}</em>}
                   <span className="bag-item__qty">
                     <button type="button" onClick={() => setQty(quoteKey(p), (p.qty || 1) - 1)} aria-label="Decrease quantity">−</button>
-                    <b>{p.qty || 1}</b>
+                    <QtyInput value={p.qty || 1} onChange={(n) => setQty(quoteKey(p), n)} label={`Quantity of ${p.title}`} />
                     <button type="button" onClick={() => setQty(quoteKey(p), (p.qty || 1) + 1)} aria-label="Increase quantity">+</button>
                   </span>
                 </span>

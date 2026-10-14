@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { QTY_MAX } from '../components/QtyInput.jsx';
 
 const QuoteContext = createContext(null);
 const KEY = 'dduroga-quote';
@@ -39,14 +40,14 @@ export function QuoteProvider({ children }) {
    * quote and opens the bag drawer.
    */
   const add = (product, qty = 1, option = '') => {
-    const amount = Math.max(1, Math.round(Number(qty)) || 1);
+    const amount = Math.min(QTY_MAX, Math.max(1, Math.round(Number(qty)) || 1));
     const opt = option || (product && product.option) || '';
     const key = product.slug + (opt ? '|' + opt : '');
     // Adding a product that is already listed raises its quantity and says so;
     // it used to do nothing, which read as a broken button.
     const existing = items.find((p) => quoteKey(p) === key);
     if (existing) {
-      const total = (existing.qty || 1) + amount;
+      const total = Math.min(QTY_MAX, (existing.qty || 1) + amount);
       setItems((prev) => prev.map((p) => (quoteKey(p) === key ? { ...p, qty: total } : p)));
       setNotice({ key, text: `Already in your quote. Quantity is now ${total}.` });
     } else {
@@ -61,7 +62,7 @@ export function QuoteProvider({ children }) {
   };
 
   const setQty = (key, qty) =>
-    setItems((prev) => prev.map((p) => (quoteKey(p) === key ? { ...p, qty: Math.max(1, qty) } : p)));
+    setItems((prev) => prev.map((p) => (quoteKey(p) === key ? { ...p, qty: Math.min(QTY_MAX, Math.max(1, Math.round(Number(qty)) || 1)) } : p)));
 
   const clear = () => setItems([]);
 

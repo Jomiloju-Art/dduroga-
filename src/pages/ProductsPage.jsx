@@ -21,8 +21,10 @@ const SORTS = [
 
 export default function ProductsPage() {
   const [params, setParams] = useSearchParams();
-  const hazard = params.get('hazard');
-  const industry = params.get('industry');
+  // Unknown values (an old or mistyped link) are ignored, so the visitor sees
+  // all products rather than an empty "Industry" page.
+  const hazard = hazardNames[params.get('hazard')] ? params.get('hazard') : null;
+  const industry = industryCatalog.some((i) => i.slug === params.get('industry')) ? params.get('industry') : null;
   const range = rangeById(params.get('range'));
   // A range implies its zone, so ?range=welder alone still highlights Hand.
   const cat = params.get('cat') || range?.zone || null;

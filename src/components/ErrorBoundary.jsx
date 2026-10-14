@@ -1,5 +1,4 @@
 import { Component } from 'react';
-import { Link } from 'react-router-dom';
 
 /**
  * Catches render errors and, importantly, failed lazy-chunk loads.
@@ -74,13 +73,10 @@ export default class ErrorBoundary extends Component {
             <button type="button" className="btn btn--primary" onClick={() => window.location.reload()}>
               Reload the page
             </button>
-            <Link
-              to="/"
-              className="btn btn--outline-dark"
-              onClick={() => this.setState({ error: null })}
-            >
-              Back to home
-            </Link>
+            {/* A plain link with a full page load: this boundary sits outside
+                the router (main.jsx), so a router <Link> here crashed the
+                fallback itself and left a blank page. */}
+            <a href="/" className="btn btn--outline-dark">Back to home</a>
           </div>
           {/* The raw message is useful to a developer and meaningless to a buyer,
               so it stays collapsed rather than in the main copy. */}

@@ -148,10 +148,15 @@ export const zoneOf = (product) => {
   return null;
 };
 
-/** Finds by public slug, or by an old storefront slug (see SLUG_RENAMES). */
+/**
+ * Finds by public slug, or by an old storefront slug (see SLUG_RENAMES). A
+ * typed or shared URL in other letter case (/products/APOLLO) also matches;
+ * the product page then redirects to the real slug.
+ */
 export const findProduct = (slug) => {
-  const s = SLUG_RENAMES[slug] || slug;
-  return allProducts.find((p) => p.slug === s);
+  if (typeof slug !== 'string') return undefined;
+  const find = (x) => { const s = SLUG_RENAMES[x] || x; return allProducts.find((p) => p.slug === s); };
+  return find(slug) || find(slug.toLowerCase());
 };
 
 const norm = (s) => s.toLowerCase().replace(/\band\b/g, '&').replace(/[^a-z0-9&]+/g, '');

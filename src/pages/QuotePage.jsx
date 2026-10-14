@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageHero from '../components/PageHero.jsx';
 import { useQuote, quoteKey } from '../quote/QuoteContext.jsx';
@@ -7,6 +7,7 @@ import { IconArrowRight, IconCheck } from '../components/Icons.jsx';
 import { usePageMeta } from '../lib/seo.js';
 import { brand } from '../data/brand.js';
 import QtyInput from '../components/QtyInput.jsx';
+import EnquiryFallback from '../components/EnquiryFallback.jsx';
 
 const EMPTY = { name: '', email: '', phone: '', company: '', notes: '' };
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -17,7 +18,18 @@ export default function QuotePage() {
   const [errors, setErrors] = useState({});
   const [sent, setSent] = useState(false);
   const [mailto, setMailto] = useState('');
+  const [mailText, setMailText] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState('');
   const formRef = useRef(null);
+
+  // In email mode the list stays until the visitor clears it (it used to be
+  // emptied before the email was actually sent). Editing it afterwards makes
+  // the prepared email out of date, so the form comes back to send it again.
+  const sentItems = useRef(null);
+  useEffect(() => {
+    if (sent && mailto && sentItems.current !== items) setSent(false);
+  }, [items, sent, mailto]);
   usePageMeta({ title: 'Your quote list', canonical: '/quote', noindex: true });
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -41,7 +53,10 @@ export default function QuotePage() {
 
   const submit = async (e) => {
     e.preventDefault();
-    if (items.length === 0 || !validate()) return;
+    // `sending` stops a double click from sending the request twice.
+    if (sending || items.length === 0 || !validate()) return;
+    setSending(true);
+    setSendError('');
     const res = await sendEnquiry(
       {
         type: 'Quote request',
@@ -54,11 +69,20 @@ export default function QuotePage() {
       },
       `Quote request from ${form.name}`
     );
-    setSent(true);
+    setSending(false);
+    if (res.endpoint && !res.ok) {
+      // It used to fail silently: the form simply came back.
+      setSendError(`We couldn’t send your request. Check your connection and try again, or call or WhatsApp us on ${brand.phone}.`);
+      return;
+    }
     setMailto(res.mailto || '');
-    if (res.endpoint && !res.ok) setSent(false);
-    else clear();
+    setMailText(res.text || '');
+    sentItems.current = items;
+    setSent(true);
+    if (!res.mailto) clear();
   };
+
+  const startOver = () => { clear(); setSent(false); setForm(EMPTY); };
 
   const units = items.reduce((n, p) => n + (p.qty || 1), 0);
   const field = (id, err) => ({ 'aria-invalid': Boolean(err), 'aria-describedby': err ? `${id}-err` : undefined });
@@ -114,10 +138,13 @@ export default function QuotePage() {
                     </div>
                     {mailto ? (
                       <>
-                        <p className="muted" style={{ fontSize: '0.95rem' }}>
-                          Send it from your email app to finish, or call or WhatsApp us on {brand.phone} and give your name.
+                        <EnquiryFallback mailto={mailto} text={mailText} />
+                        <p className="form-note" style={{ marginTop: 6 }}>
+                          Your list stays here until you clear it.{' '}
+                          <button type="button" className="link-btn" onClick={() => setSent(false)}>Edit request</button>
+                          {' · '}
+                          <button type="button" className="link-btn" onClick={startOver}>Clear list</button>
                         </p>
-                        <a className="btn hx-btn" style={{ marginTop: 16 }} href={mailto}>Open in email app</a>
                       </>
                     ) : (
                       <p className="muted" style={{ fontSize: '0.95rem' }}>
@@ -155,8 +182,9 @@ export default function QuotePage() {
                       <label htmlFor="q-notes">Notes (volumes, deadlines, specifications)</label>
                       <textarea id="q-notes" value={form.notes} onChange={set('notes')} placeholder="e.g. 500 pairs, need ISO certificates…" />
                     </div>
-                    <button type="submit" className="btn hx-btn" style={{ width: '100%', justifyContent: 'center' }}>
-                      Send quote request <IconArrowRight width="14" height="14" />
+                    {sendError && <p className="form-error" role="alert" style={{ marginBottom: 12 }}>{sendError}</p>}
+                    <button type="submit" className="btn hx-btn" style={{ width: '100%', justifyContent: 'center' }} disabled={sending} aria-busy={sending}>
+                      {sending ? 'Sending…' : <>Send quote request <IconArrowRight width="14" height="14" /></>}
                     </button>
                     <p className="form-note" style={{ marginTop: 10 }}>No payment now. This requests a quotation only.</p>
                   </form>

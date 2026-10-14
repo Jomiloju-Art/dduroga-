@@ -20,10 +20,17 @@ export async function sendEnquiry(payload, subject) {
       .filter(([, v]) => v !== '' && v != null)
       .map(([k, v]) => (Array.isArray(v) ? `${k}:\n${v.map(line).join('\n')}` : `${k}: ${v}`))
       .join('\n');
-    return { ok: true, endpoint: false, mailto: mailtoHref(subject, body) };
+    // `text` lets the page offer a copy: some email apps refuse a long mailto
+    // link, and office PCs often have no email app set up at all.
+    return { ok: true, endpoint: false, mailto: mailtoHref(subject, body), text: `${subject}\n\n${body}` };
   }
+  // A form service that never answers would leave the button on "Sending…"
+  // for good, so give up after 20 seconds and let the visitor try again.
+  const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+  const timer = ctrl && setTimeout(() => ctrl.abort(), 20000);
   try {
     const res = await fetch(ep, {
+      signal: ctrl?.signal,
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ ...payload, site: brand.name, submittedAt: new Date().toISOString() }),
@@ -31,5 +38,7 @@ export async function sendEnquiry(payload, subject) {
     return { ok: res.ok, endpoint: true };
   } catch (e) {
     return { ok: false, endpoint: true, error: String(e) };
+  } finally {
+    clearTimeout(timer);
   }
 }

@@ -30,7 +30,7 @@ export const brand = {
   whatsapp: '2349072254796', // digits only, no '+' - WhatsApp wa.me link
   email: 'sales@dduroga.com',
   emailHref: 'mailto:sales@dduroga.com',
-  address: '44 Jimoh Odutola Street, Off Eric Moore Road, Warehouse 7, Surulere, Lagos, Nigeria',
+  address: '44 Jimoh Odutola Street, Off Eric Moore Road, Surulere, Lagos, Nigeria',
   hours: 'Mon – Sat, 8:00 – 17:00 WAT',
 };
 

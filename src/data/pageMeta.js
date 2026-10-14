@@ -25,7 +25,7 @@ export const pageMeta = {
   },
   '/contact': {
     title: 'Contact us',
-    description: 'Talk to a DDUROGA Safety specialist about PPE for your operation.',
+    description: 'Talk to our DDUROGA Safety specialists about PPE for your operation.',
   },
   '/certifications': {
     title: 'Certifications & accreditations',

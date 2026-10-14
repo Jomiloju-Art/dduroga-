@@ -178,7 +178,7 @@ export default function LearningPage() {
             <span className="zb__eyebrow">FAQ</span>
             <h2 id="lc-faq-title" className="lc-head__title">Questions buyers ask us</h2>
             <p className="lc-head__sub">Can&rsquo;t find your answer? Our team replies with the documents your HSE team needs.</p>
-            <Link to="/contact" className="zb__all">Ask a specialist <IconArrowRight width="14" height="14" /></Link>
+            <Link to="/contact" className="zb__all">Ask our specialist <IconArrowRight width="14" height="14" /></Link>
           </div>
           <div className="detail-accordions lc-faq__list">
             {faqs.map((f) => (
@@ -194,7 +194,7 @@ export default function LearningPage() {
       <CtaBand
         title="Speak with a PPE compliance expert"
         text="Bring us the hazard, the site conditions and your volumes. Our specialists will map the right standard and class to each role, and send the documentation your HSE team needs."
-        ctaLabel="Talk to a specialist"
+        ctaLabel="Talk to our specialist"
         ctaTo="/contact"
         showPhone={false}
       />

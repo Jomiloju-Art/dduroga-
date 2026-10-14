@@ -5,6 +5,7 @@ import { brand } from '../data/brand.js';
 import { categories } from '../data/products.js';
 import { IconPhone, IconMail, IconMapPin, IconClock, IconCheck } from '../components/Icons.jsx';
 import { sendEnquiry } from '../lib/enquiry.js';
+import EnquiryFallback from '../components/EnquiryFallback.jsx';
 import { usePageMeta } from '../lib/seo.js';
 import { pageMeta } from '../data/pageMeta.js';
 
@@ -52,19 +53,31 @@ export default function ContactPage() {
     return Object.keys(next).length === 0;
   };
 
+  const [fallbackMailto, setFallbackMailto] = useState('');
+  const [fallbackText, setFallbackText] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState('');
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
+    // `sending` stops a double click from sending the enquiry twice.
+    if (sending || !validate()) return;
+    setSending(true);
+    setSendError('');
     const res = await sendEnquiry(
       { type: 'Contact', name: form.name, company: form.company, email: form.email, phone: form.phone, interest: form.interest, message: form.message },
       `Enquiry from ${form.name || 'website visitor'}`
     );
-    setSent(true);
+    setSending(false);
+    if (res.endpoint && !res.ok) {
+      // It used to fail silently: the form simply came back.
+      setSendError(`We couldn’t send your enquiry. Check your connection and try again, or call or WhatsApp us on ${brand.phone}.`);
+      return;
+    }
     setFallbackMailto(res.mailto || '');
-    if (res.endpoint && !res.ok) setSent(false);
+    setFallbackText(res.text || '');
+    setSent(true);
   };
-
-  const [fallbackMailto, setFallbackMailto] = useState('');
 
   return (
     <>
@@ -112,16 +125,14 @@ export default function ContactPage() {
               <div className="panel" role="status">
                 <div className="form-success" style={{ marginBottom: 16 }}>
                   <IconCheck width="18" height="18" style={{ display: 'inline', verticalAlign: -3, marginRight: 8 }} />
-                  Thank you. Your enquiry has been captured.
+                  {fallbackMailto ? 'Your enquiry is ready to send.' : 'Thank you. Your enquiry has been sent.'}
                 </div>
                 {fallbackMailto ? (
                   <>
-                    <p className="muted" style={{ fontSize: '0.95rem' }}>
-                      Send it from your email app to finish, or call or WhatsApp us on {brand.phone}.
+                    <EnquiryFallback mailto={fallbackMailto} text={fallbackText} buttonClass="btn btn--primary" copyClass="btn btn--outline-dark" />
+                    <p className="form-note" style={{ marginTop: 6 }}>
+                      <button type="button" className="link-btn" onClick={() => setSent(false)}>Edit enquiry</button>
                     </p>
-                    <a className="btn btn--primary" style={{ marginTop: 16 }} href={fallbackMailto}>
-                      Open in email app
-                    </a>
                   </>
                 ) : (
                   <p className="muted" style={{ fontSize: '0.95rem' }}>
@@ -182,7 +193,8 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <button type="submit" className="btn btn--primary">Send enquiry</button>
+                  {sendError && <p className="form-error" role="alert" style={{ marginBottom: 12 }}>{sendError}</p>}
+                  <button type="submit" className="btn btn--primary" disabled={sending} aria-busy={sending}>{sending ? 'Sending…' : 'Send enquiry'}</button>
                   <p className="form-note" style={{ marginTop: 12 }}>
                     By submitting you agree to be contacted about your enquiry. We never share your details.
                   </p>

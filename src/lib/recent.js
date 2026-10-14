@@ -3,7 +3,13 @@ import { findProduct } from '../data/products.js';
 
 const KEY = 'dduroga-recent';
 
-const read = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } };
+/** Saved slugs. Anything malformed in storage (a string, an object, nulls) reads as nothing. */
+const read = () => {
+  try {
+    const v = JSON.parse(localStorage.getItem(KEY));
+    return Array.isArray(v) ? v.filter((s) => typeof s === 'string' && s) : [];
+  } catch { return []; }
+};
 
 export function addRecent(slug) {
   if (!slug) return;

@@ -11,9 +11,35 @@ const KEY = 'dduroga-quote';
  */
 export const quoteKey = (p) => p.slug + (p.option ? '|' + p.option : '');
 
-const read = () => {
-  try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; }
+const clampQty = (qty) => Math.min(QTY_MAX, Math.max(1, Math.round(Number(qty)) || 1));
+
+/**
+ * Saved lines, cleaned. Storage can hold anything (an older format, an
+ * extension, a half-written save), and one bad value used to crash every
+ * page: a non-array, nulls or a non-numeric quantity. Lines without a slug
+ * and title are dropped, quantities are clamped, and duplicate keys merged.
+ */
+const sanitize = (raw) => {
+  if (!Array.isArray(raw)) return [];
+  const out = [];
+  for (const p of raw) {
+    if (!p || typeof p !== 'object' || typeof p.slug !== 'string' || !p.slug || typeof p.title !== 'string') continue;
+    const line = {
+      slug: p.slug, title: p.title,
+      sku: typeof p.sku === 'string' ? p.sku : '',
+      img: typeof p.img === 'string' ? p.img : '',
+      qty: clampQty(p.qty),
+      option: typeof p.option === 'string' ? p.option : '',
+    };
+    const same = out.find((x) => quoteKey(x) === quoteKey(line));
+    if (same) same.qty = clampQty(same.qty + line.qty);
+    else out.push(line);
+  }
+  return out;
 };
+
+const parse = (s) => { try { return sanitize(JSON.parse(s)); } catch { return []; } };
+const read = () => { try { return parse(localStorage.getItem(KEY)); } catch { return []; } };
 
 export function QuoteProvider({ children }) {
   const [items, setItems] = useState([]);
@@ -24,12 +50,25 @@ export function QuoteProvider({ children }) {
   const [notice, setNotice] = useState(null);
   const seq = useRef(0);
 
+  // Read after mount (the server render has no storage), and write only once
+  // that read has happened: writing on mount stored an empty list first.
+  const loaded = useRef(false);
   useEffect(() => {
     setItems(read());
+    loaded.current = true;
+    // Another tab changed the list: take its version, so the two tabs do not
+    // overwrite each other's additions.
+    const onStorage = (e) => { if (e.key === KEY) setItems(parse(e.newValue)); };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
   }, []);
 
   useEffect(() => {
-    try { localStorage.setItem(KEY, JSON.stringify(items)); } catch { /* ignore */ }
+    if (!loaded.current) return;
+    try {
+      const next = JSON.stringify(items);
+      if (localStorage.getItem(KEY) !== next) localStorage.setItem(KEY, next);
+    } catch { /* ignore */ }
   }, [items]);
 
   const openBag = () => setOpen(true);
@@ -40,7 +79,7 @@ export function QuoteProvider({ children }) {
    * quote and opens the bag drawer.
    */
   const add = (product, qty = 1, option = '') => {
-    const amount = Math.min(QTY_MAX, Math.max(1, Math.round(Number(qty)) || 1));
+    const amount = clampQty(qty);
     const opt = option || (product && product.option) || '';
     const key = product.slug + (opt ? '|' + opt : '');
     // Adding a product that is already listed raises its quantity and says so;
@@ -62,7 +101,7 @@ export function QuoteProvider({ children }) {
   };
 
   const setQty = (key, qty) =>
-    setItems((prev) => prev.map((p) => (quoteKey(p) === key ? { ...p, qty: Math.min(QTY_MAX, Math.max(1, Math.round(Number(qty)) || 1)) } : p)));
+    setItems((prev) => prev.map((p) => (quoteKey(p) === key ? { ...p, qty: clampQty(qty) } : p)));
 
   const clear = () => setItems([]);
 

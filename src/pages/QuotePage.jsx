@@ -9,20 +9,24 @@ import { brand } from '../data/brand.js';
 import QtyInput from '../components/QtyInput.jsx';
 import EnquiryFallback from '../components/EnquiryFallback.jsx';
 import { useSpamGuard } from '../components/SpamGuard.jsx';
+import { useContactChecks } from '../lib/useContactChecks.js';
+import { checkMessage } from '../lib/validate.js';
 
 const EMPTY = { name: '', email: '', phone: '', company: '', notes: '' };
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function QuotePage() {
   const { items, remove, setQty, clear } = useQuote();
   const [form, setForm] = useState(EMPTY);
-  const [errors, setErrors] = useState({});
   const [sent, setSent] = useState(false);
   const [mailto, setMailto] = useState('');
   const [mailText, setMailText] = useState('');
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState('');
   const formRef = useRef(null);
+  // Name, email and phone rules (lib/validate.js, shared with the server).
+  // Many buyers here answer by phone or WhatsApp, so either one is enough.
+  const checks = useContactChecks(form, { prefix: 'q', formRef, extra: (f) => ({ notes: checkMessage(f.notes).error }) });
+  const errors = checks.errors;
   const spam = useSpamGuard();
   // Set at once, unlike `sending` state, so clicks in the same instant cannot
   // send twice.
@@ -39,26 +43,11 @@ export default function QuotePage() {
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
-  const validate = () => {
-    const next = {};
-    if (!form.name.trim()) next.name = 'Enter your name.';
-    // Many buyers here answer by phone or WhatsApp rather than email, so either
-    // one is enough to reply to.
-    const hasEmail = Boolean(form.email.trim());
-    const hasPhone = form.phone.replace(/\D/g, '').length >= 7;
-    if (!hasEmail && !hasPhone) next.email = 'Enter an email or a phone number so we can reply.';
-    else if (hasEmail && !EMAIL_RE.test(form.email.trim())) next.email = 'That email looks invalid.';
-    if (form.phone.trim() && !hasPhone) next.phone = 'That phone number looks too short.';
-    setErrors(next);
-    // Move focus to the first problem so keyboard and screen-reader users land on it.
-    const first = ['name', 'email', 'phone'].find((k) => next[k]);
-    if (first) formRef.current?.querySelector(`#q-${first}`)?.focus();
-    return Object.keys(next).length === 0;
-  };
-
   const submit = async (e) => {
     e.preventDefault();
-    if (busy.current || items.length === 0 || !validate()) return;
+    if (busy.current || items.length === 0) return;
+    const { ok, values } = checks.submit();
+    if (!ok) return;
     if (spam.needsToken) { setSendError('Please wait a moment while we run a quick security check, then press send again.'); return; }
     busy.current = true;
     setSending(true);
@@ -66,14 +55,15 @@ export default function QuotePage() {
     const res = await sendEnquiry(
       {
         type: 'Quote request',
-        name: form.name,
-        email: form.email,
-        phone: form.phone,
-        company: form.company,
+        name: values.name,
+        email: values.email,
+        // Sent as +234…, so sales can dial or WhatsApp it as written.
+        phone: values.phone,
+        company: form.company.trim(),
         notes: form.notes,
         items: items.map((p) => ({ title: p.title, sku: p.sku, qty: p.qty || 1, option: p.option || '' })),
       },
-      `Quote request from ${form.name}`,
+      `Quote request from ${values.name}`,
       spam.guard()
     );
     busy.current = false;
@@ -92,7 +82,7 @@ export default function QuotePage() {
     if (!res.mailto) clear();
   };
 
-  const startOver = () => { clear(); setSent(false); setForm(EMPTY); };
+  const startOver = () => { clear(); setSent(false); setForm(EMPTY); checks.reset(); };
 
   const units = items.reduce((n, p) => n + (p.qty || 1), 0);
   const field = (id, err) => ({ 'aria-invalid': Boolean(err), 'aria-describedby': err ? `${id}-err` : undefined });
@@ -167,30 +157,37 @@ export default function QuotePage() {
                     <div className="form-row">
                       <div className="field">
                         <label htmlFor="q-name">Full name <span className="req">*</span></label>
-                        <input id="q-name" value={form.name} onChange={set('name')} autoComplete="name" {...field('q-name', errors.name)} />
+                        <input id="q-name" value={form.name} onChange={set('name')} onBlur={checks.blur('name')} autoComplete="name" maxLength={100} {...field('q-name', errors.name)} />
                         {errors.name && <p className="form-error" id="q-name-err">{errors.name}</p>}
                       </div>
                       <div className="field">
                         <label htmlFor="q-company">Company</label>
-                        <input id="q-company" value={form.company} onChange={set('company')} autoComplete="organization" />
+                        <input id="q-company" value={form.company} onChange={set('company')} autoComplete="organization" maxLength={150} />
                       </div>
                     </div>
                     <div className="form-row">
                       <div className="field">
                         <label htmlFor="q-email">Work email</label>
-                        <input id="q-email" type="email" value={form.email} onChange={set('email')} autoComplete="email" {...field('q-email', errors.email)} />
+                        <input id="q-email" type="email" inputMode="email" autoCapitalize="none" spellCheck={false} value={form.email} onChange={set('email')} onBlur={checks.blur('email')} autoComplete="email" maxLength={254} placeholder="name@company.com" {...field('q-email', errors.email)} />
                         {errors.email && <p className="form-error" id="q-email-err">{errors.email}</p>}
+                        {!errors.email && checks.suggestion && (
+                          <p className="form-hint" role="status">
+                            Did you mean <strong>{checks.suggestion}</strong>?{' '}
+                            <button type="button" className="link-btn" onClick={() => setForm((f) => ({ ...f, email: checks.suggestion }))}>Use this</button>
+                          </p>
+                        )}
                       </div>
                       <div className="field">
                         <label htmlFor="q-phone">Phone / WhatsApp</label>
-                        <input id="q-phone" type="tel" inputMode="tel" value={form.phone} onChange={set('phone')} autoComplete="tel" placeholder="+234…" {...field('q-phone', errors.phone)} />
+                        <input id="q-phone" type="tel" inputMode="tel" value={form.phone} onChange={set('phone')} onBlur={checks.blur('phone')} autoComplete="tel" maxLength={24} placeholder="0803 123 4567" {...field('q-phone', errors.phone)} />
                         {errors.phone && <p className="form-error" id="q-phone-err">{errors.phone}</p>}
                       </div>
                     </div>
                     <p className="form-note" style={{ marginTop: -6, marginBottom: 14 }}>Give an email or a phone number, or both, so we can send your quote.</p>
                     <div className="field">
                       <label htmlFor="q-notes">Notes (volumes, deadlines, specifications)</label>
-                      <textarea id="q-notes" value={form.notes} onChange={set('notes')} placeholder="e.g. 500 pairs, need ISO certificates…" />
+                      <textarea id="q-notes" value={form.notes} onChange={set('notes')} onBlur={checks.blur('notes')} maxLength={5000} placeholder="e.g. 500 pairs, need ISO certificates…" {...field('q-notes', errors.notes)} />
+                      {errors.notes && <p className="form-error" id="q-notes-err">{errors.notes}</p>}
                     </div>
                     {spam.fields}
                     {sendError && <p className="form-error" role="alert" style={{ marginBottom: 12 }}>{sendError}</p>}

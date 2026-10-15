@@ -7,6 +7,8 @@ import { IconPhone, IconMail, IconMapPin, IconClock, IconCheck } from '../compon
 import { sendEnquiry } from '../lib/enquiry.js';
 import EnquiryFallback from '../components/EnquiryFallback.jsx';
 import { useSpamGuard } from '../components/SpamGuard.jsx';
+import { useContactChecks } from '../lib/useContactChecks.js';
+import { checkMessage } from '../lib/validate.js';
 import { usePageMeta } from '../lib/seo.js';
 import { pageMeta } from '../data/pageMeta.js';
 
@@ -30,33 +32,23 @@ export default function ContactPage() {
     interest: productParam ? `Quote for: ${productParam}` : params.get('interest') === 'dealer' ? 'Becoming a dealer' : '',
     message: productParam ? `I would like a quote for ${productParam}.` : '',
   });
-  const [errors, setErrors] = useState({});
   const [sent, setSent] = useState(false);
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
   const formRef = useRef(null);
+  // Name, email and phone rules (lib/validate.js, shared with the server).
+  // Email or phone: many buyers here prefer a call or WhatsApp.
+  const checks = useContactChecks(form, {
+    prefix: 'cf',
+    formRef,
+    extra: (f) => ({ message: checkMessage(f.message, { required: Boolean(productParam) }).error }),
+  });
+  const errors = checks.errors;
   const spam = useSpamGuard();
   // Set at once, unlike `sending` state, so clicks in the same instant cannot
   // send twice.
   const busy = useRef(false);
-
-  const validate = () => {
-    const next = {};
-    if (!form.name.trim()) next.name = 'Please enter your name.';
-    // Email or phone: many buyers here prefer a call or WhatsApp.
-    const hasEmail = Boolean(form.email.trim());
-    const hasPhone = form.phone.replace(/\D/g, '').length >= 7;
-    if (!hasEmail && !hasPhone) next.email = 'Enter an email or a phone number so we can reply.';
-    else if (hasEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) next.email = 'That email address looks invalid.';
-    if (form.phone.trim() && !hasPhone) next.phone = 'That phone number looks too short.';
-    if (productParam && !form.message.trim()) next.message = 'Please add a short message.';
-    setErrors(next);
-    // Move focus to the first problem field.
-    const first = ['name', 'email', 'phone', 'message'].find((k) => next[k]);
-    if (first) formRef.current?.querySelector(`#cf-${first}`)?.focus();
-    return Object.keys(next).length === 0;
-  };
 
   const [fallbackMailto, setFallbackMailto] = useState('');
   const [fallbackText, setFallbackText] = useState('');
@@ -65,14 +57,17 @@ export default function ContactPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (busy.current || !validate()) return;
+    if (busy.current) return;
+    const { ok, values } = checks.submit();
+    if (!ok) return;
     if (spam.needsToken) { setSendError('Please wait a moment while we run a quick security check, then press send again.'); return; }
     busy.current = true;
     setSending(true);
     setSendError('');
     const res = await sendEnquiry(
-      { type: 'Contact', name: form.name, company: form.company, email: form.email, phone: form.phone, interest: form.interest, message: form.message },
-      `Enquiry from ${form.name || 'website visitor'}`,
+      // Phone sent as +234…, so sales can dial or WhatsApp it as written.
+      { type: 'Contact', name: values.name, company: form.company.trim(), email: values.email, phone: values.phone, interest: form.interest, message: form.message.trim() },
+      `Enquiry from ${values.name}`,
       spam.guard()
     );
     busy.current = false;
@@ -139,7 +134,7 @@ export default function ContactPage() {
                 </div>
                 {fallbackMailto ? (
                   <>
-                    <EnquiryFallback mailto={fallbackMailto} text={fallbackText} buttonClass="btn btn--primary" copyClass="btn btn--outline-dark" />
+                    <EnquiryFallback mailto={fallbackMailto} text={fallbackText} />
                     <p className="form-note" style={{ marginTop: 6 }}>
                       <button type="button" className="link-btn" onClick={() => setSent(false)}>Edit enquiry</button>
                     </p>
@@ -155,24 +150,30 @@ export default function ContactPage() {
                 <div className="form-row">
                   <div className="field">
                     <label htmlFor="cf-name">Full name <span className="req">*</span></label>
-                    <input id="cf-name" value={form.name} onChange={set('name')} autoComplete="name" aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? 'cf-name-err' : undefined} />
+                    <input id="cf-name" value={form.name} onChange={set('name')} onBlur={checks.blur('name')} autoComplete="name" maxLength={100} aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? 'cf-name-err' : undefined} />
                     {errors.name && <p className="form-error" id="cf-name-err">{errors.name}</p>}
                   </div>
                   <div className="field">
                     <label htmlFor="cf-company">Company</label>
-                    <input id="cf-company" value={form.company} onChange={set('company')} autoComplete="organization" />
+                    <input id="cf-company" value={form.company} onChange={set('company')} autoComplete="organization" maxLength={150} />
                   </div>
                 </div>
 
                 <div className="form-row">
                   <div className="field">
                     <label htmlFor="cf-email">Work email</label>
-                    <input id="cf-email" type="email" value={form.email} onChange={set('email')} autoComplete="email" aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'cf-email-err' : undefined} />
+                    <input id="cf-email" type="email" inputMode="email" autoCapitalize="none" spellCheck={false} placeholder="name@company.com" value={form.email} onChange={set('email')} onBlur={checks.blur('email')} autoComplete="email" maxLength={254} aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'cf-email-err' : undefined} />
                     {errors.email && <p className="form-error" id="cf-email-err">{errors.email}</p>}
+                    {!errors.email && checks.suggestion && (
+                      <p className="form-hint" role="status">
+                        Did you mean <strong>{checks.suggestion}</strong>?{' '}
+                        <button type="button" className="link-btn" onClick={() => setForm((f) => ({ ...f, email: checks.suggestion }))}>Use this</button>
+                      </p>
+                    )}
                   </div>
                   <div className="field">
                     <label htmlFor="cf-phone">Phone / WhatsApp</label>
-                    <input id="cf-phone" type="tel" inputMode="tel" placeholder="+234…" value={form.phone} onChange={set('phone')} autoComplete="tel" aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? 'cf-phone-err' : undefined} />
+                    <input id="cf-phone" type="tel" inputMode="tel" placeholder="0803 123 4567" value={form.phone} onChange={set('phone')} onBlur={checks.blur('phone')} autoComplete="tel" maxLength={24} aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? 'cf-phone-err' : undefined} />
                     {errors.phone && <p className="form-error" id="cf-phone-err">{errors.phone}</p>}
                   </div>
                 </div>
@@ -197,9 +198,13 @@ export default function ContactPage() {
                     id="cf-message"
                     value={form.message}
                     onChange={set('message')}
+                    onBlur={checks.blur('message')}
+                    maxLength={5000}
+                    aria-invalid={Boolean(errors.message)}
+                    aria-describedby={errors.message ? 'cf-message-err' : undefined}
                     placeholder="Application, quantities, standards you need to meet…"
                   />
-                  {errors.message && <p className="form-error">{errors.message}</p>}
+                  {errors.message && <p className="form-error" id="cf-message-err">{errors.message}</p>}
                 </div>
 
                 <div>

@@ -403,6 +403,9 @@ body.user-is-tabbing .site-header:has(.mega-wrap:focus-within) .navbar {
 .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--blue-500); background: #fff; box-shadow: 0 0 0 4px rgba(29, 116, 189, 0.14); }
 .form-error { color: #c0392b; font-size: 0.84rem; font-weight: 600; margin-top: 6px; }
 .form-note { font-size: 0.82rem; color: var(--slate-500); }
+/* "Did you mean …@gmail.com?" under an email field (lib/validate.js). */
+.form-hint { margin: 6px 0 0; font-size: 0.84rem; color: var(--slate-700, #3b4148); }
+.form-hint .link-btn { padding: 2px 0; font-size: inherit; }
 /* Spam trap (SpamGuard.jsx): off screen rather than display:none, which some
    bots detect and skip. */
 .hp-field { position: absolute !important; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
@@ -5212,3 +5215,25 @@ body:has(.site-header--hidden) .pdp-bar { top: 0; }
   .os__actions > * { justify-content: center; }
   .os__hours { text-align: center; }
 }
+
+/* Send-it-yourself options (EnquiryFallback.jsx): WhatsApp first, then Gmail,
+   then the computer's email app, which does nothing where none is set up. */
+.ef { display: grid; gap: 10px; }
+.ef__lead { margin: 0 0 4px; font-size: 0.95rem; }
+.ef__wa {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 0 20px;
+  border-radius: 8px; background: #25D366; color: #08260f; font-weight: 700; font-size: 15px; text-decoration: none;
+  transition: background-color var(--dur-base) var(--ease-out);
+}
+.ef__wa:hover { background: #1ebe5a; }
+.ef__row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ef__btn {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 14px; border-radius: 8px;
+  border: 1.5px solid var(--ddu-black); color: var(--ddu-black); font-weight: 700; font-size: 14px; text-decoration: none; text-align: center;
+  transition: background-color var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
+}
+.ef__btn:hover { background: var(--ddu-black); color: #fff; }
+.ef a:focus-visible { outline: 3px solid var(--ddu-orange); outline-offset: 2px; }
+.ef__hint { margin: 0; padding: 10px 12px; border-radius: 8px; background: #fff7ed; color: #7c3d0a; }
+.ef__copy { margin: 4px 0 0; }
+@media (max-width: 380px) { .ef__row { grid-template-columns: 1fr; } }

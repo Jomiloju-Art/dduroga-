@@ -17,3 +17,8 @@ tools
 # loses only the size optimisation. Dropped because the upstream link sustains
 # ~0.45 MB/s and 240MB aborts the CLI upload stream mid-flight.
 public/products/video/*.webm
+
+# Upstash install adds coding-agent guides here; not part of the site.
+.agents
+.claude
+skills-lock.json

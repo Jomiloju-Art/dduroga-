@@ -8,9 +8,15 @@ export const brand = {
   tagline: 'PPE manufacturer & safety equipment supplier',
   establishedYear: 2019,
 
-  // Backend endpoint for contact / newsletter / quote requests.
-  // Leave EMPTY to use the mailto fallback; paste your webhook/email/CRM POST URL here later.
-  enquiryEndpoint: '',
+  // Where the contact and quote forms send to: the site's own function
+  // (api/enquiry.js), which emails the sales inbox. Until its keys are set in
+  // Vercel it answers "not configured" and the forms fall back to the
+  // visitor's email app. Leave EMPTY to always use that fallback.
+  enquiryEndpoint: '/api/enquiry',
+
+  // Cloudflare Turnstile site key (public). Empty = no bot check on the forms.
+  // The matching secret goes in Vercel as TURNSTILE_SECRET_KEY; set both.
+  turnstileSiteKey: '',
 
   /*
    * CONTACT BLOCK — from the client's own "Mallcom Nigeria - Business Profile

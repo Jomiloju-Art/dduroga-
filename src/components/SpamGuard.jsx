@@ -1,0 +1,102 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { brand } from '../data/brand.js';
+
+/**
+ * Spam checks shared by the contact and quote forms. api/enquiry.js repeats
+ * every check on the server, because a bot can post to it directly.
+ *
+ *   trap       a field people never see (moved off screen, skipped by Tab and
+ *              screen readers). Form-filling bots fill every field, so a
+ *              filled trap means a bot.
+ *   elapsedMs  time since the form appeared. People take several seconds;
+ *              bots take under one.
+ *   token      Cloudflare Turnstile, when brand.turnstileSiteKey is set. It
+ *              usually checks silently and only asks for a click when a
+ *              visitor looks automated.
+ *
+ * Usage:
+ *   const spam = useSpamGuard();
+ *   <form>… {spam.fields} …</form>
+ *   sendEnquiry(payload, subject, spam.guard()); then spam.reset()
+ */
+export function useSpamGuard() {
+  const started = useRef(0);
+  const trapRef = useRef(null);
+  const [token, setToken] = useState('');
+  const widget = useRef(null);
+  useEffect(() => { started.current = Date.now(); }, []);
+
+  const guard = () => ({
+    trap: trapRef.current?.value || '',
+    elapsedMs: started.current ? Date.now() - started.current : 0,
+    token,
+  });
+
+  // A Turnstile token works once, so each attempt gets a fresh one.
+  const reset = useCallback(() => {
+    setToken('');
+    if (widget.current != null && window.turnstile) window.turnstile.reset(widget.current);
+  }, []);
+
+  const fields = (
+    <>
+      <div className="hp-field" aria-hidden="true">
+        <label htmlFor="dd-confirm-ref">Leave this field empty</label>
+        <input id="dd-confirm-ref" name="dd_confirm_ref" type="text" tabIndex={-1} autoComplete="off" ref={trapRef} defaultValue="" />
+      </div>
+      {brand.turnstileSiteKey && <Turnstile onToken={setToken} widgetRef={widget} />}
+    </>
+  );
+
+  return { fields, guard, reset, needsToken: Boolean(brand.turnstileSiteKey) && !token };
+}
+
+const SCRIPT = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+let scriptPromise = null;
+const loadScript = () => {
+  if (window.turnstile) return Promise.resolve();
+  if (!scriptPromise) {
+    scriptPromise = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = SCRIPT; s.async = true; s.defer = true;
+      s.onload = resolve;
+      s.onerror = () => { scriptPromise = null; reject(new Error('turnstile')); };
+      document.head.appendChild(s);
+    });
+  }
+  return scriptPromise;
+};
+
+function Turnstile({ onToken, widgetRef }) {
+  const box = useRef(null);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    let gone = false;
+    loadScript().then(() => {
+      if (gone || !box.current) return;
+      widgetRef.current = window.turnstile.render(box.current, {
+        sitekey: brand.turnstileSiteKey,
+        appearance: 'interaction-only',
+        callback: (t) => onToken(t),
+        'expired-callback': () => onToken(''),
+        'error-callback': () => onToken(''),
+      });
+    }).catch(() => !gone && setFailed(true));
+    return () => {
+      gone = true;
+      if (widgetRef.current != null && window.turnstile) window.turnstile.remove(widgetRef.current);
+      widgetRef.current = null;
+    };
+  }, [onToken, widgetRef]);
+
+  return (
+    <div className="turnstile-box">
+      <div ref={box} />
+      {failed && (
+        <p className="form-error" role="alert">
+          The security check could not load. Check your connection and reload the page, or call or WhatsApp us on {brand.phone}.
+        </p>
+      )}
+    </div>
+  );
+}

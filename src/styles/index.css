@@ -403,6 +403,10 @@ body.user-is-tabbing .site-header:has(.mega-wrap:focus-within) .navbar {
 .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--blue-500); background: #fff; box-shadow: 0 0 0 4px rgba(29, 116, 189, 0.14); }
 .form-error { color: #c0392b; font-size: 0.84rem; font-weight: 600; margin-top: 6px; }
 .form-note { font-size: 0.82rem; color: var(--slate-500); }
+/* Spam trap (SpamGuard.jsx): off screen rather than display:none, which some
+   bots detect and skip. */
+.hp-field { position: absolute !important; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+.turnstile-box:not(:empty) { margin: 4px 0 14px; }
 /* A text-style button inside a sentence ("Edit request · Clear list"). */
 .link-btn { appearance: none; background: none; border: 0; padding: 4px 0; font: inherit; font-weight: 600; color: var(--ddu-black); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 .link-btn:hover { color: var(--orange-600, #C76D0C); }

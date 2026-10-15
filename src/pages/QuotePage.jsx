@@ -8,6 +8,7 @@ import { usePageMeta } from '../lib/seo.js';
 import { brand } from '../data/brand.js';
 import QtyInput from '../components/QtyInput.jsx';
 import EnquiryFallback from '../components/EnquiryFallback.jsx';
+import { useSpamGuard } from '../components/SpamGuard.jsx';
 
 const EMPTY = { name: '', email: '', phone: '', company: '', notes: '' };
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -22,6 +23,10 @@ export default function QuotePage() {
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState('');
   const formRef = useRef(null);
+  const spam = useSpamGuard();
+  // Set at once, unlike `sending` state, so clicks in the same instant cannot
+  // send twice.
+  const busy = useRef(false);
 
   // In email mode the list stays until the visitor clears it (it used to be
   // emptied before the email was actually sent). Editing it afterwards makes
@@ -53,8 +58,9 @@ export default function QuotePage() {
 
   const submit = async (e) => {
     e.preventDefault();
-    // `sending` stops a double click from sending the request twice.
-    if (sending || items.length === 0 || !validate()) return;
+    if (busy.current || items.length === 0 || !validate()) return;
+    if (spam.needsToken) { setSendError('Please wait a moment while we run a quick security check, then press send again.'); return; }
+    busy.current = true;
     setSending(true);
     setSendError('');
     const res = await sendEnquiry(
@@ -67,12 +73,16 @@ export default function QuotePage() {
         notes: form.notes,
         items: items.map((p) => ({ title: p.title, sku: p.sku, qty: p.qty || 1, option: p.option || '' })),
       },
-      `Quote request from ${form.name}`
+      `Quote request from ${form.name}`,
+      spam.guard()
     );
+    busy.current = false;
     setSending(false);
+    spam.reset();
     if (res.endpoint && !res.ok) {
-      // It used to fail silently: the form simply came back.
-      setSendError(`We couldn’t send your request. Check your connection and try again, or call or WhatsApp us on ${brand.phone}.`);
+      // It used to fail silently: the form simply came back. A refusal from
+      // the server (rate limit, links, bot check) says why.
+      setSendError(res.message || `We couldn’t send your request. Check your connection and try again, or call or WhatsApp us on ${brand.phone}.`);
       return;
     }
     setMailto(res.mailto || '');
@@ -182,6 +192,7 @@ export default function QuotePage() {
                       <label htmlFor="q-notes">Notes (volumes, deadlines, specifications)</label>
                       <textarea id="q-notes" value={form.notes} onChange={set('notes')} placeholder="e.g. 500 pairs, need ISO certificates…" />
                     </div>
+                    {spam.fields}
                     {sendError && <p className="form-error" role="alert" style={{ marginBottom: 12 }}>{sendError}</p>}
                     <button type="submit" className="btn hx-btn" style={{ width: '100%', justifyContent: 'center' }} disabled={sending} aria-busy={sending}>
                       {sending ? 'Sending…' : <>Send quote request <IconArrowRight width="14" height="14" /></>}

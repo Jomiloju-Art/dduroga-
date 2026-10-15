@@ -9,8 +9,10 @@
  *   2. Cloudflare Turnstile token, when TURNSTILE_SECRET_KEY is set.
  *   3. at most 5 enquiries an hour from one connection, and DAILY_CAP a day
  *      in total (Resend's free plan sends 100 a day).
- *   4. field checks: a name, an email or phone, length limits, and no more
- *      than 2 web links (spam is mostly links).
+ *   4. field checks, the same rules as the forms (src/lib/validate.js): a
+ *      name, a valid email or Nigerian/international phone number, length
+ *      limits, no more than 2 web links (spam is mostly links), and an email
+ *      domain that can actually receive mail (DNS lookup).
  *
  * Environment variables (Vercel → Project → Settings → Environment Variables):
  *   RESEND_API_KEY         required to send. Without it this answers 503 and
@@ -29,14 +31,16 @@
  *   DAILY_CAP              total enquiries a day, default 90
  */
 
+import { promises as dns } from 'node:dns';
+import { checkContact, checkMessage, checkPhone } from '../src/lib/validate.js';
+
 const TO = process.env.ENQUIRY_TO || 'sales@dduroga.com';
 const FROM = process.env.ENQUIRY_FROM || 'DDUROGA Website <onboarding@resend.dev>';
 const PER_HOUR = 5;
 const DAILY_CAP = Number(process.env.DAILY_CAP) || 90;
 const MIN_MS = 3000;
 
-const LIMITS = { name: 100, company: 150, email: 200, phone: 40, interest: 150, message: 5000, notes: 5000, type: 40 };
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const LIMITS = { name: 100, company: 150, email: 254, phone: 40, interest: 150, message: 5000, notes: 5000, type: 40 };
 const LINK_RE = /(https?:\/\/|www\.|\[url|<a\s)/gi;
 
 const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
@@ -88,15 +92,47 @@ async function turnstileOk(token, ip) {
   }
 }
 
+/**
+ * Whether the email's domain can receive mail at all: it has a mail server
+ * (MX record), or failing that its own address, which mail falls back to.
+ * Catches made-up and mistyped domains ("dangote-refinry.com") that pass any
+ * format check. A "null MX" (RFC 7505) means the domain takes no mail.
+ * Trouble on our side (a DNS timeout) answers true: a real buyer must not be
+ * turned away because a lookup was slow.
+ */
+const withTimeout = (p, ms = 3000) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error('timeout'), { code: 'ETIMEOUT' })), ms))]);
+async function mailDomainOk(email) {
+  if (!email) return true;
+  const domain = email.slice(email.lastIndexOf('@') + 1);
+  try {
+    const mx = await withTimeout(dns.resolveMx(domain));
+    return mx.some((r) => r.exchange && r.exchange !== '.');
+  } catch (e) {
+    if (e.code === 'ENOTFOUND') return false;
+    if (e.code !== 'ENODATA') return true;
+    try {
+      await withTimeout(Promise.any([dns.resolve4(domain), dns.resolve6(domain)]));
+      return true;
+    } catch (e2) {
+      const codes = (e2.errors || [e2]).map((x) => x.code);
+      return !codes.every((c) => c === 'ENOTFOUND' || c === 'ENODATA');
+    }
+  }
+}
+
 /** The cleaned enquiry, or { error } with a message for the visitor. */
 function clean(body) {
   const f = {};
   for (const [k, n] of Object.entries(LIMITS)) f[k] = str(body[k], n);
-  if (!f.name) return { error: 'Please enter your name.' };
-  const phoneDigits = f.phone.replace(/\D/g, '').length;
-  if (!f.email && phoneDigits < 7) return { error: 'Please give an email or a phone number so we can reply.' };
-  if (f.email && !EMAIL_RE.test(f.email)) return { error: 'That email address looks invalid.' };
-  if (f.phone && phoneDigits < 7) return { error: 'That phone number looks too short.' };
+  // The forms' own rules (src/lib/validate.js): a name, an email or a phone,
+  // each valid if given. The phone comes back as +234…
+  const c = checkContact({ name: f.name, email: f.email, phone: f.phone });
+  if (!c.ok) return { error: Object.values(c.errors)[0] };
+  Object.assign(f, { name: c.values.name, email: c.values.email, phone: c.values.phone, phoneKind: c.values.phoneKind });
+  for (const k of ['message', 'notes']) {
+    const m = checkMessage(f[k]);
+    if (!m.ok) return { error: m.error };
+  }
 
   const items = Array.isArray(body.items) ? body.items.slice(0, 200).map((i) => ({
     title: str(i?.title, 200), sku: str(i?.sku, 100), option: str(i?.option, 100),
@@ -118,8 +154,15 @@ function compose({ f, items }) {
     ? `Quote request from ${f.name}${f.company ? `, ${f.company}` : ''} (${items.length} product${items.length === 1 ? '' : 's'})`
     : `Website enquiry from ${f.name}${f.company ? `, ${f.company}` : ''}`).slice(0, 200);
 
+  // [label, text, link]. The phone is +234… already; mobiles also get a
+  // WhatsApp link, since that is how most buyers here prefer to talk.
+  const phone = f.phone ? checkPhone(f.phone) : null;
+  const waLink = phone?.ok && phone.kind !== 'ng-landline' ? `https://wa.me/${f.phone.replace(/\D/g, '')}` : '';
   const rows = [
-    ['Name', f.name], ['Company', f.company], ['Email', f.email], ['Phone / WhatsApp', f.phone],
+    ['Name', f.name], ['Company', f.company],
+    ['Email', f.email, f.email ? `mailto:${f.email}` : ''],
+    ['Phone', phone?.ok ? phone.display : f.phone, f.phone ? `tel:${f.phone}` : ''],
+    ['WhatsApp', waLink, waLink],
     ['Interested in', f.interest],
   ].filter(([, v]) => v);
   const note = f.message || f.notes;
@@ -136,7 +179,7 @@ function compose({ f, items }) {
   const td = 'padding:6px 12px;border-bottom:1px solid #eee;vertical-align:top';
   const html = `<div style="font-family:Arial,sans-serif;font-size:14px;color:#111;max-width:640px">
 <h2 style="font-size:18px;margin:0 0 12px">${isQuote ? 'Quote request' : 'Enquiry'} from the DDUROGA website</h2>
-<table style="border-collapse:collapse;width:100%">${rows.map(([k, v]) => `<tr><td style="${td};color:#666;width:150px">${esc(k)}</td><td style="${td}">${esc(v)}</td></tr>`).join('')}</table>
+<table style="border-collapse:collapse;width:100%">${rows.map(([k, v, href]) => `<tr><td style="${td};color:#666;width:150px">${esc(k)}</td><td style="${td}">${href ? `<a href="${esc(href)}" style="color:#1d4ed8">${esc(v)}</a>` : esc(v)}</td></tr>`).join('')}</table>
 ${items.length ? `<h3 style="font-size:15px;margin:20px 0 8px">Products (${items.length}, ${units} units)</h3>
 <table style="border-collapse:collapse;width:100%"><tr><th style="${td};text-align:left">Qty</th><th style="${td};text-align:left">Product</th><th style="${td};text-align:left">Size / colour</th><th style="${td};text-align:left">SKU</th></tr>
 ${items.map((i) => `<tr><td style="${td}">${i.qty}</td><td style="${td}">${esc(i.title)}</td><td style="${td}">${esc(i.option)}</td><td style="${td}">${esc(i.sku)}</td></tr>`).join('')}</table>` : ''}
@@ -172,6 +215,9 @@ export default async function handler(req, res) {
   // 4. Fields (before counting, so a typo does not use up an attempt).
   const c = clean(body);
   if (c.error) return send(422, { ok: false, message: c.error });
+  if (!(await mailDomainOk(c.f.email))) {
+    return send(422, { ok: false, message: 'We could not find that email address’s domain, so a reply would not reach you. Please check it, or give a phone number instead.' });
+  }
 
   // 3. Limits.
   const hour = Math.floor(Date.now() / 3600000);

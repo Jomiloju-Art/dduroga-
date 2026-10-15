@@ -1,0 +1,215 @@
+/**
+ * Contact-detail checks shared by the quote form, the contact form and the
+ * sending function (api/enquiry.js), so the browser and the server apply the
+ * same rules. Pure functions: no DOM, no network.
+ *
+ *   checkName(raw)   -> { ok, value, error }
+ *   checkEmail(raw)  -> { ok, value, error, suggestion }
+ *   checkPhone(raw)  -> { ok, value, display, kind, error }
+ *   checkContact({ name, email, phone }) -> { ok, errors, values, suggestion }
+ *
+ * `error` is a sentence for the visitor. An empty field returns
+ * { ok: false, empty: true } with no error, so the caller decides whether the
+ * field is required (an email OR a phone is enough to reply to).
+ */
+
+/* ---------- name ---------- */
+
+const LINK_RE = /(https?:\/\/|www\.)/i;
+
+export function checkName(raw) {
+  const value = String(raw ?? '').replace(/\s+/g, ' ').trim();
+  if (!value) return { ok: false, empty: true, value };
+  if (value.length > 100) return { ok: false, value, error: 'That name is too long.' };
+  if (LINK_RE.test(value)) return { ok: false, value, error: 'Please enter your name without web links.' };
+  // At least two letters in any alphabet; rules out "1", "--" and "123".
+  if ((value.match(/\p{L}/gu) || []).length < 2) return { ok: false, value, error: 'Please enter your name.' };
+  return { ok: true, value };
+}
+
+/* ---------- email ---------- */
+
+// The HTML spec's email pattern (what <input type="email"> checks), plus a
+// top-level domain of at least two letters, which the spec does not require.
+const EMAIL_RE = /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*\.[a-z]{2,24}$/i;
+
+/** Throwaway inboxes: a quote sent to one can never be answered. */
+const DISPOSABLE = new Set([
+  'mailinator.com', 'yopmail.com', 'guerrillamail.com', 'guerrillamail.net', 'sharklasers.com',
+  '10minutemail.com', '10minutemail.net', 'tempmail.com', 'temp-mail.org', 'tempmail.net',
+  'throwawaymail.com', 'getnada.com', 'trashmail.com', 'dispostable.com', 'maildrop.cc',
+  'mintemail.com', 'fakeinbox.com', 'mohmal.com', 'emailondeck.com', 'tempinbox.com',
+  'mailnesia.com', 'spamgourmet.com', 'moakt.com', 'tempail.com', 'burnermail.io',
+]);
+
+/** Domains most buyers here use; a near miss of one is probably a typo. */
+const COMMON = [
+  'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'icloud.com', 'live.com',
+  'ymail.com', 'aol.com', 'msn.com', 'googlemail.com', 'yahoo.co.uk', 'hotmail.co.uk',
+  'proton.me', 'protonmail.com', 'zoho.com', 'mail.com', 'gmx.com',
+];
+
+/** Levenshtein distance, capped: returns max + 1 once it is clearly larger. */
+function distance(a, b, max = 2) {
+  if (Math.abs(a.length - b.length) > max) return max + 1;
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    let rowMin = i;
+    for (let j = 1; j <= b.length; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      rowMin = Math.min(rowMin, cur[j]);
+    }
+    if (rowMin > max) return max + 1;
+    prev = cur;
+  }
+  return prev[b.length];
+}
+
+/** A likely intended domain for a mistyped one ("gmial.com" -> "gmail.com"), or ''. */
+function suggestDomain(domain) {
+  if (COMMON.includes(domain)) return '';
+  let best = '';
+  let bestD = 3;
+  for (const c of COMMON) {
+    const d = distance(domain, c, 2);
+    if (d < bestD) { best = c; bestD = d; }
+  }
+  if (best) return best;
+  // A known provider with a mistyped ending: "gmail.con", "yahoo.cm".
+  const m = domain.match(/^([a-z0-9-]+)\.(con|cmo|comm|cm|om|co|c0m|vom|xom|ocm|cpm)$/);
+  if (m && COMMON.includes(`${m[1]}.com`)) return `${m[1]}.com`;
+  return '';
+}
+
+export function checkEmail(raw) {
+  const trimmed = String(raw ?? '').trim();
+  if (!trimmed) return { ok: false, empty: true, value: '' };
+  const at = trimmed.lastIndexOf('@');
+  const value = at > 0 ? trimmed.slice(0, at) + '@' + trimmed.slice(at + 1).toLowerCase() : trimmed;
+  const bad = (error) => ({ ok: false, value, error });
+  if (/\s/.test(value)) return bad('Email addresses cannot contain spaces.');
+  if ((value.match(/@/g) || []).length !== 1) return bad('An email address has one @, like name@company.com.');
+  const [local, domain] = value.split('@');
+  if (!local || !domain) return bad('An email address looks like name@company.com.');
+  if (value.length > 254 || local.length > 64) return bad('That email address is too long.');
+  if (local.startsWith('.') || local.endsWith('.') || local.includes('..') || domain.includes('..')) {
+    return bad('That email address has a misplaced dot.');
+  }
+  if (!domain.includes('.')) return bad(`That email is missing its ending, like ${local}@${domain}.com.`);
+  if (!EMAIL_RE.test(value)) return bad('That email address looks incomplete. It should look like name@company.com.');
+  if (DISPOSABLE.has(domain)) return bad('Please use an email address you check regularly, not a temporary one.');
+  const fix = suggestDomain(domain);
+  return { ok: true, value, suggestion: fix ? `${local}@${fix}` : '' };
+}
+
+/* ---------- phone ----------
+   Nigerian numbers first, since nearly every buyer is in Nigeria:
+     mobile    0 + 70x/80x/81x/90x/91x + 7 more digits  (11 digits: 0803 123 4567)
+     landline  0 + area code + number                  (9 or 10 digits: 01 234 5678)
+   either one also written with +234 / 234 instead of the leading 0. Any other
+   country needs + and its country code, 8 to 15 digits in all (the E.164 limit).
+   Values are returned in E.164 (+2348031234567) so sales can dial or WhatsApp
+   them as written. */
+
+const NG_MOBILE = /^[789][01]\d{8}$/; // after the leading 0 or +234
+const NG_LANDLINE = /^[1-9]\d{7,8}$/;
+
+/** Sample numbers people type to get past a form: one repeated digit, or a straight run. */
+function looksFake(digits) {
+  const tail = digits.slice(-8);
+  if (/^(\d)\1+$/.test(tail)) return true;
+  return ['12345678', '23456789', '87654321', '98765432', '01234567'].includes(tail);
+}
+
+const groupNg = (n) => (NG_MOBILE.test(n) ? `${n.slice(0, 3)} ${n.slice(3, 6)} ${n.slice(6)}` : `${n.slice(0, 1)} ${n.slice(1, 4)} ${n.slice(4)}`);
+
+function nigerian(national) {
+  const n = national.replace(/^0/, '');
+  if (NG_MOBILE.test(n)) return { kind: 'ng-mobile', n };
+  if (NG_LANDLINE.test(n) && !/^[789][01]/.test(n)) return { kind: 'ng-landline', n };
+  return null;
+}
+
+export function checkPhone(raw) {
+  const value = String(raw ?? '').trim();
+  if (!value) return { ok: false, empty: true, value: '' };
+  const bad = (error) => ({ ok: false, value, error });
+  if (/[a-z]/i.test(value)) return bad('Phone numbers can only contain digits, like 0803 123 4567.');
+  if (!/^\+?[\d\s().-]+$/.test(value)) return bad('Use digits only, like 0803 123 4567 or +234 803 123 4567.');
+
+  let digits = value.replace(/\D/g, '');
+  let intl = value.startsWith('+');
+  if (!intl && digits.startsWith('00')) { intl = true; digits = digits.slice(2); }
+
+  let ng = null;
+  if (intl || (digits.startsWith('234') && digits.length >= 12)) {
+    if (digits.startsWith('234')) {
+      const rest = digits.slice(3).replace(/^0/, '');
+      ng = nigerian(rest);
+      if (!ng) {
+        return bad(rest.length > 10
+          ? 'That number is too long. After +234 a Nigerian number has 10 digits, like +234 803 123 4567.'
+          : 'That Nigerian number looks incomplete. After +234 it should have 10 digits, like +234 803 123 4567.');
+      }
+    } else {
+      if (digits.length > 15) return bad('That number is too long. International numbers have at most 15 digits.');
+      if (digits.length < 8) return bad('That number looks incomplete. Include the country code, like +44 20 7946 0000.');
+      if (looksFake(digits)) return bad('That looks like a sample number. Please enter your real number.');
+      return { ok: true, value: `+${digits}`, display: `+${digits}`, kind: 'intl' };
+    }
+  } else if (digits.startsWith('0')) {
+    ng = nigerian(digits);
+    if (!ng) {
+      if (digits.length > 11) return bad('That number is too long. Nigerian mobile numbers have 11 digits, like 0803 123 4567.');
+      return bad(/^0[789][01]/.test(digits)
+        ? 'That number is too short. Nigerian mobile numbers have 11 digits, like 0803 123 4567.'
+        : 'That number does not look right. Nigerian mobile numbers have 11 digits, like 0803 123 4567.');
+    }
+  } else if (NG_MOBILE.test(digits)) {
+    ng = { kind: 'ng-mobile', n: digits }; // 803 123 4567, typed without the 0
+  } else {
+    return bad('Start with 0 (like 0803 123 4567) or with + and your country code.');
+  }
+
+  if (looksFake(ng.n)) return bad('That looks like a sample number. Please enter your real number.');
+  return { ok: true, value: `+234${ng.n}`, display: `+234 ${groupNg(ng.n)}`, kind: ng.kind };
+}
+
+/* ---------- message ---------- */
+
+const LINKS_RE = /(https?:\/\/|www\.|\[url|<a\s)/gi;
+export const MESSAGE_MAX = 5000;
+
+/** A message or notes field: optional unless `required`; at most 2 web links (spam is mostly links). */
+export function checkMessage(raw, { required = false } = {}) {
+  const value = String(raw ?? '').trim();
+  if (!value) return required ? { ok: false, value, error: 'Please add a short message.' } : { ok: true, value };
+  if (value.length > MESSAGE_MAX) return { ok: false, value, error: `Please keep this under ${MESSAGE_MAX.toLocaleString('en')} characters.` };
+  if ((value.match(LINKS_RE) || []).length > 2) return { ok: false, value, error: 'Please remove the web links from your message, or call us.' };
+  return { ok: true, value };
+}
+
+/* ---------- together ---------- */
+
+/**
+ * The quote and contact forms' rules: a name, and an email or a phone (either
+ * is enough to reply to), each valid if given.
+ */
+export function checkContact({ name, email, phone }) {
+  const n = checkName(name);
+  const e = checkEmail(email);
+  const p = checkPhone(phone);
+  const errors = {};
+  if (n.empty) errors.name = 'Please enter your name.';
+  else if (!n.ok) errors.name = n.error;
+  if (e.empty && p.empty) errors.email = 'Enter an email or a phone number so we can reply.';
+  if (!e.empty && !e.ok) errors.email = e.error;
+  if (!p.empty && !p.ok) errors.phone = p.error;
+  return {
+    ok: Object.keys(errors).length === 0,
+    errors,
+    suggestion: e.ok ? e.suggestion : '',
+    values: { name: n.value, email: e.ok ? e.value : '', phone: p.ok ? p.value : '', phoneKind: p.ok ? p.kind : '' },
+  };
+}

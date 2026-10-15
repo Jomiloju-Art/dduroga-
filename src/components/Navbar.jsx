@@ -3,12 +3,19 @@ import { NavLink, Link, useLocation } from 'react-router-dom';
 import Logo from './Logo.jsx';
 import SearchModal from './SearchModal.jsx';
 import { categories, industryCatalog } from '../data/products.js';
-import { IconArrowRight, IconSearch } from './Icons.jsx';
+import { IconArrowRight, IconSearch, IconBag, IconClose, IconChevronLeft, IconChevronRight } from './Icons.jsx';
 import { useQuote } from '../quote/QuoteContext.jsx';
 import { useScrollLock } from '../lib/scrollLock.js';
 
 /** Entries shown per column in the Products mega panel before the "All …" link. */
 const MEGA_ITEMS = 6;
+
+/* The homepage header used to sit see-through over the hero photo, which left
+   the navy half of the logo hard to read on the dark image. It is now the same
+   white bar as every other page (Oct 2026). Set true to bring the transparent
+   treatment back; the hero would then also need its hx-hero--under-header
+   class and top shade again (HomePage.jsx). */
+const HERO_UNDER_HEADER = false;
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -31,7 +38,7 @@ export default function Navbar() {
   const lastY = useRef(0);
 
   useEffect(() => {
-    setTransparentRoute(pathname === '/');
+    setTransparentRoute(HERO_UNDER_HEADER && pathname === '/');
   }, [pathname]);
 
   /* The scroll behaviour, copied from Gymshark:
@@ -155,7 +162,7 @@ export default function Navbar() {
           <div className={`nav-menu ${open ? 'open' : ''}`} ref={drawerRef}>
             <div className="nav-drawer-head">
               <button type="button" className="nav-close" onClick={() => setOpen(false)} aria-label="Close menu">
-                <i className="fas fa-times" aria-hidden="true" />
+                <IconClose width="14" height="14" />
               </button>
             </div>
 
@@ -163,7 +170,7 @@ export default function Navbar() {
             {sub && (
               <div className="nav-mobile-head">
                 <button type="button" className="nav-mobile-back" onClick={() => setSub(null)} aria-label="Back">
-                  <i className="fas fa-chevron-left" aria-hidden="true" />
+                  <IconChevronLeft width="20" height="20" />
                 </button>
                 <span className="nav-mobile-head__title">
                   {sub === 'products' ? 'Products' : 'Industries'}
@@ -257,11 +264,11 @@ export default function Navbar() {
                   <Link className="nav-mobile-item" to="/">Home</Link>
                   <button type="button" className="nav-mobile-item" onClick={() => setSub('products')}>
                     <span>Products</span>
-                    <i className="fas fa-chevron-right" aria-hidden="true" />
+                    <IconChevronRight width="18" height="18" />
                   </button>
                   <button type="button" className="nav-mobile-item" onClick={() => setSub('industries')}>
                     <span>Industries</span>
-                    <i className="fas fa-chevron-right" aria-hidden="true" />
+                    <IconChevronRight width="18" height="18" />
                   </button>
                   <Link className="nav-mobile-item" to="/about">About Us</Link>
                   <Link className="nav-mobile-item" to="/learning">Learning</Link>
@@ -291,7 +298,7 @@ export default function Navbar() {
               <IconSearch width="18" height="18" />
             </button>
             <button type="button" className="nav-bag" onClick={openBag} aria-label="Open your bag">
-              <i className="fas fa-shopping-bag" aria-hidden="true" />
+              <IconBag width="20" height="20" />
               {count > 0 && <span className="nav-bag__badge">{count}</span>}
             </button>
             <Link className="btn btn--gold" to="/contact" style={{ padding: '11px 22px' }}>
@@ -304,7 +311,7 @@ export default function Navbar() {
           </button>
 
           <button type="button" className="nav-bag mobile-bag" onClick={openBag} aria-label="Open your bag">
-            <i className="fas fa-shopping-bag" aria-hidden="true" />
+            <IconBag width="20" height="20" />
             {count > 0 && <span className="nav-bag__badge">{count}</span>}
           </button>
 

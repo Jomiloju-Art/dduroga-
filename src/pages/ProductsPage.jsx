@@ -5,6 +5,7 @@ import ProductCard from '../components/ProductCard.jsx';
 import Pagination from '../components/Pagination.jsx';
 import ProductFilters from '../components/ProductFilters.jsx';
 import CtaBand from '../components/CtaBand.jsx';
+import { IconSliders } from '../components/Icons.jsx';
 import { usePageMeta } from '../lib/seo.js';
 import { listingFor, listingTitle, listingDescription, listingIntro } from '../lib/seoText.js';
 import { lockScroll } from '../lib/scrollLock.js';
@@ -243,7 +244,7 @@ export default function ProductsPage() {
                   aria-label="Show filters"
                   onClick={() => setFiltersOpen(true)}
                 >
-                  <i className="fas fa-sliders-h" aria-hidden="true" />
+                  <IconSliders width="18" height="18" />
                   <span className="plp-filter-toggle__label">Filters{hasFilter ? ' •' : ''}</span>
                 </button>
               </div>

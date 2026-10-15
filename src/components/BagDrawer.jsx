@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuote, quoteKey } from '../quote/QuoteContext.jsx';
-import { IconArrowRight } from './Icons.jsx';
+import { IconArrowRight, IconClose, IconCheck } from './Icons.jsx';
 import { lockScroll } from '../lib/scrollLock.js';
 import QtyInput from './QtyInput.jsx';
 
@@ -39,13 +39,13 @@ export default function BagDrawer() {
         <header className="bag-drawer__header">
           <h2>Your bag</h2>
           <button type="button" className="bag-drawer__close" onClick={closeBag} aria-label="Close bag">
-            <i className="fas fa-times" aria-hidden="true" />
+            <IconClose width="20" height="20" />
           </button>
         </header>
 
         {notice && items.length > 0 && (
           <p className="bag-drawer__notice" role="status">
-            <i className="fas fa-check" aria-hidden="true" /> {notice.text}
+            <IconCheck width="16" height="16" /> {notice.text}
           </p>
         )}
 

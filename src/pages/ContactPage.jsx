@@ -6,6 +6,7 @@ import { categories } from '../data/products.js';
 import { IconPhone, IconMail, IconMapPin, IconClock, IconCheck } from '../components/Icons.jsx';
 import { sendEnquiry } from '../lib/enquiry.js';
 import EnquiryFallback from '../components/EnquiryFallback.jsx';
+import { useSpamGuard } from '../components/SpamGuard.jsx';
 import { usePageMeta } from '../lib/seo.js';
 import { pageMeta } from '../data/pageMeta.js';
 
@@ -35,6 +36,10 @@ export default function ContactPage() {
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
   const formRef = useRef(null);
+  const spam = useSpamGuard();
+  // Set at once, unlike `sending` state, so clicks in the same instant cannot
+  // send twice.
+  const busy = useRef(false);
 
   const validate = () => {
     const next = {};
@@ -60,18 +65,23 @@ export default function ContactPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // `sending` stops a double click from sending the enquiry twice.
-    if (sending || !validate()) return;
+    if (busy.current || !validate()) return;
+    if (spam.needsToken) { setSendError('Please wait a moment while we run a quick security check, then press send again.'); return; }
+    busy.current = true;
     setSending(true);
     setSendError('');
     const res = await sendEnquiry(
       { type: 'Contact', name: form.name, company: form.company, email: form.email, phone: form.phone, interest: form.interest, message: form.message },
-      `Enquiry from ${form.name || 'website visitor'}`
+      `Enquiry from ${form.name || 'website visitor'}`,
+      spam.guard()
     );
+    busy.current = false;
     setSending(false);
+    spam.reset();
     if (res.endpoint && !res.ok) {
-      // It used to fail silently: the form simply came back.
-      setSendError(`We couldn’t send your enquiry. Check your connection and try again, or call or WhatsApp us on ${brand.phone}.`);
+      // It used to fail silently: the form simply came back. A refusal from
+      // the server (rate limit, links, bot check) says why.
+      setSendError(res.message || `We couldn’t send your enquiry. Check your connection and try again, or call or WhatsApp us on ${brand.phone}.`);
       return;
     }
     setFallbackMailto(res.mailto || '');
@@ -193,6 +203,7 @@ export default function ContactPage() {
                 </div>
 
                 <div>
+                  {spam.fields}
                   {sendError && <p className="form-error" role="alert" style={{ marginBottom: 12 }}>{sendError}</p>}
                   <button type="submit" className="btn btn--primary" disabled={sending} aria-busy={sending}>{sending ? 'Sending…' : 'Send enquiry'}</button>
                   <p className="form-note" style={{ marginTop: 12 }}>

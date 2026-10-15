@@ -35,6 +35,30 @@ export const IconBox = (p) => (
   </svg>
 );
 
+/** Shopping bag (the quote list). Was a Font Awesome glyph, which showed as an
+ *  empty box until the icon font arrived. */
+export const IconBag = (p) => (
+  <svg viewBox="0 0 24 24" width="20" height="20" {...base} aria-hidden="true" {...p}>
+    <path d="M5 8h14l-1.2 11.1a2 2 0 0 1-2 1.9H8.2a2 2 0 0 1-2-1.9z" />
+    <path d="M9 10V7a3 3 0 0 1 6 0v3" />
+  </svg>
+);
+
+export const IconClose = (p) => (
+  <svg viewBox="0 0 24 24" width="18" height="18" {...base} aria-hidden="true" {...p}>
+    <path d="M6 6l12 12M18 6 6 18" />
+  </svg>
+);
+
+export const IconSliders = (p) => (
+  <svg viewBox="0 0 24 24" width="18" height="18" {...base} aria-hidden="true" {...p}>
+    <path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" />
+    <circle cx="16" cy="6" r="2" />
+    <circle cx="10" cy="12" r="2" />
+    <circle cx="18" cy="18" r="2" />
+  </svg>
+);
+
 export const IconChevronRight = (p) => (
   <svg viewBox="0 0 24 24" width="16" height="16" {...base} aria-hidden="true" {...p}>
     <path d="m9 6 6 6-6 6" />

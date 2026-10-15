@@ -1,6 +1,8 @@
+import { IconChevronLeft, IconChevronRight } from './Icons.jsx';
+
 /**
  * Products pagination - pill-style items, black pill for the current page,
- * Prev/Next with Font Awesome angle icons (matches the reference pattern).
+ * Prev/Next with chevron icons (matches the reference pattern).
  */
 function pageItems(page, count) {
   if (count <= 7) return Array.from({ length: count }, (_, i) => i + 1);
@@ -19,11 +21,11 @@ export default function Pagination({ page, pageCount, onChange }) {
         <li className="ha-pagination-item">
           {page > 1 ? (
             <button type="button" className="ha-pagination-link ha-pagination-link--nav" onClick={() => onChange(page - 1)} aria-label="Previous page">
-              <i className="fas fa-angle-left ha-pagination-icon--prev" aria-hidden="true" /> Prev
+              <IconChevronLeft className="ha-pagination-icon--prev" width="16" height="16" /> Prev
             </button>
           ) : (
             <span className="ha-pagination-link ha-pagination-link--nav ha-pagination-link--disabled">
-              <i className="fas fa-angle-left ha-pagination-icon--prev" aria-hidden="true" /> Prev
+              <IconChevronLeft className="ha-pagination-icon--prev" width="16" height="16" /> Prev
             </span>
           )}
         </li>
@@ -49,11 +51,11 @@ export default function Pagination({ page, pageCount, onChange }) {
         <li className="ha-pagination-item">
           {page < pageCount ? (
             <button type="button" className="ha-pagination-link ha-pagination-link--nav" onClick={() => onChange(page + 1)} aria-label="Next page">
-              Next <i className="fas fa-angle-right ha-pagination-icon--next" aria-hidden="true" />
+              Next <IconChevronRight className="ha-pagination-icon--next" width="16" height="16" />
             </button>
           ) : (
             <span className="ha-pagination-link ha-pagination-link--nav ha-pagination-link--disabled">
-              Next <i className="fas fa-angle-right ha-pagination-icon--next" aria-hidden="true" />
+              Next <IconChevronRight className="ha-pagination-icon--next" width="16" height="16" />
             </span>
           )}
         </li>

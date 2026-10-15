@@ -42,7 +42,7 @@ function Spotlight({ product, rank }) {
     <Link to={`/products/${product.slug}`} className="tr-spot" key={product.slug}>
       <span className="tr-spot__media">
         <span className="tr-badge">#{rank} Trending</span>
-        <img src={product.img} alt={product.title} />
+        <img src={product.img} alt={product.title} loading="lazy" decoding="async" />
       </span>
       <span className="tr-spot__body">
         <span className="tr-type">{rangeLabel(product) || zoneOf(product)?.label}</span>
@@ -50,13 +50,13 @@ function Spotlight({ product, rank }) {
         {symbols.length > 0 && (
           <span className="tr-symbols">
             {symbols.map((s) => (
-              <span key={s} className="tr-symbol"><img src={glossaryIcon(s)} alt="" />{s}</span>
+              <span key={s} className="tr-symbol"><img src={glossaryIcon(s)} alt="" loading="lazy" />{s}</span>
             ))}
           </span>
         )}
         {(std || product.ce) && (
           <span className="tr-std">
-            {product.ce && <img src="/accreditations/ce.png" alt="CE marked" />}
+            {product.ce && <img src="/accreditations/ce.png" alt="CE marked" loading="lazy" />}
             {std && <span>{std}</span>}
           </span>
         )}

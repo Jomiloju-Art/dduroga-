@@ -4,8 +4,6 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import { registerServiceWorker } from './lib/serviceWorker.js';
-import '@fortawesome/fontawesome-free/css/fontawesome.min.css';
-import '@fortawesome/fontawesome-free/css/solid.min.css';
 import './styles/index.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(

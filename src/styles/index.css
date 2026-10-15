@@ -458,6 +458,8 @@ body.user-is-tabbing .site-header:has(.mega-wrap:focus-within) .navbar {
   .nav-drawer-head { position: absolute; top: 20px; right: 15px; margin: 0; padding: 0; border: none; display: flex; z-index: 2; }
   .nav-close { width: 25px; height: 25px; border-radius: 15px; background: #dddddd; border: none; display: flex; align-items: center; justify-content: center; font-size: 15px; line-height: 1; color: var(--ddu-black); cursor: pointer; }
   .nav-close:hover { background: #cfcfcf; }
+  .nav-close { padding: 0; }
+  .nav-close svg { flex: none; }
   .nav-menu { position: fixed; top: 0; right: 0; bottom: 0; left: auto; width: min(320px, 88vw); background: #fff; z-index: 70; padding: 0; display: flex; flex-direction: column; align-items: stretch; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; touch-action: pan-y; -webkit-overflow-scrolling: touch; transform: translateX(100%); transition: transform var(--dur-slow) var(--ease-out); }
   /* Shadow only while open: parked off-screen, it bled a grey band down the
      right edge of every phone page. */
@@ -468,7 +470,7 @@ body.user-is-tabbing .site-header:has(.mega-wrap:focus-within) .navbar {
   .nav-mobile-head { position: absolute; top: 0; left: 0; width: 100%; height: 68px; background: #dddddd; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; color: var(--ddu-black); }
   .nav-mobile-back { position: absolute; left: 20px; background: none; border: none; padding: 0; color: var(--ddu-black); font-size: 1.1rem; cursor: pointer; }
   .nav-mobile-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 0.5rem 1rem; border: none; background: none; text-align: left; text-decoration: none; cursor: pointer; font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; letter-spacing: -0.36px; color: var(--ddu-black); }
-  .nav-mobile-item i { font-size: 0.9rem; color: var(--ddu-black); flex: none; }
+  .nav-mobile-item svg { color: var(--ddu-black); flex: none; }
   .nav-mobile-item:hover { color: var(--ddu-orange); }
   .nav-mobile-item:hover i { color: var(--ddu-orange); }
   .nav-mobile-sub { animation: navSubIn var(--dur-base) var(--ease-out) both; }
@@ -819,7 +821,7 @@ i.performance-icon { font-size: 32px; line-height: 1; }
    Smaller size and looser leading so a multi-line headline stays readable. */
 .hx-hero h1 { color: var(--ddu-white); font-size: clamp(1.55rem, 2.7vw, 2.4rem); font-weight: 800; text-transform: none; line-height: 1.14; letter-spacing: -0.01em; margin: 0 0 var(--space-3); }
 .hx-hero__actions { display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: center; }
-.hx-btn { background: var(--ddu-orange); color: var(--ddu-black); border-radius: 8px; font-weight: 700; text-transform: none; letter-spacing: 0; padding: 14px 26px; display: inline-flex; align-items: center; gap: var(--space-2); }
+.hx-btn { text-decoration: none; background: var(--ddu-orange); color: var(--ddu-black); border-radius: 8px; font-weight: 700; text-transform: none; letter-spacing: 0; padding: 14px 26px; display: inline-flex; align-items: center; gap: var(--space-2); }
 .hx-btn:hover { background: #ffab5c; }
 /* Secondary partner to .hx-btn: same shape and type, outlined. */
 .hx-btn.hx-btn--outline { background: transparent; color: var(--ddu-black); box-shadow: inset 0 0 0 1.5px var(--ddu-black); }
@@ -3082,9 +3084,9 @@ body:has(.site-header--transparent) main {
    colour do the work. Ours had 700-weight names, uppercase labels and coloured
    links, which is what made each card read as three competing elements. */
 
-/* ---------- headings: one size, one weight, left ---------- */
-.hx-section__head.hx-section__head--left h2,
-.hp-compliance h2 {
+/* ---------- headings: one size, one weight, left ----------
+   No longer used on the homepage (its sections all use .zb__title, Oct 2026). */
+.hx-section__head.hx-section__head--left h2 {
   font-size: 20px;
   line-height: 18.8px;
   font-weight: 500;
@@ -3092,7 +3094,6 @@ body:has(.site-header--transparent) main {
   text-transform: none;
   color: rgb(13, 16, 18);
 }
-.hp-compliance h2 { color: var(--ddu-white); }
 
 /* ---------- section subhead ---------- */
 .hx-section__head.hx-section__head--left p {
@@ -3453,7 +3454,7 @@ body:has(.site-header--transparent) main {
   justify-content: center;
   cursor: pointer;
 }
-.plp-filter-toggle .fa-sliders-h { font-size: 18px; }
+.plp-filter-toggle svg { width: 18px; height: 18px; flex: none; }
 
 /* ---------- grid ---------- */
 .plp-grid {
@@ -3877,7 +3878,7 @@ body:has(.site-header--transparent) main {
   border: none;
   cursor: pointer;
 }
-.nav-bag .fa-shopping-bag { font-size: 18px; }
+.nav-bag svg { width: 20px; height: 20px; }
 .nav-bag__badge {
   position: absolute;
   top: 4px;
@@ -5122,3 +5123,92 @@ body:has(.site-header--hidden) .pdp-bar { top: 0; }
 
 /* Short, data-built intro under a product listing's heading (lib/seoText.js). */
 .plp-header__intro { margin: 10px 0 0; max-width: 76ch; font-size: 14px; line-height: 1.6; color: #5b6066; }
+
+/* ============================================================
+   HOMEPAGE REVIEW (Oct 2026)
+   Every main section now opens with the same head (.zb__head: eyebrow, 44px
+   title, one line under it). Below: the sections that changed.
+   ============================================================ */
+
+/* Trending: the same title size as the other sections (was up to 52px). */
+.tr__head h2 { font-size: clamp(28px, 3.4vw, 44px); line-height: 1.08; }
+/* Arrows before the progress bar: on the right they sat under the floating
+   WhatsApp button on laptop screens. */
+.tr__nav .tr__arrow { order: -1; }
+.tr__nav .tr__bar { margin-left: 8px; }
+/* Phones: the #1 card was taller than the screen before the other products
+   showed. Shorter photo, two symbols, buttons side by side. */
+@media (max-width: 600px) {
+  .tr-spot__media { aspect-ratio: 16 / 10; }
+  .tr-spot__media img { width: 56%; height: 84%; }
+  .tr-spot__body { gap: 10px; padding: 18px 18px 20px; }
+  .tr-spot__name { font-size: 28px; }
+  .tr-symbols .tr-symbol:nth-child(n + 3) { display: none; }
+  .tr-symbol { font-size: 12px; padding: 4px 10px 4px 4px; }
+  .tr-symbol img { width: 22px; height: 22px; }
+  .tr-spot__cta { flex-wrap: nowrap; }
+  .tr-spot__cta .tr-btn { flex: 1 1 0; justify-content: center; padding: 0 12px; }
+}
+
+/* Clients: moved up under the zones, on a grey band, with a proper head. Each
+   logo sits in its own colour on an identical white tile (see ClientLogos.jsx). */
+.client-strip { padding-block: clamp(56px, 7vw, 96px); border-top: 0; text-align: left; background: #f4f5f7; }
+.client-strip .zb__head { margin-bottom: 28px; }
+.client-marquee { --marquee-gap: 14px; }
+.client-logo {
+  justify-content: center; height: 104px; min-width: 176px; padding: 0 28px;
+  background: #fff; border: 1px solid rgba(14, 18, 22, 0.07); border-radius: 14px;
+  transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+.client-logo:hover { border-color: rgba(14, 18, 22, 0.16); box-shadow: 0 8px 22px rgba(14, 18, 22, 0.07); }
+.client-logo img { filter: none; opacity: 1; }
+.client-marquee__toggle { margin-top: 18px; }
+@media (prefers-reduced-motion: reduce) {
+  .client-marquee__group { gap: 12px; }
+}
+@media (max-width: 640px) {
+  .client-marquee { --marquee-gap: 10px; }
+  .client-logo { height: 84px; min-width: 140px; padding: 0 18px; }
+}
+
+/* Compliance: the shared head on the dark band. */
+.hp-compliance__inner { padding-block: clamp(64px, 7vw, 104px); align-items: start; }
+.hp-compliance .zb__title { color: #fff; font-size: clamp(28px, 3.4vw, 44px); line-height: 1.08; font-weight: 800; margin: 12px 0 0; }
+.hp-compliance .zb__title + p { margin-top: 14px; max-width: 46ch; line-height: 1.6; }
+.hp-compliance .hp-ships { margin-top: 0; }
+
+/* Catalogue: same rhythm as the other light sections. */
+.hp-catalogue { padding-block: clamp(64px, 7vw, 104px); }
+
+/* How ordering works: the closing band before the footer (OrderSteps.jsx). */
+.os { background: var(--ddu-black); color: #fff; padding-block: clamp(64px, 7vw, 104px); }
+.os .zb__title { color: #fff; }
+.os .sg__sub { color: rgba(255, 255, 255, 0.7); }
+.os__steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.os__step { padding: 28px; border-radius: 16px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); }
+.os__num { font-family: var(--font-display); font-weight: 800; font-size: 14px; letter-spacing: 0.14em; color: var(--ddu-orange); }
+.os__title { margin: 14px 0 8px; font-family: var(--font-display); font-weight: 700; font-size: 1.3rem; line-height: 1.2; text-transform: none; letter-spacing: 0; color: #fff; }
+.os__text { margin: 0; font-size: 0.98rem; line-height: 1.6; color: rgba(255, 255, 255, 0.72); }
+.os__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin-top: 36px; }
+.os__actions .hx-btn { min-height: 52px; font-size: 15px; }
+.os__wa {
+  display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 22px; border-radius: 8px;
+  border: 1.5px solid #25D366; color: #fff; font-size: 15px; font-weight: 700; text-decoration: none;
+  transition: background-color var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
+}
+.os__wa svg { color: #25D366; transition: color var(--dur-base) var(--ease-out); }
+.os__wa:hover { background: #25D366; color: #08260f; }
+.os__wa:hover svg { color: #08260f; }
+.os__call { display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 8px; color: #fff; font-weight: 700; font-size: 1.05rem; text-decoration: none; }
+.os__call:hover { color: var(--ddu-orange); }
+.os a:focus-visible { outline: 3px solid var(--ddu-orange); outline-offset: 3px; }
+.os__hours { margin: 12px 0 0; font-size: 0.88rem; color: rgba(255, 255, 255, 0.55); }
+@media (max-width: 900px) {
+  .os__steps { grid-template-columns: minmax(0, 1fr); }
+  .os__step { padding: 22px; }
+}
+@media (max-width: 560px) {
+  .os__actions { flex-direction: column; align-items: stretch; }
+  .os__actions > * { justify-content: center; }
+  .os__hours { text-align: center; }
+}

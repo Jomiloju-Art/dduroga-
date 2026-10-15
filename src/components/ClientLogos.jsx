@@ -14,10 +14,12 @@ import { clients } from '../data/clients.js';
  *     height: height = BASE x ratio^-0.3. Same-height sizing made the wide
  *     wordmarks (NIPCO, Mantrac) dominate and the square badges (BUA, Tower
  *     Alloys, 7UP) look like specks.
- *   - One treatment. Marks sit in greyscale at rest and take their own colour
- *     on hover, so the solid-ground lockups (Colgate, Mantrac) stop shouting
- *     over the transparent wordmarks, and the strip matches the greyscale
- *     accreditation marks at the top of the page.
+ *   - One treatment. Every mark sits in its own colour on an identical white
+ *     tile. Greyscale at rest (the earlier treatment) turned the solid-ground
+ *     lockups (Colgate, Mantrac, BUA) into grey blocks and washed the light
+ *     marks (Tower Alloys) out almost to nothing; the tile gives every logo,
+ *     whatever its published style, the same frame. The marks themselves are
+ *     the clients' own files, never redrawn.
  *   - A pause control (WCAG 2.2.2: anything that moves for over five seconds
  *     needs one). Hover and keyboard focus also pause it, and it stops while
  *     scrolled out of view. Under prefers-reduced-motion it never moves and
@@ -29,7 +31,9 @@ const BASE = 50;
 const heightFor = (c) => (c.w && c.h ? Math.round(Math.min(BASE, BASE * (c.w / c.h) ** -0.3)) : 40);
 
 export default function ClientLogos({
-  title = 'From manufacturing plants to construction sites, these teams rely on us for compliant, consistently available PPE',
+  eyebrow = 'Trusted by',
+  title = 'Trusted on sites across Nigeria',
+  lead = 'From manufacturing plants to construction sites, these teams rely on us for compliant, consistently available PPE.',
 }) {
   const [paused, setPaused] = useState(false);
   const [onScreen, setOnScreen] = useState(true);
@@ -62,7 +66,7 @@ export default function ClientLogos({
                 width={c.w ? Math.round((c.w / c.h) * heightFor(c)) : undefined}
                 height={heightFor(c)}
                 style={{ '--logo-h': heightFor(c) }}
-                loading="eager"
+                loading="lazy"
                 decoding="async"
               />
             )
@@ -74,9 +78,15 @@ export default function ClientLogos({
   );
 
   return (
-    <section className="section client-strip" aria-labelledby="clients-heading" ref={ref}>
-      <div className="container">
-        <h2 id="clients-heading" className="client-strip__heading">{title}</h2>
+    <section className="client-strip" aria-labelledby="clients-heading" ref={ref}>
+      <div className="zb__inner">
+        <div className="zb__head">
+          <div>
+            <span className="zb__eyebrow">{eyebrow}</span>
+            <h2 id="clients-heading" className="zb__title">{title}</h2>
+            <p className="sg__sub">{lead}</p>
+          </div>
+        </div>
 
         <div className={`client-marquee${paused || !onScreen ? ' is-paused' : ''}`}>
           <div className="client-marquee__track">

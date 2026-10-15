@@ -170,7 +170,7 @@ export default function QuotePage() {
                         <label htmlFor="q-email">Work email</label>
                         <input id="q-email" type="email" inputMode="email" autoCapitalize="none" spellCheck={false} value={form.email} onChange={set('email')} onBlur={checks.blur('email')} autoComplete="email" maxLength={254} placeholder="name@company.com" {...field('q-email', errors.email)} />
                         {errors.email && <p className="form-error" id="q-email-err">{errors.email}</p>}
-                        {!errors.email && checks.suggestion && (
+                        {checks.suggestion && (
                           <p className="form-hint" role="status">
                             Did you mean <strong>{checks.suggestion}</strong>?{' '}
                             <button type="button" className="link-btn" onClick={() => setForm((f) => ({ ...f, email: checks.suggestion }))}>Use this</button>

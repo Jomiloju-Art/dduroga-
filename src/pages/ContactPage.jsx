@@ -164,7 +164,7 @@ export default function ContactPage() {
                     <label htmlFor="cf-email">Work email</label>
                     <input id="cf-email" type="email" inputMode="email" autoCapitalize="none" spellCheck={false} placeholder="name@company.com" value={form.email} onChange={set('email')} onBlur={checks.blur('email')} autoComplete="email" maxLength={254} aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'cf-email-err' : undefined} />
                     {errors.email && <p className="form-error" id="cf-email-err">{errors.email}</p>}
-                    {!errors.email && checks.suggestion && (
+                    {checks.suggestion && (
                       <p className="form-hint" role="status">
                         Did you mean <strong>{checks.suggestion}</strong>?{' '}
                         <button type="button" className="link-btn" onClick={() => setForm((f) => ({ ...f, email: checks.suggestion }))}>Use this</button>

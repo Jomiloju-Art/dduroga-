@@ -82,23 +82,47 @@ function suggestDomain(domain) {
   return '';
 }
 
+/** Providers people often type without their ending: "ada@gmail". */
+const BARE = { gmail: 'gmail.com', yahoo: 'yahoo.com', hotmail: 'hotmail.com', outlook: 'outlook.com', icloud: 'icloud.com', ymail: 'ymail.com', live: 'live.com', googlemail: 'googlemail.com' };
+
+/**
+ * The address the visitor most likely meant, for the common slips: a comma or
+ * semicolon for a dot ("gmail,com"), spaces, a stray dot at either end, a
+ * provider with no ending ("ada@gmail"), or a mistyped provider. '' when
+ * there is no confident fix.
+ */
+function repairEmail(raw) {
+  let s = String(raw ?? '').trim().replace(/^mailto:/i, '').replace(/\s+/g, '');
+  const at = s.lastIndexOf('@');
+  if (at < 1) return '';
+  const local = s.slice(0, at).replace(/^\.+|\.+$/g, '');
+  let domain = s.slice(at + 1).toLowerCase().replace(/[,;:]/g, '.').replace(/\.{2,}/g, '.').replace(/^\.+|\.+$/g, '');
+  if (BARE[domain]) domain = BARE[domain];
+  domain = suggestDomain(domain) || domain;
+  s = `${local}@${domain}`;
+  return EMAIL_RE.test(s) && !local.includes('..') && s !== String(raw ?? '').trim() ? s : '';
+}
+
 export function checkEmail(raw) {
   const trimmed = String(raw ?? '').trim();
   if (!trimmed) return { ok: false, empty: true, value: '' };
   const at = trimmed.lastIndexOf('@');
   const value = at > 0 ? trimmed.slice(0, at) + '@' + trimmed.slice(at + 1).toLowerCase() : trimmed;
-  const bad = (error) => ({ ok: false, value, error });
+  // Every error carries the likely intended address when there is one, so the
+  // form can offer it in one tap ("Did you mean ada@gmail.com?").
+  const bad = (error) => ({ ok: false, value, error, fix: repairEmail(trimmed) });
   if (/\s/.test(value)) return bad('Email addresses cannot contain spaces.');
   if ((value.match(/@/g) || []).length !== 1) return bad('An email address has one @, like name@company.com.');
   const [local, domain] = value.split('@');
   if (!local || !domain) return bad('An email address looks like name@company.com.');
   if (value.length > 254 || local.length > 64) return bad('That email address is too long.');
-  if (local.startsWith('.') || local.endsWith('.') || local.includes('..') || domain.includes('..')) {
+  if (/[,;:]/.test(domain)) return bad(`Use a dot (.) in your email address, not a ${domain.includes(',') ? 'comma' : domain.includes(';') ? 'semicolon' : 'colon'}.`);
+  if (local.startsWith('.') || local.endsWith('.') || local.includes('..') || domain.includes('..') || domain.endsWith('.')) {
     return bad('That email address has a misplaced dot.');
   }
-  if (!domain.includes('.')) return bad(`That email is missing its ending, like ${local}@${domain}.com.`);
+  if (!domain.includes('.')) return bad('That email address is missing its ending, like .com or .ng.');
   if (!EMAIL_RE.test(value)) return bad('That email address looks incomplete. It should look like name@company.com.');
-  if (DISPOSABLE.has(domain)) return bad('Please use an email address you check regularly, not a temporary one.');
+  if (DISPOSABLE.has(domain)) return { ok: false, value, error: 'Please use an email address you check regularly, not a temporary one.' };
   const fix = suggestDomain(domain);
   return { ok: true, value, suggestion: fix ? `${local}@${fix}` : '' };
 }
@@ -115,12 +139,10 @@ export function checkEmail(raw) {
 const NG_MOBILE = /^[789][01]\d{8}$/; // after the leading 0 or +234
 const NG_LANDLINE = /^[1-9]\d{7,8}$/;
 
-/** Sample numbers people type to get past a form: one repeated digit, or a straight run. */
-function looksFake(digits) {
-  const tail = digits.slice(-8);
-  if (/^(\d)\1+$/.test(tail)) return true;
-  return ['12345678', '23456789', '87654321', '98765432', '01234567'].includes(tail);
-}
+/* There is deliberately no "sample number" check (0801 234 5678, 0811 111
+   1111): it turned away numbers a real buyer can have, including Nigeria's
+   repeated-digit vanity numbers. Format is checked; spam is handled by the
+   trap field, the bot check and the rate limits (api/enquiry.js). */
 
 const groupNg = (n) => (NG_MOBILE.test(n) ? `${n.slice(0, 3)} ${n.slice(3, 6)} ${n.slice(6)}` : `${n.slice(0, 1)} ${n.slice(1, 4)} ${n.slice(4)}`);
 
@@ -155,7 +177,6 @@ export function checkPhone(raw) {
     } else {
       if (digits.length > 15) return bad('That number is too long. International numbers have at most 15 digits.');
       if (digits.length < 8) return bad('That number looks incomplete. Include the country code, like +44 20 7946 0000.');
-      if (looksFake(digits)) return bad('That looks like a sample number. Please enter your real number.');
       return { ok: true, value: `+${digits}`, display: `+${digits}`, kind: 'intl' };
     }
   } else if (digits.startsWith('0')) {
@@ -172,7 +193,6 @@ export function checkPhone(raw) {
     return bad('Start with 0 (like 0803 123 4567) or with + and your country code.');
   }
 
-  if (looksFake(ng.n)) return bad('That looks like a sample number. Please enter your real number.');
   return { ok: true, value: `+234${ng.n}`, display: `+234 ${groupNg(ng.n)}`, kind: ng.kind };
 }
 
@@ -209,7 +229,8 @@ export function checkContact({ name, email, phone }) {
   return {
     ok: Object.keys(errors).length === 0,
     errors,
-    suggestion: e.ok ? e.suggestion : '',
+    // The likely intended address: a typo fix for a valid one, a repair for a broken one.
+    suggestion: e.ok ? e.suggestion : (e.fix || ''),
     values: { name: n.value, email: e.ok ? e.value : '', phone: p.ok ? p.value : '', phoneKind: p.ok ? p.kind : '' },
   };
 }

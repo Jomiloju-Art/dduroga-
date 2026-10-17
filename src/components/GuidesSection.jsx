@@ -1,63 +1,56 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { homeResources } from '../data/homeContent.js';
+import { guides } from '../data/guides.js';
 import { IconArrowRight } from './Icons.jsx';
-import Reveal from './Reveal.jsx';
 
 /**
- * "Guides & insights": the homepage's editorial block.
+ * The homepage's learning section: "Safety insights" with topic tabs over
+ * three guide cards (after Sonas's "Industry insights" on Dribbble; the
+ * client chose it in Oct 2026 over a resources centre, a bento, a spotlight
+ * and a hub, and it replaced a featured-story layout).
  *
- * Magazine layout: the newest guide as a full-bleed featured story (photo,
- * gradient, tag, title, summary, read time), then the next three as compact
- * rows beside it. The guides carry a summary and a reading time, which the old
- * three plain cards never showed. Heading matches the other homepage sections
- * (eyebrow, display title, "all" link on the right).
+ * Topics come from the guides themselves, so a guide with a new tag adds a
+ * tab. "All" shows the newest three; a topic shows up to three of its own.
  */
+const topics = [...new Set(guides.map((g) => g.tag))];
+
 export default function GuidesSection() {
-  const [feature, ...rest] = homeResources;
-  if (!feature) return null;
+  const [topic, setTopic] = useState('');
+  const shown = (topic ? guides.filter((g) => g.tag === topic) : guides).slice(0, 3);
+  if (!guides.length) return null;
   return (
-    <section className="gx" aria-labelledby="gx-title">
-      <div className="gx__inner">
-        <div className="zb__head">
-          <div>
-            <span className="zb__eyebrow">Learning centre</span>
-            <h2 className="zb__title" id="gx-title">Guides &amp; insights</h2>
-            <p className="sg__sub">Choosing the right protection, explained in plain language.</p>
-          </div>
-          <Link to="/learning" className="zb__all">All guides <IconArrowRight width="14" height="14" /></Link>
-        </div>
-
-        <Reveal className="gx__grid reveal-stagger">
-          <Link to={`/learning/${feature.slug}`} className="gx-feature">
-            <img className="gx-feature__img" src={feature.image} alt="" loading="lazy" decoding="async" />
-            <span className="gx-feature__shade" aria-hidden="true" />
-            <span className="gx-feature__body">
-              <span className="gx-tag gx-tag--light">{feature.type}</span>
-              <h3 className="gx-feature__title">{feature.title}</h3>
-              {feature.summary && <p className="gx-feature__summary">{feature.summary}</p>}
-              <span className="gx-feature__foot">
-                <span className="gx-btn">Read the guide <IconArrowRight width="14" height="14" /></span>
-                <span className="gx-meta gx-meta--light">{feature.date}{feature.readMinutes ? ` · ${feature.readMinutes} min read` : ''}</span>
-              </span>
-            </span>
-          </Link>
-
-          <ul className="gx-list">
-            {rest.map((r) => (
-              <li key={r.slug}>
-                <Link to={`/learning/${r.slug}`} className="gx-row">
-                  <span className="gx-row__media"><img src={r.image} alt="" loading="lazy" decoding="async" /></span>
-                  <span className="gx-row__body">
-                    <span className="gx-tag">{r.type}</span>
-                    <h3 className="gx-row__title">{r.title}</h3>
-                    <span className="gx-meta">{r.date}{r.readMinutes ? ` · ${r.readMinutes} min read` : ''}</span>
-                  </span>
-                  <span className="gx-row__arrow" aria-hidden="true"><IconArrowRight width="18" height="18" /></span>
-                </Link>
-              </li>
+    <section className="lx lx-tabs" aria-labelledby="gx-title">
+      <div className="zb__inner">
+        <div className="lx-tabs__head">
+          <span className="zb__eyebrow">Learning centre</span>
+          <h2 className="zb__title" id="gx-title">Safety <span className="lx-accent">insights</span></h2>
+          <p className="sg__sub">Short guides to the marks printed on gloves, boots, helmets and hi-vis.</p>
+          <div className="lx-chips" role="group" aria-label="Filter guides by topic">
+            {['', ...topics].map((t) => (
+              <button key={t || 'all'} type="button" className="lx-chip" aria-pressed={topic === t} onClick={() => setTopic(t)}>
+                {t || 'All'}
+              </button>
             ))}
-          </ul>
-        </Reveal>
+          </div>
+        </div>
+        {/* Keyed by topic so the cards replay their entrance on change. */}
+        <div className="lx-tabs__grid" key={topic}>
+          {shown.map((g) => (
+            <Link to={`/learning/${g.slug}`} className="lx-card" key={g.slug}>
+              <span className="lx-card__img"><img src={`/guides/${g.slug}.jpg`} alt="" loading="lazy" decoding="async" /></span>
+              <span className="lx-card__tag">{g.tag}</span>
+              <strong className="lx-card__title">{g.title}</strong>
+              <span className="lx-card__foot">
+                {g.date} · {g.readMinutes} min read
+                <span className="lx-card__go">Read <IconArrowRight width="14" height="14" /></span>
+              </span>
+            </Link>
+          ))}
+        </div>
+        <p className="sr-only" aria-live="polite">{topic ? `${shown.length} ${shown.length === 1 ? 'guide' : 'guides'} on ${topic}` : ''}</p>
+        <div className="lx-center">
+          <Link to="/learning" className="lx-btn">All {guides.length} guides <IconArrowRight width="15" height="15" /></Link>
+        </div>
       </div>
     </section>
   );

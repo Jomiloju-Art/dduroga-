@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Loader from './Loader.jsx';
 import ErrorBoundary from './ErrorBoundary.jsx';
 import Navbar from './Navbar.jsx';
+import TopBar from './TopBar.jsx';
 import Footer from './Footer.jsx';
 import BagDrawer from './BagDrawer.jsx';
 import { brand } from '../data/brand.js';
@@ -15,6 +16,7 @@ export default function Layout() {
 
   return (
     <>
+      <TopBar />
       <Navbar />
       <main id="main">
         {/* Boundary sits here, not around <Routes>, so a loading or failed page

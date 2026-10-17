@@ -11,11 +11,9 @@
  *   title  - what the standard governs
  *   scope  - one line, plain language
  *   zone   - protection zone id used by the catalogue (head | hand | body | feet)
- *   hazard - canonical hazard id from `hazardNames`, when a clean filter exists
+ *   hazard - canonical hazard id from `hazardNames`, shown as a label in search
  *   marks  - extra grade/class vocabulary a buyer might type instead
  */
-import { byHazard } from './products.js';
-
 export const standards = [
   // --- Hand ---------------------------------------------------------------
   {
@@ -334,19 +332,12 @@ export function searchStandards(query, limit = 6) {
 /** Short, human label for a protection zone id. */
 export const zoneLabels = { head: 'Head', hand: 'Hand', body: 'Body', feet: 'Feet' };
 
-/** Below this many matching products, a hazard filter is not worth landing on. */
-const THIN = 5;
-
 /**
- * Catalogue link for a standard entry.
- *
- * Only one filter is ever emitted: ProductsPage resolves hazard before zone,
- * so passing both would silently drop the zone and light up the wrong filter
- * chip. The hazard filter is used only when it returns a useful number of
- * products, counted live off the catalogue so this cannot drift.
+ * Catalogue link for a standard entry: the protection zone it belongs to.
+ * (It used to land on a hazard filter where one had enough products; hazard
+ * filtering was removed from the catalogue at the client's request, Oct 2026.)
  */
 export function standardHref(s) {
-  if (s.hazard && byHazard(s.hazard).length >= THIN) return `/products?hazard=${s.hazard}`;
   return `/products?cat=${s.zone}`;
 }
 

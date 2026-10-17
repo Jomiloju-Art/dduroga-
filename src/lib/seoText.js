@@ -8,7 +8,7 @@
  * ones Nigerian buyers search with: the product type plus "Nigeria" or
  * "Lagos".
  */
-import { rangeLabel, rangeById, zones, hazardNames, industryCatalog, productsByRange, productsByZone, byIndustry, byHazard, allProducts } from '../data/products.js';
+import { rangeLabel, rangeById, zones, industryCatalog, productsByRange, productsByZone, byIndustry, allProducts } from '../data/products.js';
 
 export const SITE = 'DDUROGA Safety';
 export const HOME_TITLE = 'DDUROGA Safety | PPE Supplier in Lagos, Nigeria';
@@ -59,8 +59,7 @@ export function productDescription(p) {
 /* ---------- product listings ---------- */
 
 /** What a /products URL is showing, resolved the same way ProductsPage does. */
-export function listingFor({ cat, range, industry, hazard }) {
-  if (hazard && hazardNames[hazard]) return { kind: 'hazard', label: hazardNames[hazard], list: byHazard(hazard) };
+export function listingFor({ cat, range, industry }) {
   if (industry) {
     const i = industryCatalog.find((x) => x.slug === industry);
     if (i) return { kind: 'industry', label: i.label, list: byIndustry(industry) };
@@ -74,7 +73,6 @@ export function listingFor({ cat, range, industry, hazard }) {
 
 export function listingTitle({ kind, label }) {
   if (kind === 'industry') return `PPE for ${label} in Nigeria`;
-  if (kind === 'hazard') return `${label} Protection PPE in Nigeria`;
   if (kind === 'all') return 'PPE & Safety Equipment in Nigeria';
   return `${label} in Nigeria`;
 }
@@ -82,8 +80,7 @@ export function listingTitle({ kind, label }) {
 export function listingDescription({ kind, label, list }) {
   const n = list.length;
   const what = kind === 'industry' ? `PPE for ${lower(label)} sites`
-    : kind === 'hazard' ? `PPE rated for ${lower(label)} protection`
-      : kind === 'all' ? 'safety boots, gloves, helmets, hi-vis and workwear'
+    : kind === 'all' ? 'safety boots, gloves, helmets, hi-vis and workwear'
         : lower(label);
   return clip(`${n} certified products: ${what} from DDUROGA Safety, stocked in Lagos and supplied across Nigeria. Request a quote online.`);
 }
@@ -102,8 +99,6 @@ export function listingIntro({ kind, label, list }) {
       return `${n} ${lower(label)} products, including ${joinList(types)}.${tested} ${where}`;
     case 'industry':
       return `PPE for ${lower(label)} in Nigeria: ${n} certified products, led by ${joinList(types)}. ${where}`;
-    case 'hazard':
-      return `${n} products rated for ${lower(label)} protection, including ${joinList(types)}.${tested} ${where}`;
     default:
       return `The full DDUROGA Safety range: ${n} certified products for head, hand, body and feet protection. ${where}`;
   }

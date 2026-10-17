@@ -64,7 +64,19 @@ export default function Navbar() {
       const header = document.querySelector('.site-header');
       return Math.max(8, hero.getBoundingClientRect().bottom + window.scrollY - (header?.offsetHeight || 74));
     };
+    // Where the header's bottom edge sits in the window, for the mega-menu
+    // backdrop (.menu-backdrop starts there). It moves: the contact bar
+    // (TopBar.jsx) sits above the header until it scrolls away. Worked out
+    // from the bar and the header's height rather than the header's own box,
+    // so the slide-away transform cannot leave it stale.
+    const setHeaderBottom = () => {
+      const bar = document.querySelector('.topbar');
+      const header = document.querySelector('.site-header');
+      const top = Math.max(0, bar ? bar.getBoundingClientRect().bottom : 0);
+      document.documentElement.style.setProperty('--hdr-bottom', `${Math.round(top + (header?.offsetHeight || 74))}px`);
+    };
     const onScroll = () => {
+      setHeaderBottom();
       const y = window.scrollY;
       const delta = y - lastY.current;
       const end = threshold();

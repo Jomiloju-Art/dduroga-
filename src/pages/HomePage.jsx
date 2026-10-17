@@ -2,14 +2,14 @@ import { Link } from 'react-router-dom';
 import {
   homeIndustries,
 } from '../data/homeContent.js';
-import { IconArrowRight, IconCheck } from '../components/Icons.jsx';
+import { IconArrowRight } from '../components/Icons.jsx';
 import { usePageMeta } from '../lib/seo.js';
 import { pageMeta } from '../data/pageMeta.js';
 import TrustBand from '../components/TrustBand.jsx';
 import TrendingShowcase from '../components/TrendingShowcase.jsx';
 import ClientLogos from '../components/ClientLogos.jsx';
 import ZoneBento from '../components/ZoneBento.jsx';
-import SectorGrid from '../components/SectorGrid.jsx';
+import SectorMosaic from '../components/SectorMosaic.jsx';
 import GuidesSection from '../components/GuidesSection.jsx';
 import OrderSteps from '../components/OrderSteps.jsx';
 import { catalogues } from '../data/catalogues.generated.js';
@@ -17,14 +17,6 @@ import { zones, productsByZone, allProducts, industryCatalog } from '../data/pro
 
 /** "147 pages · PDF · 24.9 MB", from src/data/catalogues.generated.js. */
 const catalogueMeta = (c) => `${c.pages} pages · PDF · ${(c.bytes / 1024 / 1024).toFixed(1)} MB`;
-
-/** What ships with an order — replaces repeating the badge set a second time. */
-const documentation = [
-  'Declarations of conformity on request',
-  'Test reports on request',
-  'Specification sheets for tenders',
-  'Custom branding and private label',
-];
 
 /*
  * Section order (Oct 2026 review): products first, then proof, then the range
@@ -62,62 +54,31 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-        {/* Fades the hero's bottom edge into the white band below, so the dark
-            photo and the light section read as one surface rather than two
-            stacked blocks with a hard seam. */}
+        {/* Darkens the photo's lower edge under the certification band. */}
         <div className="hx-hero__blend" aria-hidden="true" />
-      </section>
+        {/* The brand name as a large outline, quietly behind the headline in
+            the open part of the photo (desktop only). */}
+        <span className="hx-hero__word" aria-hidden="true">DDUROGA</span>
 
-      {/* ================= 2. TRUST BAND ================= */}
-      <TrustBand />
+        {/* ================= 2. TRUST BAND =================
+            Inside the hero: frosted across the photo's foot on desktop, a
+            plain white band under it on phones. */}
+        <TrustBand variant="hero" />
+      </section>
 
       {/* ================= 3. PROTECTION ZONES ================= */}
       <ZoneBento />
 
-      {/* ================= 4. CLIENTS =================
-          Moved up from near the end: these names are the strongest proof on the
-          page, and B2B buyers look for them early. */}
-      <ClientLogos />
-
-      {/* ================= 5. TRENDING (client-picked, see data/trending.js) ================= */}
+      {/* ================= 4. TRENDING (client-picked, see data/trending.js) ================= */}
       <TrendingShowcase />
 
-      {/* ================= 6. FIND YOUR RANGE =================
-          Browse by industry (SectorGrid.jsx). The "By hazard" chips that used to follow were
+      {/* ================= 5. FIND YOUR RANGE =================
+          Browse by industry: sector photo tiles (SectorMosaic.jsx). The "By hazard" chips that used to follow were
           removed at the client's request (Oct 2026); hazards remain a filter
           on the catalogue page. */}
-      <SectorGrid slugs={homeIndustries} />
+      <SectorMosaic slugs={homeIndustries} />
 
-      {/* ================= 7. COMPLIANCE ================= */}
-      <section className="hp-compliance" aria-labelledby="compliance-title">
-        <div className="hx-bleed hp-compliance__inner">
-          <div>
-            <span className="zb__eyebrow">Compliance</span>
-            <h2 className="zb__title" id="compliance-title">Are you compliant?</h2>
-            <p>
-              Ask for the standards documentation your auditors need with your order. Learn what
-              each mark means and how to specify it correctly.
-            </p>
-          </div>
-          <div>
-            {/* Lists the documents buyers can ask for. Nothing here promises
-                more than "on request" until the client confirms what ships as standard. */}
-            <ul className="hp-ships">
-              {documentation.map((d) => (
-                <li key={d}>
-                  <IconCheck width="17" height="17" />
-                  <span>{d}</span>
-                </li>
-              ))}
-            </ul>
-            <Link to="/learning" className="btn hx-btn">
-              Visit the Learning Centre <IconArrowRight width="14" height="14" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ================= 8. CATALOGUE =================
+      {/* ================= 6. CATALOGUE =================
           One download: Mallcom's 2025 catalogue, the source every product page
           on this site is built from. The PDF is the catalogue as printed, with
           its photos recompressed for the web (97 MB to 24.9 MB); text and
@@ -174,11 +135,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ================= 9. GUIDES & INSIGHTS (GuidesSection.jsx) ================= */}
+      {/* ================= 7. SAFETY INSIGHTS: guides by topic (GuidesSection.jsx) ================= */}
       <GuidesSection />
 
-      {/* ================= 10. HOW ORDERING WORKS + CLOSE (OrderSteps.jsx) ================= */}
+      {/* ================= 8. HOW ORDERING WORKS + CLOSE (OrderSteps.jsx) ================= */}
       <OrderSteps />
+
+      {/* ================= 9. CLIENTS =================
+          Last, right before the footer (client's request, Oct 2026; it sat
+          under the protection zones before). */}
+      <ClientLogos />
     </>
   );
 }

@@ -1,114 +1,95 @@
-import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { clients } from '../data/clients.js';
+import { IconArrowRight } from './Icons.jsx';
+import Reveal from './Reveal.jsx';
 
 /**
- * "Trusted by" strip — an infinite logo marquee (ticker).
+ * "Trusted by": a still logo wall (after Enorm's client section on Dribbble;
+ * the client chose it in Oct 2026 over a honeycomb and orbit rings, and it
+ * replaced a scrolling logo marquee). An orange block carries the heading,
+ * then every client's logo sits in a grid with hairline dividers, and the
+ * last cell asks for a quote. All 13 logos are visible at once, without
+ * waiting for a ticker.
  *
- * How the loop works: the list is rendered TWICE inside one track. The track
- * slides by exactly one copy (-50% of its own width) and repeats, so the seam
- * never shows. The second copy is aria-hidden so assistive tech hears the
- * clients once, not twice. Motion is CSS transform only.
+ * Only what clients.js holds is shown: each client's own logo and name (the
+ * name appears on hover). No quotes, figures or sectors, because none have
+ * been supplied.
  *
- * Logo wall practice applied here:
- *   - Optical sizing. Every mark gets roughly the same AREA, not the same
- *     height: height = BASE x ratio^-0.3. Same-height sizing made the wide
- *     wordmarks (NIPCO, Mantrac) dominate and the square badges (BUA, Tower
- *     Alloys, 7UP) look like specks.
- *   - One treatment. Every mark sits in its own colour on an identical white
- *     tile. Greyscale at rest (the earlier treatment) turned the solid-ground
- *     lockups (Colgate, Mantrac, BUA) into grey blocks and washed the light
- *     marks (Tower Alloys) out almost to nothing; the tile gives every logo,
- *     whatever its published style, the same frame. The marks themselves are
- *     the clients' own files, never redrawn.
- *   - A pause control (WCAG 2.2.2: anything that moves for over five seconds
- *     needs one). Hover and keyboard focus also pause it, and it stops while
- *     scrolled out of view. Under prefers-reduced-motion it never moves and
- *     falls back to a centred, wrapped, static row.
+ * The grid is sized for 13 logos: with the heading block and the quote cell
+ * it fills whole rows at 6, 4 and 3 across. Another count leaves gaps in the
+ * last row, which then needs the spans in .cs-wall adjusting.
+ *
+ * Phones get the scrolling logo row instead (the client asked for the
+ * marquee back on mobile, without a play/pause button): the heading block,
+ * then every logo on a tile in an endless loop, then the quote link. The list
+ * is rendered twice in one track that slides by exactly one copy, so the seam
+ * never shows; the second copy is hidden from screen readers. Touching or
+ * hovering the row pauses it, and under reduced motion it stands still as a
+ * wrapped grid. Only one of the two layouts is ever displayed.
  *
  * Renders nothing while `clients` is empty.
  */
-const BASE = 50;
-const heightFor = (c) => (c.w && c.h ? Math.round(Math.min(BASE, BASE * (c.w / c.h) ** -0.3)) : 40);
+
+/* Optical sizing: every mark gets roughly the same area, not the same height,
+   so wide wordmarks (NIPCO, Mantrac) don't dominate square badges (BUA, 7UP). */
+const heightFor = (c) => (c.w && c.h ? Math.min(46, 46 * (c.w / c.h) ** -0.3) : 36);
+
+function Mark({ c, label }) {
+  return c.logo
+    ? <img src={c.logo} alt={label ? c.name : ''} title={c.name} loading="lazy" decoding="async" style={{ '--lh': `${heightFor(c).toFixed(1)}%` }} />
+    : <strong className="cs-wall__text">{c.name}</strong>;
+}
 
 export default function ClientLogos({
   eyebrow = 'Trusted by',
   title = 'Trusted on sites across Nigeria',
   lead = 'From manufacturing plants to construction sites, these teams rely on us for compliant, consistently available PPE.',
 }) {
-  const [paused, setPaused] = useState(false);
-  const [onScreen, setOnScreen] = useState(true);
-  const ref = useRef(null);
-
-  // No point animating what nobody can see.
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || !('IntersectionObserver' in window)) return undefined;
-    const io = new IntersectionObserver(([e]) => setOnScreen(e.isIntersecting));
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
   if (!clients.length) return null;
-
-  const copy = (isClone) => (
-    <ul
-      className="client-marquee__group"
-      key={isClone ? 'clone' : 'main'}
-      aria-hidden={isClone || undefined}
-    >
-      {clients.map((c) => (
-        <li className="client-logo" key={c.name}>
-          {c.logo
-            ? (
-              <img
-                src={c.logo}
-                alt={isClone ? '' : c.name}
-                width={c.w ? Math.round((c.w / c.h) * heightFor(c)) : undefined}
-                height={heightFor(c)}
-                style={{ '--logo-h': heightFor(c) }}
-                loading="lazy"
-                decoding="async"
-              />
-            )
-            : <span className="client-logo__name">{c.name}</span>}
-          {c.sector && <span className="client-logo__sector">{c.sector}</span>}
-        </li>
-      ))}
-    </ul>
-  );
-
   return (
-    <section className="client-strip" aria-labelledby="clients-heading" ref={ref}>
+    <section className="cs cs-wall" aria-labelledby="clients-heading">
       <div className="zb__inner">
-        <div className="zb__head">
-          <div>
-            <span className="zb__eyebrow">{eyebrow}</span>
-            <h2 id="clients-heading" className="zb__title">{title}</h2>
-            <p className="sg__sub">{lead}</p>
-          </div>
-        </div>
+        <Reveal as="ul" className="cs-wall__grid reveal-stagger">
+          <li className="cs-wall__intro">
+            <span className="cs-wall__eyebrow">{eyebrow}</span>
+            <h2 id="clients-heading">{title}</h2>
+            <p>{lead}</p>
+          </li>
+          {clients.map((c) => (
+            <li className="cs-wall__cell" key={c.name}>
+              <Mark c={c} label />
+              <span className="cs-wall__name" aria-hidden="true">{c.name}</span>
+            </li>
+          ))}
+          <li className="cs-wall__cell cs-wall__cell--cta">
+            <Link to="/contact">
+              <span>Supplying your site next?</span>
+              <strong>Request a quote <IconArrowRight width="15" height="15" /></strong>
+            </Link>
+          </li>
+        </Reveal>
 
-        <div className={`client-marquee${paused || !onScreen ? ' is-paused' : ''}`}>
-          <div className="client-marquee__track">
-            {copy(false)}
-            {copy(true)}
+        {/* Phones: heading, endless logo row, quote link. */}
+        <div className="cs-mob">
+          <div className="cs-wall__intro">
+            <span className="cs-wall__eyebrow">{eyebrow}</span>
+            <h2>{title}</h2>
+            <p>{lead}</p>
           </div>
+          <div className="cs-marquee">
+            <div className="cs-marquee__track">
+              {[false, true].map((clone) => (
+                <ul className="cs-marquee__group" key={clone ? 'clone' : 'main'} aria-hidden={clone || undefined}>
+                  {clients.map((c) => <li className="cs-marquee__tile" key={c.name}><Mark c={c} label={!clone} /></li>)}
+                </ul>
+              ))}
+            </div>
+          </div>
+          <Link to="/contact" className="cs-mob__cta">
+            <span>Supplying your site next?</span>
+            <strong>Request a quote <IconArrowRight width="15" height="15" /></strong>
+          </Link>
         </div>
-
-        <button
-          type="button"
-          className="client-marquee__toggle"
-          aria-pressed={paused}
-          onClick={() => setPaused((p) => !p)}
-        >
-          {paused ? (
-            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M4 2.5v11l9-5.5z" fill="currentColor" /></svg>
-          ) : (
-            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M4 2.5h3v11H4zM9 2.5h3v11H9z" fill="currentColor" /></svg>
-          )}
-          {paused ? 'Play' : 'Pause'}
-          <span className="sr-only"> client logos</span>
-        </button>
       </div>
     </section>
   );

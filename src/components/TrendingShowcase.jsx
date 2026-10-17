@@ -5,21 +5,30 @@ import { TRENDING } from '../data/trending.js';
 import { glossaryIcon } from '../data/glossaryIcons.js';
 import { useQuote } from '../quote/QuoteContext.jsx';
 import { IconArrowRight } from './Icons.jsx';
+import { productSpecs } from '../lib/productSpecs.js';
 
 /**
- * Homepage "Trending now": a dark band with zone tabs, one spotlight product
- * and a swipeable rail of the rest. Products and order come from trending.js.
+ * Homepage "Trending now": a dark product stage, after the spotlit product
+ * showcases on Dribbble (Oct 2026 review; it replaced a spotlight card and a
+ * two-row card grid).
  *
- * Every detail on a card (symbols, standard, CE) comes from the product's
- * Mallcom 2025 catalogue row, the same data the product page shows.
+ *   left    the product's trending rank as a large outline number, its type,
+ *           name, protection symbols and key specs, View product / Add to quote
+ *   centre  the product on a lit disc, with the previous and next products
+ *           dimmed either side and viewfinder corners around the stage
+ *   right   position meter (01 / 11) and arrows
+ *   below   every trending product as a thumbnail, to jump straight to one
+ *
+ * Product photos are on white, so they are blended (multiply) into the lit
+ * disc: the white disappears and the product reads as standing in the light.
+ * Products and order come from trending.js; every detail comes from the
+ * product's Mallcom 2025 catalogue row. Arrow keys and swipes move through
+ * the products, and the change is announced to screen readers.
  */
 
-/** The headline standard: one with a performance code, else an EN/ISO one, else the first. */
-const firstStandard = (p) => {
-  const list = p.catalogueStandards || [];
-  const s = list.find((x) => x.rating) || list.find((x) => /^EN/.test(x.code)) || list[0];
-  return s ? (s.rating ? `${s.code} ${s.rating}` : s.code) : '';
-};
+const pad = (n) => String(n).padStart(2, '0');
+const typeOf = (p) => rangeLabel(p) || zoneOf(p)?.label || '';
+const reduceMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
 function QuickAdd({ product, className, children }) {
   const { add } = useQuote();
@@ -35,95 +44,82 @@ function QuickAdd({ product, className, children }) {
   );
 }
 
-function Spotlight({ product, rank }) {
-  const symbols = product.catalogueSymbols.filter(glossaryIcon).slice(0, 4);
-  const std = firstStandard(product);
+/** Key specs as label / value rows (lib/productSpecs.js). */
+function Specs({ product, max }) {
+  const rows = productSpecs(product, max);
+  if (!rows.length) return null;
   return (
-    <Link to={`/products/${product.slug}`} className="tr-spot" key={product.slug}>
-      <span className="tr-spot__media">
-        <span className="tr-badge">#{rank} Trending</span>
-        <img src={product.img} alt={product.title} loading="lazy" decoding="async" />
-      </span>
-      <span className="tr-spot__body">
-        <span className="tr-type">{rangeLabel(product) || zoneOf(product)?.label}</span>
-        <span className="tr-spot__name">{product.title}</span>
-        {symbols.length > 0 && (
-          <span className="tr-symbols">
-            {symbols.map((s) => (
-              <span key={s} className="tr-symbol"><img src={glossaryIcon(s)} alt="" loading="lazy" />{s}</span>
-            ))}
+    <span className="tr-specs ts__specs">
+      {rows.map((r) => (
+        <span className="tr-spec" key={r.label}>
+          <span className="tr-spec__k">{r.label}</span>
+          <span className="tr-spec__v">
+            {r.label === 'CE' && <img src="/accreditations/ce.png" alt="" loading="lazy" />}
+            {r.value}
           </span>
-        )}
-        {(std || product.ce) && (
-          <span className="tr-std">
-            {product.ce && <img src="/accreditations/ce.png" alt="CE marked" loading="lazy" />}
-            {std && <span>{std}</span>}
-          </span>
-        )}
-        <span className="tr-spot__cta">
-          <span className="tr-btn tr-btn--light">View product <IconArrowRight width="16" height="16" /></span>
-          <QuickAdd product={product} className="tr-btn tr-btn--orange">Add to quote</QuickAdd>
         </span>
-      </span>
-    </Link>
-  );
-}
-
-function RailCard({ product }) {
-  const std = firstStandard(product);
-  return (
-    <Link to={`/products/${product.slug}`} className="tr-card">
-      <span className="tr-card__media">
-        <img src={product.img} alt={product.title} loading="lazy" />
-        <QuickAdd product={product} className="tr-card__add">+</QuickAdd>
-      </span>
-      <span className="tr-card__body">
-        <span className="tr-type">{rangeLabel(product) || zoneOf(product)?.label}</span>
-        <span className="tr-card__name">{product.title}</span>
-        {std && <span className="tr-card__std">{product.ce && <b>CE</b>}{std}</span>}
-      </span>
-    </Link>
+      ))}
+    </span>
   );
 }
 
 export default function TrendingShowcase() {
   const all = useMemo(() => TRENDING.map((s, i) => ({ p: findProduct(s), rank: i + 1 })).filter((x) => x.p), []);
   const [zone, setZone] = useState('');
+  const [index, setIndex] = useState(0);
+  const [dir, setDir] = useState(1);
   const list = zone ? all.filter((x) => zoneOf(x.p)?.id === zone) : all;
-  const [spot, ...rest] = list;
+  const n = list.length;
+  const at = Math.min(index, Math.max(0, n - 1));
+  const cur = list[at];
 
-  const railRef = useRef(null);
-  const [progress, setProgress] = useState({ start: 0, size: 1, atStart: true, atEnd: false });
-  const measure = () => {
-    const el = railRef.current;
-    if (!el) return;
-    const max = el.scrollWidth - el.clientWidth;
-    setProgress({
-      start: max > 0 ? el.scrollLeft / el.scrollWidth : 0,
-      size: el.scrollWidth ? el.clientWidth / el.scrollWidth : 1,
-      atStart: el.scrollLeft <= 2,
-      atEnd: el.scrollLeft >= max - 2,
-    });
+  const go = (to, d) => {
+    if (n < 2) return;
+    const i = ((to % n) + n) % n;
+    setDir(d ?? (i > at ? 1 : -1));
+    setIndex(i);
   };
+  const next = () => go(at + 1, 1);
+  const prev = () => go(at - 1, -1);
+
+  // Keep the active thumbnail in view without scrolling the page itself.
+  const thumbsRef = useRef(null);
   useEffect(() => {
-    const el = railRef.current;
-    if (!el) return undefined;
-    el.scrollLeft = 0;
-    measure();
-    el.addEventListener('scroll', measure, { passive: true });
-    window.addEventListener('resize', measure);
-    return () => { el.removeEventListener('scroll', measure); window.removeEventListener('resize', measure); };
-  }, [zone]);
-  const scrollBy = (dir) => {
-    const el = railRef.current;
-    if (el) el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: 'smooth' });
+    const rail = thumbsRef.current;
+    const el = rail?.children[at];
+    if (!rail || !el) return;
+    const left = el.offsetLeft;
+    const right = left + el.offsetWidth;
+    const behavior = reduceMotion() ? 'auto' : 'smooth';
+    if (left < rail.scrollLeft) rail.scrollTo({ left: left - 8, behavior });
+    else if (right > rail.scrollLeft + rail.clientWidth) rail.scrollTo({ left: right - rail.clientWidth + 8, behavior });
+  }, [at, zone]);
+
+  // Swipe on the stage (phones).
+  const touch = useRef(null);
+  const onTouchStart = (e) => { const t = e.touches[0]; touch.current = { x: t.clientX, y: t.clientY }; };
+  const onTouchEnd = (e) => {
+    const s = touch.current;
+    touch.current = null;
+    if (!s) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - s.x;
+    if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(t.clientY - s.y)) (dx < 0 ? next : prev)();
+  };
+  const onKeyDown = (e) => {
+    if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
   };
 
   const tabs = [{ id: '', label: 'All' }, ...zones.map((z) => ({ id: z.id, label: z.id.charAt(0).toUpperCase() + z.id.slice(1) }))]
     .map((t) => ({ ...t, count: t.id ? all.filter((x) => zoneOf(x.p)?.id === t.id).length : all.length }))
     .filter((t) => t.count > 0);
 
-  if (!spot) return null;
+  if (!cur) return null;
+  const p = cur.p;
+  const before = n > 1 ? list[(at - 1 + n) % n] : null;
+  const after = n > 2 ? list[(at + 1) % n] : null;
+  const symbols = (p.catalogueSymbols || []).filter(glossaryIcon).slice(0, 3);
 
   return (
     <section className="tr" aria-labelledby="trending-heading">
@@ -142,7 +138,7 @@ export default function TrendingShowcase() {
                   role="tab"
                   aria-selected={zone === t.id}
                   className="tr-tab"
-                  onClick={() => setZone(t.id)}
+                  onClick={() => { setZone(t.id); setIndex(0); setDir(1); }}
                 >
                   {t.label}<span>{t.count}</span>
                 </button>
@@ -152,27 +148,83 @@ export default function TrendingShowcase() {
           </div>
         </div>
 
-        {/* key on zone so the cards replay their entrance when the filter changes */}
-        <div className="tr__stage" key={zone || 'all'}>
-          <Spotlight product={spot.p} rank={spot.rank} />
-          {rest.length > 0 && (
-            <div className="tr__railwrap">
-              <div className="tr__rail" ref={railRef}>
-                {rest.map((x) => <RailCard key={x.p.slug} product={x.p} />)}
-              </div>
-              <div className="tr__nav">
-                <span className="tr__bar" aria-hidden="true">
-                  <i style={{ left: `${progress.start * 100}%`, width: `${Math.min(1, progress.size) * 100}%` }} />
-                </span>
-                <button type="button" className="tr__arrow" onClick={() => scrollBy(-1)} disabled={progress.atStart} aria-label="Previous products">
-                  <IconArrowRight width="18" height="18" style={{ transform: 'rotate(180deg)' }} />
-                </button>
-                <button type="button" className="tr__arrow" onClick={() => scrollBy(1)} disabled={progress.atEnd} aria-label="Next products">
-                  <IconArrowRight width="18" height="18" />
-                </button>
-              </div>
-            </div>
-          )}
+        <div
+          className="ts"
+          role="region"
+          aria-roledescription="carousel"
+          aria-label="Trending products"
+          onKeyDown={onKeyDown}
+        >
+          {/* Keyed by product so the text replays its entrance on change. */}
+          <div className="ts__info" key={`i-${zone}-${p.slug}`} data-dir={dir}>
+            <span className="ts__rank" aria-hidden="true">{pad(cur.rank)}</span>
+            <span className="ts__badge">#{cur.rank} trending</span>
+            <span className="tr-type">{typeOf(p)}</span>
+            <h3 className="ts__name"><Link to={`/products/${p.slug}`}>{p.title}</Link></h3>
+            {symbols.length > 0 && (
+              <span className="tr-symbols ts__symbols">
+                {symbols.map((s) => (
+                  <span key={s} className="tr-symbol"><img src={glossaryIcon(s)} alt="" loading="lazy" />{s}</span>
+                ))}
+              </span>
+            )}
+            <Specs product={p} max={4} />
+            <span className="ts__cta">
+              <Link to={`/products/${p.slug}`} className="tr-btn tr-btn--white">View product <IconArrowRight width="16" height="16" /></Link>
+              <QuickAdd product={p} className="tr-btn tr-btn--orange">Add to quote</QuickAdd>
+            </span>
+          </div>
+
+          <div className="ts__stage" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+            <span className="ts__frame" aria-hidden="true"><i /><i /><i /><i /></span>
+            {before && (
+              <button type="button" className="ts__ghost ts__ghost--prev" onClick={prev} aria-label={`Previous: ${before.p.title}`}>
+                <img src={before.p.img} alt="" loading="lazy" decoding="async" />
+              </button>
+            )}
+            {after && (
+              <button type="button" className="ts__ghost ts__ghost--next" onClick={next} aria-label={`Next: ${after.p.title}`}>
+                <img src={after.p.img} alt="" loading="lazy" decoding="async" />
+              </button>
+            )}
+            <Link to={`/products/${p.slug}`} className="ts__spot" key={`s-${zone}-${p.slug}`} data-dir={dir} tabIndex={-1} aria-hidden="true">
+              <img src={p.img} alt="" loading="lazy" decoding="async" />
+            </Link>
+          </div>
+
+          <div className="ts__meter">
+            <span className="ts__count"><b>{pad(at + 1)}</b><span>/ {pad(n)}</span></span>
+            <span className="ts__bar" aria-hidden="true"><i style={{ '--p': n ? (at + 1) / n : 1 }} /></span>
+            <span className="ts__arrows">
+              <button type="button" className="ts__arrow" onClick={prev} disabled={n < 2} aria-label="Previous product">
+                <IconArrowRight width="18" height="18" style={{ transform: 'rotate(180deg)' }} />
+              </button>
+              <button type="button" className="ts__arrow" onClick={next} disabled={n < 2} aria-label="Next product">
+                <IconArrowRight width="18" height="18" />
+              </button>
+            </span>
+          </div>
+        </div>
+
+        <p className="sr-only" aria-live="polite">{`${at + 1} of ${n}: ${p.title}, ${typeOf(p)}`}</p>
+
+        <div className="ts__thumbs" ref={thumbsRef} aria-label="All trending products">
+          {list.map((x, i) => (
+            <button
+              type="button"
+              key={x.p.slug}
+              className="ts__thumb"
+              aria-current={i === at ? 'true' : undefined}
+              aria-label={`#${x.rank} ${x.p.title}`}
+              onClick={() => go(i)}
+            >
+              <span className="ts__thumb-img"><img src={x.p.img} alt="" loading="lazy" decoding="async" /></span>
+              <span className="ts__thumb-text">
+                <span className="ts__thumb-rank">{pad(x.rank)}</span>
+                <span className="ts__thumb-name">{x.p.title}</span>
+              </span>
+            </button>
+          ))}
         </div>
       </div>
     </section>

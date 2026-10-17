@@ -16,7 +16,7 @@ export const brand = {
 
   // Cloudflare Turnstile site key (public). Empty = no bot check on the forms.
   // The matching secret goes in Vercel as TURNSTILE_SECRET_KEY; set both.
-  turnstileSiteKey: '',
+  turnstileSiteKey: '0x4AAAAAAFZUqhtf5EDFDn-O',
 
   /*
    * CONTACT BLOCK — from the client's own "Mallcom Nigeria - Business Profile

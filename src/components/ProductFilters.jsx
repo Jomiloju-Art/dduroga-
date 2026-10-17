@@ -1,11 +1,11 @@
-import { zones, industryCatalog, hazardNames, byHazard, byIndustry, productsByZone } from '../data/products.js';
+import { zones, industryCatalog, byIndustry, productsByZone } from '../data/products.js';
 
 /**
  * Facet groups shown in the catalogue sidebar / mobile offcanvas.
  *
  * Counts come from the live catalogue, and options that would return nothing are
- * disabled rather than clickable. Gas & Vapour still matches no product, so it
- * stays visible but disabled instead of leading to an empty grid.
+ * disabled rather than clickable. There is no hazard group: the client asked
+ * for hazard filtering to be removed from the site (Oct 2026).
  *
  * Product types are not repeated here: they are the chip row above the grid
  * (ProductsPage), which appears once a zone is chosen.
@@ -16,12 +16,6 @@ const STATIC_GROUPS = [
     label: 'Industry',
     all: 'All industries',
     items: industryCatalog.map((i) => ({ value: i.slug, label: i.label, count: byIndustry(i.slug).length })),
-  },
-  {
-    key: 'hazard',
-    label: 'Hazard',
-    all: 'All hazards',
-    items: Object.entries(hazardNames).map(([id, label]) => ({ value: id, label, count: byHazard(id).length })),
   },
 ];
 

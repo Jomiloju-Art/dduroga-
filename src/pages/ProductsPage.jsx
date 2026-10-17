@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
-import { allProducts, zones, hazardNames, industryCatalog, byHazard, byIndustry, productsByZone, productsByRange, rangeById, rangesForZone, rangeLabel, byFeatured } from '../data/products.js';
+import { allProducts, zones, industryCatalog, byIndustry, productsByZone, productsByRange, rangeById, rangesForZone, rangeLabel, byFeatured } from '../data/products.js';
 import ProductCard from '../components/ProductCard.jsx';
 import Pagination from '../components/Pagination.jsx';
 import ProductFilters from '../components/ProductFilters.jsx';
@@ -23,8 +23,8 @@ const SORTS = [
 export default function ProductsPage() {
   const [params, setParams] = useSearchParams();
   // Unknown values (an old or mistyped link) are ignored, so the visitor sees
-  // all products rather than an empty "Industry" page.
-  const hazard = hazardNames[params.get('hazard')] ? params.get('hazard') : null;
+  // all products rather than an empty "Industry" page. That includes old
+  // ?hazard= links: hazard filtering was removed at the client's request.
   const industry = industryCatalog.some((i) => i.slug === params.get('industry')) ? params.get('industry') : null;
   const range = rangeById(params.get('range'));
   // A range implies its zone, so ?range=welder alone still highlights Hand.
@@ -46,7 +46,7 @@ export default function ProductsPage() {
   // filter picked halfway down the page left the visitor in the middle of the
   // new results. While the phone filter drawer is open this waits until it
   // closes, so the drawer does not jump under the visitor's finger.
-  const filterKey = [params.get('cat'), params.get('range'), hazard, industry, sort].join('|');
+  const filterKey = [params.get('cat'), params.get('range'), industry, sort].join('|');
   const lastKey = useRef(filterKey);
   const pendingTop = useRef(false);
   useEffect(() => {
@@ -72,17 +72,13 @@ export default function ProductsPage() {
   const pick = (key, value) => (key === 'range' ? setQuery({ cat, range: value }) : setQuery({ [key]: value }));
 
   const zone = zones.find((z) => z.id === cat);
-  const hazardLabel = hazard ? hazardNames[hazard] : null;
   const industryLabel = industry ? industryCatalog.find((i) => i.slug === industry)?.label : null;
   const zoneRanges = zone ? rangesForZone(zone.id) : [];
 
   let title = 'All products';
   let visible = allProducts;
 
-  if (hazard) {
-    visible = byHazard(hazard);
-    title = hazardLabel || 'Hazard';
-  } else if (industry) {
+  if (industry) {
     visible = byIndustry(industry);
     title = industryLabel || 'Industry';
   } else if (range) {
@@ -125,16 +121,16 @@ export default function ProductsPage() {
     };
   }, [filtersOpen]);
 
-  const hasFilter = Boolean(cat || hazard || industry);
+  const hasFilter = Boolean(cat || industry);
   const zoneShort = (z) => z.id.charAt(0).toUpperCase() + z.id.slice(1);
 
   // Search title, description and intro come from lib/seoText.js, which the
   // build script also uses for the static HTML crawlers read first.
-  const listing = listingFor({ cat, range: range?.id, industry, hazard });
+  const listing = listingFor({ cat, range: range?.id, industry });
   usePageMeta({
     title: listingTitle(listing),
     description: listingDescription(listing),
-    canonical: `/products${range ? `?range=${range.id}` : cat ? `?cat=${cat}` : hazard ? `?hazard=${hazard}` : industry ? `?industry=${industry}` : ''}`,
+    canonical: `/products${range ? `?range=${range.id}` : cat ? `?cat=${cat}` : industry ? `?industry=${industry}` : ''}`,
   });
 
   return (
@@ -169,7 +165,7 @@ export default function ProductsPage() {
       </div>
 
       {/* Product types within the chosen zone, from Mallcom's catalogue ranges. */}
-      {zone && !hazard && !industry && zoneRanges.length > 0 && (
+      {zone && !industry && zoneRanges.length > 0 && (
         <div className="plp-quick plp-quick--ranges" role="group" aria-label={`${zone.label} product types`}>
           <span className="plp-quick__label">Type:</span>
           <button
@@ -206,7 +202,7 @@ export default function ProductsPage() {
               <button type="button" className="plp-sidebar__close" onClick={() => setFiltersOpen(false)} aria-label="Close filters">×</button>
             </div>
             <ProductFilters
-              active={{ cat, range: range?.id, industry, hazard }}
+              active={{ cat, range: range?.id, industry }}
               onPick={pick}
             />
             <button type="button" className="plp-sidebar__apply" onClick={() => setFiltersOpen(false)}>

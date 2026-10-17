@@ -20,13 +20,18 @@ import AccreditationDrawer from './AccreditationDrawer.jsx';
  * not hold those, and inventing them on the page whose whole job is credibility
  * would be self-defeating.
  */
-export default function TrustBand() {
+/**
+ * `variant="hero"` sits the band inside the homepage hero, frosted over the
+ * bottom of the photo on desktop (brands along the hero's foot, as on
+ * equipment-supplier sites); on phones it stays a plain white band.
+ */
+export default function TrustBand({ variant }) {
   const [active, setActive] = useState(null);
   const close = useCallback(() => setActive(null), []);
   const marks = [...facilityAccreditations, ...productAccreditations];
 
   return (
-    <section className="hp-marks" aria-labelledby="trust-heading">
+    <section className={`hp-marks${variant === 'hero' ? ' hp-marks--hero' : ''}`} aria-labelledby="trust-heading">
       <div className="hp-marks__inner">
         <div className="hp-marks__row">
           <h2 className="hp-marks__label" id="trust-heading">Certified &amp; accredited</h2>

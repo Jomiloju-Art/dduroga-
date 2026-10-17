@@ -19,18 +19,5 @@ export const homeIndustries = ['construction', 'oil-gas', 'manufacturing', 'mini
 /** Hazard ids (from hazardNames) shown as homepage tiles. */
 export const homeHazards = ['cut', 'impact', 'chemical', 'heat', 'electric', 'slip'];
 
-/** Sample articles for the resources row (real guides from guides.js). */
-import { guides } from './guides.js';
-export const homeResources = guides.slice(0, 4).map((g) => ({
-  slug: g.slug,
-  type: g.tag,
-  date: g.date,
-  title: g.title,
-  summary: g.summary,
-  readMinutes: g.readMinutes,
-  image: `/guides/${g.slug}.jpg`,
-  zone: g.zone,
-}));
-
 /** Bulk-quote quantity tiers for the closing CTA. */
 export const quoteTiers = ['Under 500 units', '500 – 5,000', '5,000 – 50,000', '50,000+'];

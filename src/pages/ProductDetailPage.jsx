@@ -21,6 +21,7 @@ import Reveal from '../components/Reveal.jsx';
 import NotFoundPage from './NotFoundPage.jsx';
 import SizeGuide from '../components/SizeGuide.jsx';
 import { sizingFor } from '../data/sizes.js';
+import { sizePart, colourPart } from '../lib/productSpecs.js';
 import PerformanceRatings, { hazardIcon, standardIcon } from '../components/PerformanceRatings.jsx';
 import { videoForProduct } from '../lib/productVideo.js';
 
@@ -76,15 +77,9 @@ function variantKind(variants) {
 }
 const KIND_LABEL = { size: 'size', colour: 'colour', 'size-colour': 'size / colour' };
 
-/* Variant values hold a size, a colour, or "size / colour". Split them so size
-   and colour can be picked separately (sizes now come from data/sizes.js). */
-const SIZE_RE = /^(\d+(\.\d+)?|XS|S|M|L|XL|XXL|XXXL|\dXL)$/i;
-const sizePart = (c) => { const v = String(c || '').split('/')[0].trim(); return SIZE_RE.test(v) ? v.toUpperCase() : null; };
-const colourPart = (c) => {
-  const parts = String(c || '').split('/').map((x) => x.trim()).filter(Boolean);
-  if (parts.length > 1) return parts.slice(1).join(' / ');
-  return parts[0] && !SIZE_RE.test(parts[0]) ? parts[0] : null;
-};
+/* Variant values hold a size, a colour, or "size / colour". sizePart and
+   colourPart (lib/productSpecs.js) split them so size and colour can be picked
+   separately (sizes now come from data/sizes.js). */
 /* Storefront footwear variants are UK sizes; the size offered is EU. Map EU to
    the usual UK size so a matching variant (and its SKU) can still be found. */
 const EU_TO_UK = { 38: '5', 39: '6', 40: '6.5', 41: '7', 42: '8', 43: '9', 44: '9.5', 45: '10.5', 46: '11', 47: '12', 48: '13' };

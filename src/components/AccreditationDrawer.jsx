@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { lockScroll } from '../lib/scrollLock.js';
 
 /**
@@ -11,6 +12,10 @@ import { lockScroll } from '../lib/scrollLock.js';
  *
  * Behaves as a modal dialog: focus moves to the close button on open, Tab is
  * kept inside, Escape and the scrim close it, and focus returns to the logo.
+ *
+ * Rendered into <body> through a portal: the homepage band it opens from has
+ * a backdrop-filter, which makes position: fixed children size to the band
+ * instead of the screen (the panel was squashed to the band's height).
  */
 export default function AccreditationDrawer({ item, onClose }) {
   const panelRef = useRef(null);
@@ -39,7 +44,12 @@ export default function AccreditationDrawer({ item, onClose }) {
     };
   }, [open, onClose]);
 
-  return (
+  // Portals need the DOM; the server render (and first client render) skip it.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+
+  return createPortal((
     <>
       <div className={`accr-scrim${open ? ' is-open' : ''}`} onClick={onClose} aria-hidden="true" />
       <aside
@@ -66,5 +76,5 @@ export default function AccreditationDrawer({ item, onClose }) {
         )}
       </aside>
     </>
-  );
+  ), document.body);
 }

@@ -54,7 +54,7 @@ export default function Footer() {
           <Logo href="/" />
           <p className="sf__blurb">
             Certified PPE for head, hand, body and feet protection, stocked in Lagos and delivered to
-            industry across Nigeria. Part of the Mallcom group.
+            industry across Nigeria. Sole authorized distributor of Mallcom India.
           </p>
           <ul className="sf__contact">
             <li><a href={brand.phoneHref}><IconPhone width="16" height="16" /> {brand.phone}</a></li>

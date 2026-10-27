@@ -10,12 +10,14 @@
  *   range      sub-category id within the zone (rangeMeta), from Mallcom's 2025
  *              catalogue where the product is printed in it, inferred otherwise.
  *   collection Mallcom's catalogue tier ("Luxury footwear"), when printed.
- *   catalogueStandards  [{ code, rating? }] as printed in the catalogue.
- *   catalogueSymbols    glossary icon names printed on the catalogue row.
- *   ce         true when the catalogue row carries the CE mark.
+ *   catalogueStandards  [{ code, rating? }] as printed in the catalogue, or
+ *                       on the product's official datasheet when it has one.
+ *   catalogueSymbols    glossary icon names printed on the catalogue row (or datasheet).
+ *   ce         true when the catalogue row (or datasheet) carries the CE mark.
+ *   datasheets [{ href, label? }] official Mallcom PDFs (datasheets.js); absent for most.
  *
  * Only products printed in Mallcom's 2025 catalogue are listed (client
- * decision, Oct 2026). The storefront snapshot still holds the others; they
+ * decision, Oct 2026), plus the few with an official datasheet. The storefront snapshot still holds the others; they
  * are filtered out here, not deleted, so the decision is easy to revisit.
  * Catalogue products the storefront never carried come from `addedProducts`
  * (photos and copy taken from the catalogue page itself).

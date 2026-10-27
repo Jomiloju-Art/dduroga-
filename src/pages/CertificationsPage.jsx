@@ -57,7 +57,7 @@ export default function CertificationsPage() {
           <p className="accr-section-lead">How our products are made: quality, environmental and ethical management, independently audited.</p>
           <Cards items={facilityAccreditations} onPick={setActive} />
           <div className="accr-callout">
-            <b>Who holds these?</b> Facility accreditations are issued to Mallcom India Limited, our parent company, for its manufacturing sites. DDUROGA Safety is Mallcom’s wholly owned Nigerian subsidiary.
+            <b>Who holds these?</b> Facility accreditations are issued to Mallcom India Limited for its manufacturing sites. DDUROGA Safety is Mallcom India’s sole authorized distributor in West Africa.
           </div>
         </div>
       </section>

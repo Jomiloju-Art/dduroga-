@@ -59,14 +59,16 @@ export const social = {
 };
 
 /**
- * Brands DDUROGA distributes, shown small on the homepage certification band
- * under "Exclusive distributor in Nigeria for" (client wording, Oct 2026).
+ * DDUROGA's brands, shown small on the homepage certification band
+ * as "Mallcom (authorized distributor) · Bragoxd (our brand)" (client wording,
+ * Oct 2026; Bragoxd is DDUROGA's own brand, not a distributed one).
  * DDUROGA is the umbrella brand; these must never outweigh it visually.
  *
- * `logo: null` shows the name as text until the official artwork arrives:
- * use the brand's own logo file, never a redrawn one.
+ * `logo` is the brand's own logo file, never a redrawn one; `mark: true` means
+ * the file is a symbol only, so the name is set beside it. Bragoxd uses
+ * DDUROGA's shield (client, Oct 2026).
  */
 export const brandPartners = [
-  { name: 'Mallcom', logo: '/brand/mallcom-logo.png' },
-  { name: 'Bragoxd', logo: null }, // FILL: official Bragoxd logo file
+  { name: 'Mallcom', logo: '/brand/mallcom-logo.png', role: 'authorized distributor' },
+  { name: 'Bragoxd', logo: '/logo-mark.png', mark: true, role: 'our brand' },
 ];

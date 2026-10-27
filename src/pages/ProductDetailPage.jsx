@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams, Navigate } from 'react-router-dom';
-import { findProduct, zoneOf, productsByZone, productsByRange, byFeatured, hazardNames, industryCatalog, industryLabel, typeLabel, rangeById } from '../data/products.js';
+import { findProduct, zoneOf, productsByZone, productsByRange, byFeatured, hazardNames, industryCatalog, typeLabel, rangeById } from '../data/products.js';
 import CertifiedTo, { standardStrings } from '../components/CertifiedTo.jsx';
 import PageHero from '../components/PageHero.jsx';
 import ProductArt from '../components/ProductArt.jsx';
@@ -11,7 +11,6 @@ import RecommendRow from '../components/RecommendRow.jsx';
 import { IconArrowRight, IconCheck, IconDocument } from '../components/Icons.jsx';
 import { brand } from '../data/brand.js';
 import { useQuote } from '../quote/QuoteContext.jsx';
-import { downloadDatasheet } from '../lib/datasheet.js';
 import { loadDetails } from '../lib/details.js';
 import { productTitle, productDescription } from '../lib/seoText.js';
 import QtyInput, { QTY_MAX } from '../components/QtyInput.jsx';
@@ -150,10 +149,12 @@ export default function ProductDetailPage() {
   const dataKey = product?.key || slug;
   const tags = useMemo(() => (product ? groupTags(product) : null), [product]);
   // Catalogue standards carry their rating ("EN 388 3132X"); the description scan
-  // adds anything else the copy mentions.
+  // adds anything else the copy mentions - except where an official datasheet
+  // gives the full list, which the older storefront copy must not add to.
   const standards = useMemo(() => {
     if (!product) return [];
     const fromCatalogue = standardStrings(product.catalogueStandards);
+    if (product.datasheets?.length) return fromCatalogue;
     const seen = new Set(product.catalogueStandards.map((s) => s.code));
     return [...fromCatalogue, ...findStandards(product.desc || '').filter((s) => !seen.has(s))];
   }, [product]);
@@ -342,6 +343,16 @@ export default function ProductDetailPage() {
     setQty(1);
     return true;
   };
+  // Official Mallcom datasheets (data/datasheets.js). Most products have none
+  // yet, and then no download is offered: no home-made sheets.
+  const sheets = (product.datasheets || []).map((d) => {
+    const name = d.label || product.title;
+    return { ...d, name, file: `Mallcom ${name} datasheet.pdf` };
+  });
+  // The header and phone bars have room for one link; with several sheets it
+  // jumps to the list in the buy column.
+  const sheetLink = sheets.length === 1 ? { href: sheets[0].href, download: sheets[0].file }
+    : sheets.length > 1 ? { href: '#pdp-datasheets' } : null;
   const specs = {
     zone: zone?.label || 'Not specified',
     range: range?.label || '',
@@ -427,24 +438,13 @@ export default function ProductDetailPage() {
               {/* Catalogue rows (symbols + CE + coded standards) replace the
                   tag-derived tiles wherever the catalogue covers the product. */}
               {product.catalogueSymbols.length || product.catalogueStandards.length ? (
-                <CertifiedTo symbols={product.catalogueSymbols} standards={product.catalogueStandards} ce={product.ce} />
+                <CertifiedTo symbols={product.catalogueSymbols} standards={product.catalogueStandards} ce={product.ce} fromDatasheet={Boolean(product.datasheets?.length)} />
               ) : (
                 <PerformanceRatings items={ratingItems} />
               )}
-              {/* product.industries (see productIndustries.js), not the raw storefront
-                  tags: those listed one sector under up to four spellings and were
-                  missing on half the range. Each chip opens that industry's listing,
-                  which is built from the same data, so the two always agree. */}
-              {product.industries.length > 0 && (
-                <div className="detail-taggroup">
-                  <h2>Useful in these industries</h2>
-                  <div className="chip-row">
-                    {product.industries.map((slug) => (
-                      <Link key={slug} to={`/products?industry=${slug}`} className="chip">{industryLabel(slug)}</Link>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* No "Useful in these industries" chips: removed at the client's
+                  request (Oct 2026). product.industries still drives the
+                  catalogue's Industry filter and the related-products row. */}
 
               {/* Colour, then size: two separate choices. Sizes are the ranges
                   in data/sizes.js (gloves 6-11, footwear EU 38-48, garments
@@ -553,13 +553,15 @@ export default function ProductDetailPage() {
                   >
                     {qty > 1 ? `Add ${qty} to quote` : 'Add to quote'}
                   </button>
-                  <button
-                    type="button"
-                    className="pdp-datasheet"
-                    onClick={() => downloadDatasheet(product, specs)}
-                  >
-                    Download datasheet
-                  </button>
+                  {sheets.length > 0 && (
+                    <div id="pdp-datasheets">
+                      {sheets.map((d) => (
+                        <a key={d.href} className="pdp-datasheet" href={d.href} download={d.file}>
+                          {sheets.length > 1 ? `Download datasheet: ${d.name}` : 'Download datasheet'}
+                        </a>
+                      ))}
+                    </div>
+                  )}
                   {/* Only claims the site already makes elsewhere; add lead times and
                       minimum order here once the client confirms them. */}
                   <ul className="pdp-assure">
@@ -754,14 +756,12 @@ export default function ProductDetailPage() {
             <strong>{product.title}</strong>
             <span>{quoteItem.sku ? `SKU ${quoteItem.sku}` : typeLabel(product) || zone?.label}</span>
           </span>
-          <button
-            type="button"
-            className="pdp-bar__datasheet"
-            onClick={() => downloadDatasheet(product, specs)}
-          >
-            <IconDocument width="16" height="16" />
-            <span>Datasheet</span>
-          </button>
+          {sheetLink && (
+            <a className="pdp-bar__datasheet" {...sheetLink}>
+              <IconDocument width="16" height="16" />
+              <span>Datasheet</span>
+            </a>
+          )}
           <button
             type="button"
             className="btn hx-btn pdp-bar__cta"
@@ -777,7 +777,7 @@ export default function ProductDetailPage() {
           that did nearly the same as "Add to quote"; the quote list sends it. */}
       <div className={`pdp-sticky${buyVisible ? '' : ' is-visible'}`} aria-hidden={buyVisible}>
         <button type="button" className="btn hx-btn" tabIndex={buyVisible ? -1 : 0} onClick={() => addToQuote()}>Add to quote</button>
-        <button type="button" className="btn btn--outline-dark" tabIndex={buyVisible ? -1 : 0} onClick={() => downloadDatasheet(product, specs)}>Datasheet</button>
+        {sheetLink && <a className="btn btn--outline-dark" tabIndex={buyVisible ? -1 : 0} {...sheetLink}>Datasheet</a>}
       </div>
     </>
   );

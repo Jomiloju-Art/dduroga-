@@ -6,7 +6,7 @@
  * Accreditations). The logos in public/accreditations/ were extracted from that
  * PDF; swap in the official vector files from each scheme when they arrive.
  *
- * Facility accreditations belong to Mallcom India Limited, the parent company,
+ * Facility accreditations belong to Mallcom India Limited, the manufacturer,
  * for its manufacturing sites. Say so wherever they appear.
  *
  * `facts` values of TODO render as a "To be supplied" tag. Do not fill them

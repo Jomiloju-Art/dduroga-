@@ -3,25 +3,26 @@ import Reveal from '../components/Reveal.jsx';
 import CtaBand from '../components/CtaBand.jsx';
 import { IconArrowRight } from '../components/Icons.jsx';
 import { brand } from '../data/brand.js';
-import { aboutTitle, aboutLede, aboutHowWeWork, aboutValues, aboutFacts } from '../data/aboutContent.js';
+import { aboutTitle, aboutLede, aboutColumns, aboutStrengths, aboutValues, aboutFacts } from '../data/aboutContent.js';
 import { usePageMeta } from '../lib/seo.js';
 import { pageMeta } from '../data/pageMeta.js';
 
 /**
- * About page - DDUROGA Safety, a 2019-established wholly owned Nigerian
- * subsidiary of the Mallcom group.
+ * About page - DDUROGA Safety, Mallcom India's sole authorized distributor in
+ * West Africa and the owner of the Bragoxd brand.
  *
  *   1. Story       editorial opening (Dribbble 26411724; the client chose it
  *                  in Oct 2026 over four other layouts): the statement beside
- *                  the story and four facts, then three columns: our story,
- *                  how we work, what you can hold us to. It replaced a dark
- *                  hero with a zone-photo mosaic, a facts band and a separate
- *                  "How we work" section.
- *   2. Values      three numbered cards, the full text behind column three.
- *   3. Visit us    address, contact lines and the map.
+ *                  the story and four facts, then three columns: Mallcom,
+ *                  Bragoxd, our mission. It replaced a dark hero with a
+ *                  zone-photo mosaic, a facts band and a separate "How we
+ *                  work" section.
+ *   2. Apart       what sets us apart, five numbered cards.
+ *   3. Values      four numbered cards.
+ *   4. Visit us    address, contact lines and the map.
+ *   5. Work with us   the closing quote band.
  *
- * Copy and facts live in data/aboutContent.js; every fact is from brand.js or
- * counted from the catalogue.
+ * Copy and facts live in data/aboutContent.js (the client's own write-up).
  */
 export default function AboutPage() {
   usePageMeta(pageMeta['/about']);
@@ -40,7 +41,7 @@ export default function AboutPage() {
               </div>
             </div>
             <div className="ax-story__body">
-              <p className="ax-story__lede">{aboutLede}</p>
+              {aboutLede.map((p) => <p className="ax-story__lede" key={p.slice(0, 24)}>{p}</p>)}
               <ul className="ax-story__facts" aria-label="DDUROGA at a glance">
                 {aboutFacts.map((f, i) => (
                   <Reveal as="li" key={f.label} delay={i * 70}><strong>{f.value}</strong><span>{f.label}</span></Reveal>
@@ -49,29 +50,38 @@ export default function AboutPage() {
             </div>
           </div>
           <div className="ax-story__cols">
-            <div>
-              <h2>Our story</h2>
-              <p>Established in {brand.establishedYear} in Lagos as the wholly owned Nigerian subsidiary of Mallcom. Mallcom manufactures; DDUROGA sells, with local stock and local pricing.</p>
-            </div>
-            <div>
-              <h2>How we work</h2>
-              <p>{aboutHowWeWork}</p>
-              <Link to="/certifications" className="ax-link">See certifications <IconArrowRight width="14" height="14" /></Link>
-            </div>
-            <div>
-              <h2>What you can hold us to</h2>
-              <p>{aboutValues.map((v) => v.title).join(' · ')}.</p>
-              <a href="#values" className="ax-link">Our values <IconArrowRight width="14" height="14" /></a>
-            </div>
+            {aboutColumns.map((c) => (
+              <div key={c.title}>
+                <h2>{c.title}</h2>
+                <p>{c.text}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="ab-section ab-section--soft" id="values">
+      <section className="ab-section ab-section--soft">
+        <div className="ab-wrap">
+          <span className="zb__eyebrow">Why DDUROGA</span>
+          <h2 className="ab-h2">What sets us apart.</h2>
+          <ol className="ab-values">
+            {aboutStrengths.map((v, i) => (
+              <Reveal as="li" className="ab-value" key={v.title} delay={i * 80}>
+                <span className="ab-value__n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                <h3 className="ab-value__title">{v.title}</h3>
+                <p>{v.text}</p>
+              </Reveal>
+            ))}
+          </ol>
+          <Link to="/certifications" className="ab-link">See certifications <IconArrowRight width="14" height="14" /></Link>
+        </div>
+      </section>
+
+      <section className="ab-section" id="values">
         <div className="ab-wrap">
           <span className="zb__eyebrow">Our values</span>
           <h2 className="ab-h2">What you can hold us to.</h2>
-          <ol className="ab-values">
+          <ol className="ab-values ab-values--four">
             {aboutValues.map((v, i) => (
               <Reveal as="li" className="ab-value" key={v.title} delay={i * 80}>
                 <span className="ab-value__n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
@@ -83,7 +93,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="ab-section">
+      <section className="ab-section ab-section--soft">
         <div className="ab-wrap ab-visit">
           <div className="ab-visit__copy">
             <span className="zb__eyebrow">Visit us</span>
@@ -116,8 +126,8 @@ export default function AboutPage() {
       </section>
 
       <CtaBand
-        title="Kitting out a site?"
-        text="Tell us the hazards, the roles and the volumes, and our team will put together certified options with the documentation your HSE team needs."
+        title="Work with us"
+        text="Whether you are equipping a single site or running a multi-year supply contract, our team is ready to help. Request a quote or speak to our team today."
         ctaLabel="Request a quote"
         ctaTo="/contact"
       />

@@ -17,7 +17,7 @@ export const pageMeta = {
   },
   '/about': {
     title: 'About us: PPE supplier in Lagos, Nigeria',
-    description: 'DDUROGA Safety is a Nigerian PPE supplier and the wholly owned Nigerian subsidiary of Mallcom, supplying certified protection to industry nationwide from our Lagos warehouse.',
+    description: 'DDUROGA Safety is a B2B PPE supplier serving industrial businesses across West Africa: the sole authorized distributor of Mallcom India, and the home of our own brand, Bragoxd.',
   },
   '/learning': {
     title: 'PPE guides and safety standards explained',

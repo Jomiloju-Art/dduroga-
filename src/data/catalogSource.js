@@ -3,7 +3,9 @@
  *
  * Joins the storefront snapshot (catalog.generated.js: 524 records with
  * Shopify CDN image links) with the 2025 catalogue ranges and the local image
- * copies, and keeps only the products printed in the 2025 catalogue.
+ * copies, and keeps only the products printed in the 2025 catalogue (plus the
+ * few with an official datasheet, see datasheets.js, and the few added by hand,
+ * see extraProducts.js).
  * scripts/build-catalog.mjs runs this and writes the finished list to
  * catalog.slim.generated.js, which is what products.js ships. The raw files
  * were 1 MB of JavaScript downloaded and parsed before every page.
@@ -11,6 +13,8 @@
 import { catalog as storefront, zoneMeta } from './catalog.generated.js';
 import { rangeMeta, productRanges, addedProducts } from './productRanges.generated.js';
 import { localImageCounts } from './localImages.generated.js';
+import { DATASHEETS } from './datasheets.js';
+import { SHOWN, NEW_PRODUCTS } from './extraProducts.js';
 
 
 /**
@@ -50,23 +54,27 @@ export const SLUG_RENAMES = {
   'proclo-11': 'proclo-n382',
   'selkrik-rex': 'selkirk-rex',
   'doxle-gold-copy': 'doxle',
+  'jasper-1-yellow': 'jasper-xiv',
 };
 
 const enrich = (p, r = productRanges[p.slug] || {}, key = p.slug) => {
   const localImage = localizer(p, key);
+  // An official datasheet replaces the catalogue's ratings (datasheets.js).
+  const sheet = DATASHEETS[key];
   return {
     ...p,
     imgs: (p.imgs || []).map(localImage),
     variants: p.variants ? p.variants.map((v) => (v.img ? { ...v, img: localImage(v.img) } : v)) : p.variants,
     key,
-    slug: SLUG_RENAMES[p.slug] || p.slug,
+    slug: sheet?.slug || SLUG_RENAMES[p.slug] || p.slug,
     range: r.range || null,
     rangeSource: r.source || null,
     collection: r.collection || null,
-    catalogueStandards: r.standards || [],
-    catalogueSymbols: r.symbols || [],
-    ce: Boolean(r.ce),
-    inCatalogue: Boolean(r.inCatalogue),
+    catalogueStandards: (sheet || r).standards || [],
+    catalogueSymbols: (sheet || r).symbols || [],
+    ce: Boolean((sheet || r).ce),
+    datasheets: sheet?.files || [],
+    inCatalogue: Boolean(r.inCatalogue || sheet?.show || SHOWN[key]),
     cataloguePage: r.page ?? null,
   };
 };
@@ -80,6 +88,7 @@ const catalog = Object.fromEntries(
       // slug (the old jasper-iv page showed JASPER XVII), and its reviews and
       // spec data must not attach to the real catalogue product.
       ...addedProducts.filter((a) => a.zone === zone).map((a) => enrich(a.product, a.rec, `catalogue:${a.product.slug}`)),
+      ...NEW_PRODUCTS.filter((a) => a.zone === zone).map((a) => enrich(a.product, a.rec)),
     ],
   ]),
 );

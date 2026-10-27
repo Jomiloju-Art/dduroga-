@@ -13,8 +13,9 @@ import AccreditationDrawer from './AccreditationDrawer.jsx';
  * ("ISO 9001 · CE Certified · EN / IS standards") at the client's request to
  * show the marks as they appear in the catalogue.
  *
- * The brand line beside the heading names the brands DDUROGA distributes
- * (brandPartners in brand.js); it replaced the earlier "Made by Mallcom".
+ * The brand line beside the heading names Mallcom (distributed) and Bragoxd
+ * (DDUROGA's own) from brandPartners in brand.js; it replaced the earlier
+ * "Made by Mallcom", then "Exclusive distributor in Nigeria for".
  *
  * There are deliberately no order counts or "X clients served" numbers — we do
  * not hold those, and inventing them on the page whose whole job is credibility
@@ -48,14 +49,22 @@ export default function TrustBand({ variant }) {
           </ul>
           <Link to="/certifications" className="hp-marks__all">All certifications <span aria-hidden="true">→</span></Link>
         </div>
-        {/* The brands DDUROGA distributes. Deliberately small and muted: DDUROGA
-            is the umbrella brand and this line must not compete with it. */}
+        {/* Mallcom (distributed) and Bragoxd (DDUROGA's own). Deliberately small
+            and muted: DDUROGA is the umbrella brand and this line must not
+            compete with it. */}
         <p className="brand-line hp-marks__brands">
-          <span className="hp-trust__label">Exclusive distributor in Nigeria for</span>
           <span className="brand-line__logos">
-            {brandPartners.map((b) => (b.logo
-              ? <img key={b.name} className="brand-line__logo" src={b.logo} alt={b.name} loading="lazy" decoding="async" />
-              : <span key={b.name} className="brand-line__word">{b.name}</span>))}
+            {brandPartners.map((b) => (
+              <span key={b.name} className="brand-line__item">
+                {b.mark ? (
+                  <>
+                    <img className="brand-line__mark" src={b.logo} alt="" width="185" height="212" loading="lazy" decoding="async" />
+                    <span className="brand-line__word">{b.name}</span>
+                  </>
+                ) : <img className="brand-line__logo" src={b.logo} alt={b.name} loading="lazy" decoding="async" />}
+                <span className="brand-line__role">({b.role})</span>
+              </span>
+            ))}
           </span>
         </p>
       </div>

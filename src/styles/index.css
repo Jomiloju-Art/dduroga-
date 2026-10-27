@@ -3694,6 +3694,8 @@ body:has(.site-header--transparent) main {
   cursor: pointer;
   transition: background var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
 }
+/* Links to the official PDFs, so drop the link underline. */
+a.pdp-datasheet, a.pdp-bar__datasheet { text-decoration: none; box-sizing: border-box; }
 .pdp-datasheet:hover { background: #0E1216; color: #fff; }
 .pdp-datasheet:focus-visible { outline: 3px solid var(--ddu-orange); outline-offset: 2px; }
 
@@ -4167,14 +4169,23 @@ body:has(.site-header--transparent) main {
 .tr-btn:hover { transform: translateY(-1px); }
 .tr :focus-visible { outline: 3px solid var(--ddu-orange); outline-offset: 3px; }
 
-/* Homepage: "Exclusive distributor in Nigeria for" brand line (TrustBand).
+/* Homepage: "Mallcom (authorized distributor) · Bragoxd (our brand)" line (TrustBand).
    Small and muted on purpose: DDUROGA is the umbrella brand. */
 .brand-line { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; }
 .brand-line__logos { display: inline-flex; align-items: center; gap: 14px; }
 .brand-line__logos > * + * { padding-left: 14px; border-left: 1px solid rgba(14, 18, 22, 0.15); }
 .brand-line__logo { display: block; height: 28px; width: auto; }
 .brand-line__word { font-family: var(--font-display); font-weight: 700; font-size: 1rem; letter-spacing: 0.04em; color: rgba(14, 18, 22, 0.7); }
-@media (max-width: 900px) { .brand-line__logo { height: 24px; } }
+.brand-line__item { display: inline-flex; align-items: center; gap: 8px; }
+.brand-line__mark { display: block; height: 24px; width: auto; margin-right: -2px; }
+.brand-line__role { font-size: 0.8rem; color: rgba(14, 18, 22, 0.55); }
+@media (max-width: 900px) { .brand-line__logo { height: 24px; } .brand-line__mark { height: 21px; } }
+.brand-line__role { white-space: nowrap; }
+/* Phones: one brand per line, as side by side the roles wrap mid-phrase. */
+@media (max-width: 600px) {
+  .brand-line__logos { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .brand-line__logos > * + * { padding-left: 0; border-left: 0; }
+}
 
 /* Search results page: suggestions and matching product types. */
 .search-page__suggest, .search-page__types { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 8px; }
@@ -4498,6 +4509,9 @@ body:has(.site-header--hidden) .pdp-bar { top: 0; }
 .ab-value__n { display: block; font-family: var(--font-display); font-weight: 800; font-size: 0.9rem; color: var(--ddu-orange); letter-spacing: 0.08em; }
 .ab-value__title { margin: 10px 0 10px; font-family: var(--font-display); font-weight: 700; text-transform: none; font-size: 1.25rem; color: var(--ddu-black); }
 .ab-value p { margin: 0; font-size: 0.96rem; line-height: 1.6; color: rgba(14, 18, 22, 0.7); }
+.ab-values--four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.ab-values + .ab-link { margin-top: 20px; }
+.ax-story__lede + .ax-story__lede { margin-top: 1em; }
 
 .ab-visit { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 32px clamp(32px, 6vw, 96px); align-items: center; }
 .ab-visit__list { display: grid; grid-template-columns: auto 1fr; gap: 10px 20px; margin: 24px 0 8px; }
@@ -4509,6 +4523,10 @@ body:has(.site-header--hidden) .pdp-bar { top: 0; }
 @media (max-width: 1023px) {
   .ab-visit { grid-template-columns: minmax(0, 1fr); }
   .ab-values { grid-template-columns: minmax(0, 1fr); }
+  .ab-values--four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .ab-values--four { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 600px) {
   .ab-visit__map .about-map { height: 280px; }
@@ -5232,7 +5250,7 @@ body:has(.site-header--hidden) .pdp-bar { top: 0; }
 .ax-story__top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px clamp(32px, 6vw, 96px); }
 .ax-story__title { margin: 10px 0 0; font-family: Georgia, 'Times New Roman', serif; font-weight: 400; font-size: clamp(2rem, 3.4vw, 3rem); line-height: 1.12; color: var(--ddu-black); }
 .ax-story__lede { margin: 0; font-size: 1.05rem; line-height: 1.7; color: rgba(14, 18, 22, 0.78); }
-.ax-story__facts { list-style: none; margin: 28px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.ax-story__facts { list-style: none; margin: 28px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .ax-story__facts li { display: flex; flex-direction: column; gap: 4px; padding-top: 12px; border-top: 2px solid var(--ddu-orange); font-size: 12px; color: rgba(14, 18, 22, 0.6); }
 .ax-story__facts strong { font-family: var(--font-display); font-size: 1.5rem; color: var(--ddu-black); }
 .ax-story__cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin-top: clamp(40px, 5vw, 72px); padding-top: 28px; border-top: 1px solid rgba(14, 18, 22, 0.12); }
@@ -5240,7 +5258,6 @@ body:has(.site-header--hidden) .pdp-bar { top: 0; }
 .ax-story__cols p { margin: 0; font-size: 0.92rem; line-height: 1.65; color: rgba(14, 18, 22, 0.7); }
 @media (max-width: 900px) {
   .ax-story__top, .ax-story__cols { grid-template-columns: minmax(0, 1fr); }
-  .ax-story__facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* ============================================================

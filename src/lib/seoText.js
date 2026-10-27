@@ -94,7 +94,7 @@ export function listingIntro({ kind, label, list }) {
   const where = 'Stocked in Lagos and supplied to sites across Nigeria.';
   switch (kind) {
     case 'range':
-      return `${label} from the Mallcom 2025 catalogue: ${n} models.${tested} ${where}`;
+      return `${label} from Mallcom: ${n} models.${tested} ${where}`;
     case 'zone':
       return `${n} ${lower(label)} products, including ${joinList(types)}.${tested} ${where}`;
     case 'industry':

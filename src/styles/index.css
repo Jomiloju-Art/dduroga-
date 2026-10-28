@@ -3812,6 +3812,11 @@ a.pdp-datasheet, a.pdp-bar__datasheet { text-decoration: none; box-sizing: borde
   color: #3d444c;
   margin: 0;
 }
+/* Test methods; product pages link straight to these (#tests-<id>). */
+.guide-tests { scroll-margin-top: 110px; padding-top: 24px; border-top: 1px solid #DEE0E3; }
+.guide-copy .guide-tests__intro { margin-bottom: 16px; }
+.guide-tests ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; }
+.guide-tests h3 { font-size: 15px; font-weight: 600; color: #0E1216; margin: 0 0 4px; }
 
 .guide-facts {
   position: sticky;
@@ -5193,3 +5198,13 @@ body:has(.site-header--hidden) .pdp-bar { top: 0; }
   .lx-tabs__grid { animation: none; }
   .lx-card { transition: none; }
 }
+
+/* Product page, Standards & tests: chips link to the Learning write-up. */
+.chip--link { text-decoration: none; cursor: pointer; }
+.chip--link::after { content: '→'; margin-left: 6px; font-weight: 600; }
+.chip--link:hover, .chip--link:focus-visible { filter: brightness(0.94); text-decoration: underline; }
+.std-scores { margin: 12px 0 0; font-size: 14px; color: #3d444c; }
+.std-scores strong { color: #0E1216; margin-right: 6px; }
+.std-scores--note { margin-top: 4px; font-size: 12.5px; color: #6b7280; }
+.std-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.std-links a { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--navy-800); }

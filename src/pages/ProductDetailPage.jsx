@@ -23,6 +23,7 @@ import { sizingFor } from '../data/sizes.js';
 import { sizePart, colourPart } from '../lib/productSpecs.js';
 import PerformanceRatings, { hazardIcon, standardIcon } from '../components/PerformanceRatings.jsx';
 import { videoForProduct } from '../lib/productVideo.js';
+import { sortTests, ratingScores, standardTestsHref, testsHref } from '../data/standardTests.js';
 
 const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '');
 const HAZARD_NORMS = new Set(Object.values(hazardNames).map(norm));
@@ -201,6 +202,17 @@ export default function ProductDetailPage() {
       });
     return () => { alive = false; };
   }, [dataKey]);
+
+  // Standards & tests: the long test write-ups live in the Learning centre
+  // (standardTests.js); here only links to them, the product's own levels from
+  // its catalogue rating, and any short lines that match no standard.
+  const tests = useMemo(() => sortTests(rich?.tests), [rich]);
+  const scoreRows = useMemo(
+    () => (product?.catalogueStandards || [])
+      .map((s) => { const r = ratingScores(s.code, s.rating); return r && { code: s.code, scores: r.scores }; })
+      .filter(Boolean),
+    [product],
+  );
 
   useEffect(() => { if (product) addRecent(product.slug); }, [product?.slug]);
   const recent = useRecentlyViewed().filter((p) => p.slug !== product?.slug);
@@ -672,15 +684,37 @@ export default function ProductDetailPage() {
                 <summary>Standards &amp; tests</summary>
                 <div className="acc-body">
                   {standards.length ? (
-                    <div className="chip-row">{standards.map((s) => <span key={s} className="chip chip--gold">{s}</span>)}</div>
+                    <div className="chip-row">
+                      {standards.map((s) => {
+                        const href = standardTestsHref(s);
+                        return href
+                          ? <Link key={s} to={href} className="chip chip--gold chip--link" title={`How ${s.split(' ').slice(0, 2).join(' ')} is tested`}>{s}</Link>
+                          : <span key={s} className="chip chip--gold">{s}</span>;
+                      })}
+                    </div>
                   ) : null}
-                  {rich?.tests?.length > 0 && (
+                  {scoreRows.map((r) => (
+                    <p key={r.code} className="std-scores">
+                      <strong>{r.code}</strong> {r.scores.map((x) => `${x.name} ${x.level}`).join(' · ')}
+                    </p>
+                  ))}
+                  {scoreRows.some((r) => r.scores.some((x) => x.level === 'X')) && <p className="std-scores std-scores--note">X = not tested</p>}
+                  {tests.families.length > 0 && (
                     <>
                       <h3 className="acc-sub">Tests conducted</h3>
-                      <ul className="spec-list">
-                        {rich.tests.map((t, i) => <li key={i}><IconCheck width="17" height="17" /> {t}</li>)}
+                      <ul className="std-links">
+                        {tests.families.map((f) => (
+                          <li key={f.id}>
+                            <Link to={testsHref(f)}>How the {f.label} tests are done <IconArrowRight width="14" height="14" /></Link>
+                          </li>
+                        ))}
                       </ul>
                     </>
+                  )}
+                  {tests.other.length > 0 && (
+                    <ul className="spec-list">
+                      {tests.other.map((t, i) => <li key={i}><IconCheck width="17" height="17" /> {t}</li>)}
+                    </ul>
                   )}
                   <p style={{ marginTop: 10 }}>Full test certificates, batch records and conformity documentation available on request from our quality team.</p>
                 </div>

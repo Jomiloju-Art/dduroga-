@@ -47,6 +47,22 @@ export default function GuideDetailPage() {
               <p>{s.p}</p>
             </section>
           ))}
+          {/* Test methods, one block per standard; product pages link here
+              as #tests-<id> (standardTests.js). */}
+          {(guide.tests || []).map((t) => (
+            <section key={t.id} id={`tests-${t.id}`} className="guide-tests">
+              <h2>{t.title}</h2>
+              <p className="guide-tests__intro">How Mallcom tests its products to this standard.</p>
+              <ul>
+                {t.items.map((it) => (
+                  <li key={it.name}>
+                    <h3>{it.name}</h3>
+                    <p>{it.text}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
         </div>
 
         <aside className="guide-facts">

@@ -103,8 +103,7 @@ function Standard({ code, rating }) {
   );
 }
 
-/** `fromDatasheet`: the ratings come from Mallcom's product datasheet, not the catalogue. */
-export default function CertifiedTo({ symbols = [], standards = [], ce = false, fromDatasheet = false }) {
+export default function CertifiedTo({ symbols = [], standards = [], ce = false }) {
   const shown = symbols.filter((s) => glossaryIcon(s));
   if (!shown.length && !standards.length) return null;
   return (
@@ -128,7 +127,6 @@ export default function CertifiedTo({ symbols = [], standards = [], ce = false, 
           </ul>
         </div>
       )}
-      <p className="pr-source">{fromDatasheet ? "As printed on Mallcom's product datasheet" : 'As printed in the Mallcom 2025 catalogue'}. Test certificates and declarations of conformity on request.</p>
     </div>
   );
 }

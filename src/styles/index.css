@@ -3210,12 +3210,14 @@ body:has(.site-header--transparent) main {
 .plp-card:hover { transform: none; box-shadow: none; border: 0; }
 .plp-card:focus-visible { outline: 3px solid var(--ddu-orange); outline-offset: 2px; }
 
-/* media: 4:5 box, cover, hover second-image crossfade */
+/* media: 4:5 box, the whole photo fitted inside it (never cropped: the
+   client asked, Oct 2026), hover second-image crossfade. White, as the
+   product photos are shot on white. */
 .plp-card__media {
   position: relative;
   width: 100%;
   padding-top: 125%;
-  background: #DEE0E3;
+  background: #fff;
   overflow: hidden;
 }
 .plp-card__img {
@@ -3223,7 +3225,10 @@ body:has(.site-header--transparent) main {
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  box-sizing: border-box;
+  padding: 6%;
+  background: #fff;
+  object-fit: contain;
   object-position: 50% 50%;
   transition: opacity var(--dur-base) var(--ease-out);
 }
@@ -3532,7 +3537,7 @@ body:has(.site-header--transparent) main {
   justify-content: center;
   overflow: hidden;
 }
-.bag-item__img img { width: 100%; height: 100%; object-fit: cover; }
+.bag-item__img img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
 .bag-item__info {
   flex: 1;
   min-width: 0;

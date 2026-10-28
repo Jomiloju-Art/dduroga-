@@ -80,13 +80,8 @@ export default function ProductCard({ product }) {
           </div>
         )}
 
-        {/* Badge only when it is good news. "Lead time" on 20 of 24 cards is
-            noise; the PDP states lead time where it matters. */}
-        {(product.variants || []).some((v) => v.a) && (
-          <div className="plp-card__badges">
-            <span className="plp-badge plp-badge--stock">In stock</span>
-          </div>
-        )}
+        {/* No "In stock" badge: stock labels were removed site-wide at the
+            client's request (Oct 2026). */}
 
         {options.length > 0 && (
           <div className="plp-card__options">

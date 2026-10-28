@@ -406,20 +406,14 @@ export default function ProductDetailPage() {
               <span className="eyebrow">{range ? range.label : zone?.label}</span>
               <h1 className="pdp-title">{product.title}</h1>
 
-              {/* One grey meta line under the title (BBC pattern): SKU, then
-                  stock as a dot pill. The buy column had no at-a-glance status
-                  line at all before this. */}
-              <div className="pdp-metaline">
-                {quoteItem.sku && (
-                  <>
-                    <span>SKU {quoteItem.sku}</span>
-                    <span className="pdp-metaline__sep" aria-hidden="true">·</span>
-                  </>
-                )}
-                {selected?.a
-                  ? <span className="pdp-stock pdp-stock--in"><span className="pdp-stock__dot" aria-hidden="true" />In stock</span>
-                  : <span className="pdp-stock pdp-stock--lead"><span className="pdp-stock__dot" aria-hidden="true" />Lead time on request</span>}
-              </div>
+              {/* One grey meta line under the title (BBC pattern): the SKU. The
+                  "In stock" / "Lead time on request" pill was removed at the
+                  client's request (Oct 2026). */}
+              {quoteItem.sku && (
+                <div className="pdp-metaline">
+                  <span>SKU {quoteItem.sku}</span>
+                </div>
+              )}
 
               {/* Share row. The star rating and "Customer reviews (0)" /
                   "Write a review" links were removed: with no review data they
@@ -438,7 +432,7 @@ export default function ProductDetailPage() {
               {/* Catalogue rows (symbols + CE + coded standards) replace the
                   tag-derived tiles wherever the catalogue covers the product. */}
               {product.catalogueSymbols.length || product.catalogueStandards.length ? (
-                <CertifiedTo symbols={product.catalogueSymbols} standards={product.catalogueStandards} ce={product.ce} fromDatasheet={Boolean(product.datasheets?.length)} />
+                <CertifiedTo symbols={product.catalogueSymbols} standards={product.catalogueStandards} ce={product.ce} />
               ) : (
                 <PerformanceRatings items={ratingItems} />
               )}

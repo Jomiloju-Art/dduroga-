@@ -7,7 +7,6 @@ import { usePageMeta } from '../lib/seo.js';
 import { pageMeta } from '../data/pageMeta.js';
 import TrustBand from '../components/TrustBand.jsx';
 import TrendingShowcase from '../components/TrendingShowcase.jsx';
-import ClientLogos from '../components/ClientLogos.jsx';
 import ZoneBento from '../components/ZoneBento.jsx';
 import SectorMosaic from '../components/SectorMosaic.jsx';
 import GuidesSection from '../components/GuidesSection.jsx';
@@ -141,10 +140,9 @@ export default function HomePage() {
       {/* ================= 8. HOW ORDERING WORKS + CLOSE (OrderSteps.jsx) ================= */}
       <OrderSteps />
 
-      {/* ================= 9. CLIENTS =================
-          Last, right before the footer (client's request, Oct 2026; it sat
-          under the protection zones before). */}
-      <ClientLogos />
+      {/* No "Trusted by" client-logo wall: removed at the client's request
+          (Oct 2026). ClientLogos.jsx and data/clients.js are kept for when
+          it comes back; it sat here, right before the footer. */}
     </>
   );
 }

@@ -16,7 +16,7 @@ import { HOME_TITLE } from './seoText.js';
 const SITE = 'DDUROGA Safety';
 export const DEFAULT_DESCRIPTION =
   'DDUROGA Safety supplies certified PPE for head, hand, body and feet protection, trusted by industry across the country.';
-export const SITE_URL = 'https://dduroga.vercel.app';
+export const SITE_URL = 'https://dduroga.com';
 
 const SCHEMA_IDS = ['schema-product', 'schema-breadcrumb'];
 
@@ -100,7 +100,7 @@ export function usePageMeta({
   description = DEFAULT_DESCRIPTION,
   /** Defaults to the current path, so a page that forgets it never claims to be the homepage. */
   canonical,
-  image = '/og-image.png',
+  image = '/og-image.jpg',
   product = null,
   crumbs = null,
   /** Keep utility pages (search, quote list, not found) out of search engines. */

@@ -70,22 +70,9 @@ export default function CertificationsPage() {
         </div>
       </section>
 
-      <section className="section" style={{ paddingTop: 0 }}>
-        <div className="container">
-          <h2 className="accr-section-title">Nigerian approvals</h2>
-          <p className="accr-section-lead">Local regulatory approvals for importing and supplying PPE in Nigeria.</p>
-          <div className="accr-cards">
-            <div className="accr-card accr-card--todo">
-              <span className="accr-card__logo">SON · SONCAP</span>
-              <span className="accr-card__body">
-                <span className="accr-card__name">Standards Organisation of Nigeria</span>
-                <span className="accr-card__what">SONCAP product certificates and any MANCAP approvals will be listed here once confirmed.</span>
-                <span className="accr-card__meta"><span className="accr-pill accr-pill--todo">To be confirmed</span><span /></span>
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* The "Nigerian approvals" (SON / SONCAP) placeholder was removed at the
+          client's request (Oct 2026). Add a section back once real SONCAP or
+          MANCAP certificates are supplied. */}
 
       <CtaBand
         title="Need certificates for a tender?"

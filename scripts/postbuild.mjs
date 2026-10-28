@@ -31,7 +31,7 @@ const { allProducts } = await load('src/data/products.js');
 const { guides } = await load('src/data/guides.js');
 const { pageMeta } = await load('src/data/pageMeta.js');
 const seoText = await load('src/lib/seoText.js');
-const SITE_URL = 'https://dduroga.vercel.app';
+const SITE_URL = 'https://dduroga.com';
 const { SITE, HOME_TITLE } = seoText;
 
 // The server renderer is optional: without it the pages still get the right
@@ -40,7 +40,7 @@ const ssrFile = path.join(root, 'dist-ssr/entry-server.js');
 const ssr = fs.existsSync(ssrFile) ? await import(pathToFileURL(ssrFile).href) : null;
 let rendered = 0, renderFailed = [];
 
-const DEFAULT_IMAGE = '/og-image.png';
+const DEFAULT_IMAGE = '/og-image.jpg';
 const DEFAULT_DESCRIPTION = 'DDUROGA Safety supplies certified PPE for head, hand, body and feet protection, trusted by industry across the country.';
 const shell = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
 
@@ -75,7 +75,7 @@ async function render({ url, title, fullTitle, description, canonical, image = D
   html = setTag(html, 'property', 'og:image', abs(image));
   html = setTag(html, 'name', 'twitter:image', abs(image));
   if (image !== DEFAULT_IMAGE) {
-    // The fixed 1200x630 size belongs to og-image.png only.
+    // The fixed 1200x630 size belongs to og-image.jpg only.
     html = html.replace(/\s*<meta\s+property="og:image:(width|height)"\s+content="[^"]*"\s*\/?>/g, '');
   }
   if (canonical) {

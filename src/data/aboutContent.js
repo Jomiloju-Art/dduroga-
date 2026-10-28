@@ -5,7 +5,7 @@
  */
 import { allProducts, zones } from './products.js';
 
-export const aboutTitle = 'Certified protection for Nigerian workers, for the full shift.';
+export const aboutTitle = 'Protecting the people who build Nigeria.';
 
 export const aboutLede = [
   'Dduroga Safety is a B2B supplier of personal protective equipment (PPE) serving industrial businesses across West Africa. We supply safety footwear, flame-resistant garments, head, hand, and hearing protection, and hi-vis workwear to the teams who work in demanding environments every day.',

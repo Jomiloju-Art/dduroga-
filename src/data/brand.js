@@ -37,7 +37,7 @@ export const brand = {
   email: 'sales@dduroga.com',
   emailHref: 'mailto:sales@dduroga.com',
   address: '44 Jimoh Odutola Street, Off Eric Moore Road, Surulere, Lagos, Nigeria',
-  hours: 'Mon – Sat, 8:00 – 17:00 WAT',
+  hours: 'Mon – Sat, 8:00 – 18:00 WAT', // closing time confirmed by the client, Oct 2026
 };
 
 /**

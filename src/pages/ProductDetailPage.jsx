@@ -294,21 +294,24 @@ export default function ProductDetailPage() {
   const featureRows = featList.map(splitFeature).filter(Boolean);
   // Overview copy, two sentences to a paragraph.
   //  - Storefront descriptions were stored cut at 600 characters, often
-  //    mid-word ("a secure yet comfo"): drop that trailing fragment.
+  //    mid-word ("a secure yet comfo"). Those 35 are finished in
+  //    src/data/textFixes.js; any still cut lose their unfinished last
+  //    sentence here.
   //  - Sentences end in full stops in some descriptions and run together with
   //    only a capital in others (toSentences); split on both.
   //  - A sentence the key features already state word for word is left out,
   //    otherwise products whose description IS the feature list say it twice.
   const overview = (() => {
     if (!product.hasDesc) return [];
-    let text = String(product.desc).replace(/\s+/g, ' ').trim();
-    if (text.length >= 600 && !/[.!?)]$/.test(text) && text.lastIndexOf('. ') > 0) text = text.slice(0, text.lastIndexOf('. ') + 1);
+    const text = String(product.desc).replace(/\s+/g, ' ').trim();
+    const cut = text.length >= 600 && !/[.!?)]$/.test(text);
     const norm = (x) => x.toLowerCase().replace(/[^a-z0-9%]+/g, ' ').trim();
     // Only once the spec data has loaded: before that, featList is a stand-in
     // built from the description itself and is not shown.
     const featText = detailsLoaded ? norm(featList.join(' ')) : '';
-    const sentences = text.split(/(?<=[.!?])\s+(?=[A-Z])/).flatMap(toSentences)
-      .filter((x) => !(featText && featText.includes(norm(x))));
+    let sentences = text.split(/(?<=[.!?])\s+(?=[A-Z])/).flatMap(toSentences);
+    if (cut && sentences.length > 1) sentences = sentences.slice(0, -1);
+    sentences = sentences.filter((x) => !(featText && featText.includes(norm(x))));
     const out = [];
     for (let i = 0; i < sentences.length; i += 2) out.push(sentences.slice(i, i + 2).map((x) => (/[.!?]$/.test(x) ? x : x.replace(/[;,]?$/, '.'))).join(' '));
     return out;
@@ -612,7 +615,7 @@ export default function ProductDetailPage() {
                 <div className="acc-body">
                   {overview.length
                     ? overview.map((p, i) => <p key={i} className="pinfo__lead">{p}</p>)
-                    : !featureRows.length && <p className="pinfo__lead">Certified product within the {zone?.label.toLowerCase()} range.</p>}
+                    : !featureRows.length && <p className="pinfo__lead">Certified product within the {zone?.label.toLowerCase().replace(/^feet\b/, 'foot')} range.</p>}
                   {!detailsLoaded ? (
                     /* Skeleton while the spec data loads, rather than a line
                        that is briefly untrue. */

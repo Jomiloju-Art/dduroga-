@@ -5,8 +5,8 @@
 export const aboutTitle = 'Protecting the people who build Nigeria.';
 
 export const aboutLede = [
-  'Dduroga Safety is a B2B supplier of personal protective equipment (PPE) serving industrial businesses across West Africa. We supply safety footwear, flame-resistant garments, head, hand, and hearing protection, and hi-vis workwear to the teams who work in demanding environments every day.',
-  'We started with a simple belief: a worker should never have to choose between a product that is certified and one that is available. Too many companies in the region wait months for stock, or settle for PPE with unclear specifications. We built Dduroga to close that gap.',
+  'DDUROGA Safety is a B2B supplier of personal protective equipment (PPE) serving industrial businesses across West Africa. We supply safety footwear, flame-resistant garments, head, hand, and hearing protection, and hi-vis workwear to the teams who work in demanding environments every day.',
+  'We started with a simple belief: a worker should never have to choose between a product that is certified and one that is available. Too many companies in the region wait months for stock, or settle for PPE with unclear specifications. We built DDUROGA to close that gap.',
 ];
 
 export const aboutColumns = [

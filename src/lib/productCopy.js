@@ -18,14 +18,41 @@
  * a capitalised word that follows a lowercase word, which is the only signal the
  * text gives. Guard against the false positives that creates: acronyms (HDPE),
  * measurements (cm), and numbers are left alone.
+ *
+ * No break where the capital is mid-phrase, which the client's review of
+ * 29 Oct 2026 found on a dozen pages ("Iriomote is a. High ankle", "flap
+ * and. Velcro", "Abrasion. Resistant", "assembled in. Canada"):
+ *   - after a word that cannot end a sentence (a, and, with, in, per, ...)
+ *   - after another capitalised word: a Title Case list ("Abrasion
+ *     Resistant, Odor Free") or name ("Washable Microfiber")
+ *   - before a name used mid-sentence ("split leather Canadian gloves")
+ * A material name can still end one ("flap and Velcro | Non-detachable hood").
+ * Nor between a number and its unit ("energy levels of 200. Joules").
  */
+const NO_BREAK_AFTER = new Set([
+  'a', 'an', 'the', 'and', 'or', 'nor', 'but', 'yet', 'with', 'without', 'from', 'of', 'in', 'into', 'on', 'onto',
+  'at', 'by', 'to', 'for', 'per', 'as', 'via', 'than', 'that', 'which', 'its', 'their', 'our', 'is', 'are', 'be',
+  'both', 'each', 'every', 'all', 'any', 'no', 'very', 'more', 'most', 'less', 'such', 'this', 'these', 'those', '&', '+',
+]);
+const NAME_RE = /^(Canad(a|ian)|Velcro|Kevlar|Cordura|Cambrelle|Mallcom|Dyneema|Thinsulate|Nomex|Lycra|Spandex|European|Indian|German)\b/;
+const MATERIAL_RE = /^(Velcro|Kevlar|Cordura|Cambrelle|Dyneema|Thinsulate|Nomex|Lycra|Spandex)$/;
+const UNIT_RE = /^(Joules?|Newtons?|Volts?|Ohms?|Kohms?|Mohms?|Grams?|Kg|Gauge|Degrees?|Celsius|Microns?)\b/;
+
 export function toSentences(text) {
   const clean = String(text || '').replace(/\s+/g, ' ').trim();
   if (!clean) return [];
-  return clean
-    .split(/(?<=[a-z0-9)\]])\s+(?=[A-Z][a-z])/)
-    .map((s) => s.trim())
-    .filter((s) => s.length > 12);
+  const out = [];
+  let start = 0;
+  for (const m of clean.matchAll(/(?<=[a-z0-9)\]])\s+(?=[A-Z][a-z])/g)) {
+    const prev = clean.slice(start, m.index).match(/(\S+)$/)?.[1] || '';
+    const next = clean.slice(m.index + m[0].length);
+    if ((/^[A-Z]/.test(prev) && !MATERIAL_RE.test(prev)) || NO_BREAK_AFTER.has(prev.toLowerCase()) || NAME_RE.test(next)) continue;
+    if (/^\d[\d.,]*$/.test(prev) && UNIT_RE.test(next)) continue;
+    out.push(clean.slice(start, m.index));
+    start = m.index + m[0].length;
+  }
+  out.push(clean.slice(start));
+  return out.map((s) => s.trim()).filter((s) => s.length > 12);
 }
 
 /**

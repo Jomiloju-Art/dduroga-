@@ -6,6 +6,11 @@
  *   whatsapp, phone, email   a tap on a WhatsApp, tel: or mailto: link
  *   catalogue                the 2025 catalogue PDF downloaded
  *   product_view             a product page opened; s is the product slug
+ *   turnstile_error, turnstile_timeout, fallback_used
+ *                            the forms' security check failed or hung, or an
+ *                            enquiry went to the visitor's email app instead
+ *                            of being sent; also counted per day in
+ *                            health:YYYY-MM-DD (8 days) for api/health.js
  * Quote and contact form sends are counted by api/enquiry.js itself, after
  * the email has gone, so they cannot be faked from here.
  *
@@ -18,6 +23,7 @@
  */
 
 const EVENTS = new Set(['whatsapp', 'phone', 'email', 'catalogue', 'product_view']);
+const PROBLEMS = new Set(['turnstile_error', 'turnstile_timeout', 'fallback_used']);
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{0,79}$/;
 const PER_HOUR = 120;
 const KEEP = String(400 * 86400);
@@ -42,7 +48,7 @@ export default async function handler(req, res) {
   if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = null; } }
   const e = typeof body?.e === 'string' ? body.e : '';
   const s = typeof body?.s === 'string' ? body.s.toLowerCase() : '';
-  if (!EVENTS.has(e) || (e === 'product_view' && !SLUG_RE.test(s))) return res.status(204).end();
+  if (!(EVENTS.has(e) || PROBLEMS.has(e)) || (e === 'product_view' && !SLUG_RE.test(s))) return res.status(204).end();
 
   const ip = String(req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || '').split(',')[0].trim() || 'unknown';
   const hour = Math.floor(Date.now() / 3600000);
@@ -56,6 +62,10 @@ export default async function handler(req, res) {
 
     const cmds = [['HINCRBY', `stats:${month}`, e, '1'], ['EXPIRE', `stats:${month}`, KEEP]];
     if (e === 'product_view') cmds.push(['HINCRBY', `stats:${month}:products`, s, '1'], ['EXPIRE', `stats:${month}:products`, KEEP]);
+    if (PROBLEMS.has(e)) {
+      const day = `health:${new Date().toISOString().slice(0, 10)}`;
+      cmds.push(['HINCRBY', day, e, '1'], ['EXPIRE', day, String(8 * 86400)]);
+    }
     await kv(cmds);
   } catch (err) {
     console.error('event', String(err));

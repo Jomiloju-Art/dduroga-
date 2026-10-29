@@ -8,7 +8,8 @@
  *      appearing: a bot. Answered "ok" so it does not learn to adapt.
  *   2. Cloudflare Turnstile token, when TURNSTILE_SECRET_KEY is set.
  *   3. at most 5 enquiries an hour from one connection, and DAILY_CAP a day
- *      in total (Resend's free plan sends 100 a day).
+ *      in total (Resend's free plan sends 100 emails a day, and each enquiry
+ *      with an email address sends two: ours and the customer's receipt).
  *   4. field checks, the same rules as the forms (src/lib/validate.js): a
  *      name, a valid email or Nigerian/international phone number, length
  *      limits, no more than 2 web links (spam is mostly links), and an email
@@ -28,16 +29,24 @@
  *                          tier. Makes the limits hold across all servers;
  *                          without it they are counted per server instance,
  *                          which still slows a flood but does not stop it.
- *   DAILY_CAP              total enquiries a day, default 90
+ *   DAILY_CAP              total enquiries a day, default 45
+ *
+ * After the checks, and before any email, the enquiry is saved to the store
+ * (enq:log:YYYY-MM, one field per enquiry, kept 180 days) with its delivery
+ * status, so an enquiry is never lost to a failed or junked email:
+ * api/enquiries.js lists them, api/health.js alerts on failures. When the
+ * customer gave an email address they then get a short receipt.
  */
 
 import { promises as dns } from 'node:dns';
 import { checkContact, checkMessage, checkPhone } from '../src/lib/validate.js';
+import { brand } from '../src/data/brand.js';
 
 const TO = process.env.ENQUIRY_TO || 'sales@dduroga.com';
 const FROM = process.env.ENQUIRY_FROM || 'DDUROGA Website <onboarding@resend.dev>';
 const PER_HOUR = 5;
-const DAILY_CAP = Number(process.env.DAILY_CAP) || 90;
+const DAILY_CAP = Number(process.env.DAILY_CAP) || 45;
+const LOG_DAYS = 180;
 const MIN_MS = 3000;
 
 const LIMITS = { name: 100, company: 150, email: 254, phone: 40, interest: 150, message: 5000, notes: 5000, type: 40 };
@@ -74,17 +83,47 @@ async function hit(key, ttl) {
   return e.n;
 }
 
-/** Counts a sent enquiry for the monthly report (api/stats.js). Best effort. */
-async function countSent(field) {
-  if (!kvUrl || !kvToken) return;
-  const key = `stats:${new Date().toISOString().slice(0, 7)}`;
+/** Runs Redis commands in one request. Best effort: answers null on trouble. */
+async function kv(commands) {
+  if (!kvUrl || !kvToken) return null;
   try {
-    await fetch(`${kvUrl}/pipeline`, {
+    const r = await fetch(`${kvUrl}/pipeline`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${kvToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify([['HINCRBY', key, field, '1'], ['EXPIRE', key, String(400 * 86400)]]),
+      body: JSON.stringify(commands),
     });
-  } catch { /* the enquiry is already sent; a missed count does not matter */ }
+    return await r.json();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Counts for the monthly report (api/stats.js); problems (send_failed,
+ * confirm_failed) also go in the day's health hash that api/health.js reads.
+ */
+function count(field, problem = false) {
+  const month = `stats:${new Date().toISOString().slice(0, 7)}`;
+  const day = `health:${new Date().toISOString().slice(0, 10)}`;
+  return kv([
+    ['HINCRBY', month, field, '1'], ['EXPIRE', month, String(400 * 86400)],
+    ...(problem ? [['HINCRBY', day, field, '1'], ['EXPIRE', day, String(8 * 86400)]] : []),
+  ]);
+}
+
+/** Saves or updates the backup copy of an enquiry (see the header). */
+function logEnquiry(id, record) {
+  const key = `enq:log:${id.slice(0, 7)}`;
+  return kv([['HSET', key, id, JSON.stringify(record)], ['EXPIRE', key, String(LOG_DAYS * 86400)]]);
+}
+
+async function resend(payload) {
+  const r = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!r.ok) throw new Error(`${r.status} ${(await r.text()).slice(0, 300)}`);
 }
 
 /* ---------- checks ---------- */
@@ -202,6 +241,27 @@ ${note ? `<h3 style="font-size:15px;margin:20px 0 8px">${isQuote ? 'Notes' : 'Me
   return { subject, text, html };
 }
 
+/**
+ * The customer's receipt. Fixed wording plus their first name and a product
+ * count, never their message or product titles: anyone can type any address
+ * into the form, so the receipt must be useless for sending spam.
+ */
+function receipt({ f, items }) {
+  const isQuote = items.length > 0;
+  const first = oneLine(f.name).split(' ')[0].slice(0, 40);
+  const what = isQuote ? `quote request for ${items.length} product${items.length === 1 ? '' : 's'}` : 'enquiry';
+  const subject = isQuote ? 'We have received your quote request: DDUROGA Safety' : 'We have received your enquiry: DDUROGA Safety';
+  const lines = [
+    `Hi ${first},`, '',
+    `Thank you for your ${what}. It has reached our sales team and we will get back to you shortly.`, '',
+    `If it is urgent, call or WhatsApp us on ${brand.phone}, or reply to this email.`, '',
+    'DDUROGA Safety', 'https://dduroga.com', '',
+    'You are receiving this because this address was entered on the dduroga.com contact or quote form. If that was not you, please ignore this email.',
+  ];
+  const html = `<div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.6;color:#111;max-width:560px">${lines.map((l) => (l ? `<p style="margin:0">${esc(l)}</p>` : '<br>')).join('')}</div>`;
+  return { subject, text: lines.join('\n'), html };
+}
+
 /* ---------- handler ---------- */
 
 export default async function handler(req, res) {
@@ -242,27 +302,41 @@ export default async function handler(req, res) {
     return send(429, { ok: false, message: 'We could not take your enquiry online just now. Please call or WhatsApp us, or email us directly.' });
   }
 
+  // Backup copy first, so the enquiry survives whatever happens to the email.
+  const now = new Date().toISOString();
+  const id = `${now}-${Math.random().toString(36).slice(2, 8)}`;
+  const { phoneKind, ...fields } = c.f;
+  const record = { at: now, kind: c.items.length > 0 ? 'quote' : 'enquiry', ...fields, items: c.items, status: 'pending' };
+  await logEnquiry(id, record);
+
   // A failed send answers 503, like "not configured", so the page falls back
   // to the visitor's email app and the enquiry is not lost.
   const mail = compose(c);
   try {
-    const r = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        from: FROM, to: TO.split(',').map((s) => s.trim()).filter(Boolean),
-        ...(c.f.email ? { reply_to: c.f.email } : {}),
-        subject: mail.subject, text: mail.text, html: mail.html,
-      }),
+    await resend({
+      from: FROM, to: TO.split(',').map((s) => s.trim()).filter(Boolean),
+      ...(c.f.email ? { reply_to: c.f.email } : {}),
+      subject: mail.subject, text: mail.text, html: mail.html,
     });
-    if (!r.ok) {
-      console.error('resend', r.status, (await r.text()).slice(0, 300));
-      return send(503, { ok: false, error: 'send_failed' });
-    }
   } catch (e) {
     console.error('resend', String(e));
+    await Promise.all([logEnquiry(id, { ...record, status: 'failed', error: String(e).slice(0, 200) }), count('send_failed', true)]);
     return send(503, { ok: false, error: 'send_failed' });
   }
-  await countSent(c.items.length > 0 ? 'quote_sent' : 'enquiry_sent');
+
+  // The receipt is a courtesy: if it fails, the enquiry still went through.
+  let receiptStatus = 'none';
+  if (c.f.email) {
+    const r = receipt(c);
+    try {
+      await resend({ from: FROM, to: [c.f.email], reply_to: TO.split(',')[0].trim(), subject: r.subject, text: r.text, html: r.html });
+      receiptStatus = 'sent';
+    } catch (e) {
+      console.error('receipt', String(e));
+      receiptStatus = 'failed';
+      await count('confirm_failed', true);
+    }
+  }
+  await Promise.all([logEnquiry(id, { ...record, status: 'sent', receipt: receiptStatus }), count(record.kind === 'quote' ? 'quote_sent' : 'enquiry_sent')]);
   return send(200, { ok: true });
 }

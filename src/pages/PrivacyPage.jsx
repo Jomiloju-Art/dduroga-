@@ -53,7 +53,14 @@ export default function PrivacyPage() {
             for that. We do not add you to a mailing list, and we never sell or share your details with
             anyone for their own marketing.
           </p>
-          <p>We keep your enquiry only as long as we need it to handle it and to keep normal business records.</p>
+          <p>
+            If you give an email address, we send you a short email to confirm we received your enquiry.
+          </p>
+          <p>
+            We keep your enquiry only as long as we need it to handle it and to keep normal business records.
+            The website also keeps a backup copy for 6 months, so an enquiry is not lost if an email fails, and
+            then deletes it automatically.
+          </p>
 
           <h2>Who handles it for us</h2>
           <p>A few services run parts of the website for us and only process data to do that job:</p>
@@ -61,7 +68,7 @@ export default function PrivacyPage() {
             <li><b>Vercel</b> hosts the website.</li>
             <li><b>Cloudflare Turnstile</b> checks that a form is sent by a person, not a spam robot.</li>
             <li><b>Resend</b> delivers your form to our inbox as an email.</li>
-            <li><b>Upstash</b> keeps your connection’s IP address for about an hour, only to stop floods of spam.</li>
+            <li><b>Upstash</b> stores the website’s backup copy of your enquiry for 6 months, and your connection’s IP address for about an hour, only to stop floods of spam.</li>
             <li><b>Microsoft 365</b> holds our email inbox, where your enquiry arrives.</li>
           </ul>
 

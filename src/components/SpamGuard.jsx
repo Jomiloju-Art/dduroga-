@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { brand } from '../data/brand.js';
+import { track } from '../lib/track.js';
 
 /**
  * Spam checks shared by the contact and quote forms. api/enquiry.js repeats
@@ -16,7 +17,11 @@ import { brand } from '../data/brand.js';
  *              blocked, or the site's address missing from the widget's
  *              hostnames: error 110200), `unavailable` is set and the
  *              forms hand the enquiry to the visitor's email app instead of
- *              waiting for a token that will never come.
+ *              waiting for a token that will never come. The same happens
+ *              when it neither passes nor fails within WAIT_MS (a slow
+ *              network, a strict browser), unless it is showing the visitor
+ *              a box to tick. Each failure is reported once per page
+ *              (api/event.js), so api/health.js can raise the alarm.
  *
  * Usage:
  *   const spam = useSpamGuard();
@@ -58,6 +63,7 @@ export function useSpamGuard() {
 }
 
 const SCRIPT = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+const WAIT_MS = 15000;
 let scriptPromise = null;
 const loadScript = () => {
   if (window.turnstile) return Promise.resolve();
@@ -78,18 +84,25 @@ function Turnstile({ onToken, onFail, widgetRef }) {
   const [failed, setFailed] = useState(false);
   useEffect(() => {
     let gone = false;
+    const reported = new Set();
+    const report = (e) => { if (!reported.has(e)) { reported.add(e); track(e); } };
+    // Cleared by a token, or by the widget asking the visitor to tick a box
+    // (they may take a while, and that is not a failure).
+    const timer = setTimeout(() => { if (!gone) { onFail(true); report('turnstile_timeout'); } }, WAIT_MS);
     loadScript().then(() => {
       if (gone || !box.current) return;
       widgetRef.current = window.turnstile.render(box.current, {
         sitekey: brand.turnstileSiteKey,
         appearance: 'interaction-only',
-        callback: (t) => { onFail(false); onToken(t); },
+        callback: (t) => { clearTimeout(timer); onFail(false); onToken(t); },
+        'before-interactive-callback': () => clearTimeout(timer),
         'expired-callback': () => onToken(''),
-        'error-callback': () => { onToken(''); onFail(true); },
+        'error-callback': () => { clearTimeout(timer); onToken(''); onFail(true); report('turnstile_error'); },
       });
-    }).catch(() => { if (!gone) { setFailed(true); onFail(true); } });
+    }).catch(() => { if (!gone) { clearTimeout(timer); setFailed(true); onFail(true); report('turnstile_error'); } });
     return () => {
       gone = true;
+      clearTimeout(timer);
       if (widgetRef.current != null && window.turnstile) window.turnstile.remove(widgetRef.current);
       widgetRef.current = null;
     };

@@ -1,4 +1,5 @@
 import { brand } from '../data/brand.js';
+import { track } from './track.js';
 
 /** Build a mailto: link carrying an enquiry as the body. */
 export const mailtoHref = (subject, body) =>
@@ -38,7 +39,8 @@ export async function sendEnquiry(payload, subject, guard = {}) {
   const ep = (brand.enquiryEndpoint || '').trim();
   // No endpoint, or the bot check could not run (the server would refuse the
   // enquiry without its token): the visitor's email app, so it is not lost.
-  if (!ep || guard.unavailable) return mailtoFallback(payload, subject);
+  if (!ep) return mailtoFallback(payload, subject);
+  if (guard.unavailable) { track('fallback_used'); return mailtoFallback(payload, subject); }
 
   // A sending service that never answers would leave the button on
   // "Sending…" for good, so give up after 20 seconds.
@@ -54,7 +56,7 @@ export async function sendEnquiry(payload, subject, guard = {}) {
     // Sending not set up yet (no email key on the server), or the function is
     // missing (a local preview): fall back to the visitor's email app rather
     // than failing.
-    if (res.status === 503 || res.status === 404 || res.status === 405) return mailtoFallback(payload, subject);
+    if (res.status === 503 || res.status === 404 || res.status === 405) { track('fallback_used'); return mailtoFallback(payload, subject); }
     const data = await res.json().catch(() => ({}));
     return { ok: res.ok && data.ok !== false, endpoint: true, message: data.message || '' };
   } catch (e) {

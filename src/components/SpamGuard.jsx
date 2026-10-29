@@ -12,7 +12,11 @@ import { brand } from '../data/brand.js';
  *              bots take under one.
  *   token      Cloudflare Turnstile, when brand.turnstileSiteKey is set. It
  *              usually checks silently and only asks for a click when a
- *              visitor looks automated.
+ *              visitor looks automated. If it cannot run at all (script
+ *              blocked, or the site's address missing from the widget's
+ *              hostnames: error 110200), `unavailable` is set and the
+ *              forms hand the enquiry to the visitor's email app instead of
+ *              waiting for a token that will never come.
  *
  * Usage:
  *   const spam = useSpamGuard();
@@ -23,6 +27,7 @@ export function useSpamGuard() {
   const started = useRef(0);
   const trapRef = useRef(null);
   const [token, setToken] = useState('');
+  const [unavailable, setUnavailable] = useState(false);
   const widget = useRef(null);
   useEffect(() => { started.current = Date.now(); }, []);
 
@@ -30,6 +35,7 @@ export function useSpamGuard() {
     trap: trapRef.current?.value || '',
     elapsedMs: started.current ? Date.now() - started.current : 0,
     token,
+    unavailable: unavailable && !token,
   });
 
   // A Turnstile token works once, so each attempt gets a fresh one.
@@ -44,11 +50,11 @@ export function useSpamGuard() {
         <label htmlFor="dd-confirm-ref">Leave this field empty</label>
         <input id="dd-confirm-ref" name="dd_confirm_ref" type="text" tabIndex={-1} autoComplete="off" ref={trapRef} defaultValue="" />
       </div>
-      {brand.turnstileSiteKey && <Turnstile onToken={setToken} widgetRef={widget} />}
+      {brand.turnstileSiteKey && <Turnstile onToken={setToken} onFail={setUnavailable} widgetRef={widget} />}
     </>
   );
 
-  return { fields, guard, reset, needsToken: Boolean(brand.turnstileSiteKey) && !token };
+  return { fields, guard, reset, needsToken: Boolean(brand.turnstileSiteKey) && !token && !unavailable };
 }
 
 const SCRIPT = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
@@ -67,7 +73,7 @@ const loadScript = () => {
   return scriptPromise;
 };
 
-function Turnstile({ onToken, widgetRef }) {
+function Turnstile({ onToken, onFail, widgetRef }) {
   const box = useRef(null);
   const [failed, setFailed] = useState(false);
   useEffect(() => {
@@ -77,17 +83,17 @@ function Turnstile({ onToken, widgetRef }) {
       widgetRef.current = window.turnstile.render(box.current, {
         sitekey: brand.turnstileSiteKey,
         appearance: 'interaction-only',
-        callback: (t) => onToken(t),
+        callback: (t) => { onFail(false); onToken(t); },
         'expired-callback': () => onToken(''),
-        'error-callback': () => onToken(''),
+        'error-callback': () => { onToken(''); onFail(true); },
       });
-    }).catch(() => !gone && setFailed(true));
+    }).catch(() => { if (!gone) { setFailed(true); onFail(true); } });
     return () => {
       gone = true;
       if (widgetRef.current != null && window.turnstile) window.turnstile.remove(widgetRef.current);
       widgetRef.current = null;
     };
-  }, [onToken, widgetRef]);
+  }, [onToken, onFail, widgetRef]);
 
   return (
     <div className="turnstile-box">

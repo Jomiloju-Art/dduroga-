@@ -36,7 +36,9 @@ function mailtoFallback(payload, subject) {
  */
 export async function sendEnquiry(payload, subject, guard = {}) {
   const ep = (brand.enquiryEndpoint || '').trim();
-  if (!ep) return mailtoFallback(payload, subject);
+  // No endpoint, or the bot check could not run (the server would refuse the
+  // enquiry without its token): the visitor's email app, so it is not lost.
+  if (!ep || guard.unavailable) return mailtoFallback(payload, subject);
 
   // A sending service that never answers would leave the button on
   // "Sending…" for good, so give up after 20 seconds.

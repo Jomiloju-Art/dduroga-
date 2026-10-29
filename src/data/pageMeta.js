@@ -31,6 +31,10 @@ export const pageMeta = {
     title: 'Certifications & accreditations',
     description: 'Facility accreditations and product certification marks behind the DDUROGA Safety range, manufactured by the Mallcom group.',
   },
+  '/privacy': {
+    title: 'Privacy policy',
+    description: 'What DDUROGA Safety collects when you use dduroga.com, why, who handles it, and how to ask us to see, correct or delete your details.',
+  },
   '/search': {
     title: 'Search',
     description: 'Search the DDUROGA Safety PPE catalogue by product name, SKU, type or standard.',

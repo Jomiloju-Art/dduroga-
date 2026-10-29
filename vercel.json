@@ -85,7 +85,7 @@
       "destination": "/_p/learning/:slug.html"
     },
     {
-      "source": "/:page(products|about|learning|contact|certifications|search|quote)",
+      "source": "/:page(products|about|learning|contact|certifications|privacy|search|quote)",
       "destination": "/_p/:page.html"
     }
   ],

@@ -96,7 +96,7 @@ export default function Footer() {
       <div className="sf__bottom">
         <div className="sf__bottom-inner">
           <p className="sf__address">{brand.address}</p>
-          <p className="sf__copy">&copy; {year} {brand.legalName}</p>
+          <p className="sf__copy">&copy; {year} {brand.legalName} · <Link to="/privacy">Privacy policy</Link></p>
         </div>
       </div>
     </footer>

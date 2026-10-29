@@ -194,7 +194,7 @@ export default function QuotePage() {
                     <button type="submit" className="btn hx-btn" style={{ width: '100%', justifyContent: 'center' }} disabled={sending} aria-busy={sending}>
                       {sending ? 'Sending…' : <>Send quote request <IconArrowRight width="14" height="14" /></>}
                     </button>
-                    <p className="form-note" style={{ marginTop: 10 }}>No payment now. This requests a quotation only.</p>
+                    <p className="form-note" style={{ marginTop: 10 }}>No payment now. This requests a quotation only. We only use your details to reply to you. <Link to="/privacy">Privacy policy</Link></p>
                   </form>
                 )}
               </div>

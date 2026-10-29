@@ -6,6 +6,7 @@ import Navbar from './Navbar.jsx';
 import TopBar from './TopBar.jsx';
 import Footer from './Footer.jsx';
 import BagDrawer from './BagDrawer.jsx';
+import PrivacyNotice from './PrivacyNotice.jsx';
 import { brand } from '../data/brand.js';
 
 /** Shared page frame: sticky nav + routed content + footer + bag drawer + WhatsApp. */
@@ -40,6 +41,9 @@ export default function Layout() {
 
       {/* The quote list, presented as Gymshark's "Your bag" slide-in drawer. */}
       <BagDrawer />
+
+      {/* First-visit note that no tracking cookies are used (option A, Oct 2026). */}
+      <PrivacyNotice />
 
       {/* WhatsApp, by client request. NOTE: `brand.whatsapp` is still the stub
           `919000000000`, so this opens a chat with a number that does not exist

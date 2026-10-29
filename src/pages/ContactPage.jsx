@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import PageHero from '../components/PageHero.jsx';
 import { brand } from '../data/brand.js';
 import { categories } from '../data/products.js';
@@ -212,7 +212,7 @@ export default function ContactPage() {
                   {sendError && <p className="form-error" role="alert" style={{ marginBottom: 12 }}>{sendError}</p>}
                   <button type="submit" className="btn btn--primary" disabled={sending} aria-busy={sending}>{sending ? 'Sending…' : 'Send enquiry'}</button>
                   <p className="form-note" style={{ marginTop: 12 }}>
-                    By submitting you agree to be contacted about your enquiry. We never share your details.
+                    By submitting you agree to be contacted about your enquiry. We never share your details. <Link to="/privacy">Privacy policy</Link>
                   </p>
                 </div>
               </form>

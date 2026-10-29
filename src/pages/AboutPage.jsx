@@ -3,7 +3,7 @@ import Reveal from '../components/Reveal.jsx';
 import CtaBand from '../components/CtaBand.jsx';
 import { IconArrowRight } from '../components/Icons.jsx';
 import { brand } from '../data/brand.js';
-import { aboutTitle, aboutLede, aboutColumns, aboutStrengths, aboutValues, aboutFacts } from '../data/aboutContent.js';
+import { aboutTitle, aboutLede, aboutColumns, aboutStrengths, aboutValues } from '../data/aboutContent.js';
 import { usePageMeta } from '../lib/seo.js';
 import { pageMeta } from '../data/pageMeta.js';
 
@@ -42,11 +42,6 @@ export default function AboutPage() {
             </div>
             <div className="ax-story__body">
               {aboutLede.map((p) => <p className="ax-story__lede" key={p.slice(0, 24)}>{p}</p>)}
-              <ul className="ax-story__facts" aria-label="DDUROGA at a glance">
-                {aboutFacts.map((f, i) => (
-                  <Reveal as="li" key={f.label} delay={i * 70}><strong>{f.value}</strong><span>{f.label}</span></Reveal>
-                ))}
-              </ul>
             </div>
           </div>
           <div className="ax-story__cols">

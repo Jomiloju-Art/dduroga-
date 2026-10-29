@@ -1,10 +1,7 @@
 /**
  * The About page's copy (AboutPage.jsx), kept apart from the layout.
- * The text is the client's own write-up (Oct 2026), used as written; the
- * counts are from the catalogue.
+ * The text is the client's own write-up (Oct 2026), used as written.
  */
-import { allProducts, zones } from './products.js';
-
 export const aboutTitle = 'Protecting the people who build Nigeria.';
 
 export const aboutLede = [
@@ -55,10 +52,4 @@ export const aboutValues = [
   { title: 'Integrity', text: 'Genuine products, honest specifications, transparent dealings.' },
   { title: 'Reliability', text: 'We deliver what we promise, when we promise it.' },
   { title: 'Partnership', text: 'Our success grows with our customers’ success.' },
-];
-
-export const aboutFacts = [
-  { value: 'Mallcom', label: 'Sole authorized distributor' },
-  { value: allProducts.length, label: 'Products in the range' },
-  { value: zones.length, label: 'Protection zones, head to toe' },
 ];

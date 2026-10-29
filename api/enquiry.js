@@ -74,6 +74,19 @@ async function hit(key, ttl) {
   return e.n;
 }
 
+/** Counts a sent enquiry for the monthly report (api/stats.js). Best effort. */
+async function countSent(field) {
+  if (!kvUrl || !kvToken) return;
+  const key = `stats:${new Date().toISOString().slice(0, 7)}`;
+  try {
+    await fetch(`${kvUrl}/pipeline`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${kvToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify([['HINCRBY', key, field, '1'], ['EXPIRE', key, String(400 * 86400)]]),
+    });
+  } catch { /* the enquiry is already sent; a missed count does not matter */ }
+}
+
 /* ---------- checks ---------- */
 
 async function turnstileOk(token, ip) {
@@ -250,5 +263,6 @@ export default async function handler(req, res) {
     console.error('resend', String(e));
     return send(503, { ok: false, error: 'send_failed' });
   }
+  await countSent(c.items.length > 0 ? 'quote_sent' : 'enquiry_sent');
   return send(200, { ok: true });
 }

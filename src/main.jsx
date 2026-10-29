@@ -4,7 +4,14 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import { registerServiceWorker } from './lib/serviceWorker.js';
+import { inject } from '@vercel/analytics';
+import { trackContactClicks } from './lib/track.js';
 import './styles/index.css';
+
+// Visitors, pages and referrers: Vercel Web Analytics (no cookies, so no
+// consent banner). Contact taps are counted separately (src/lib/track.js).
+inject({ mode: import.meta.env.DEV ? 'development' : 'production' });
+trackContactClicks();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

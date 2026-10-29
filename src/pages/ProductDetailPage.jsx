@@ -16,6 +16,7 @@ import { productTitle, productDescription } from '../lib/seoText.js';
 import QtyInput, { QTY_MAX } from '../components/QtyInput.jsx';
 import { usePageMeta } from '../lib/seo.js';
 import { addRecent, useRecentlyViewed } from '../lib/recent.js';
+import { track } from '../lib/track.js';
 import Reveal from '../components/Reveal.jsx';
 import NotFoundPage from './NotFoundPage.jsx';
 import SizeGuide from '../components/SizeGuide.jsx';
@@ -214,7 +215,7 @@ export default function ProductDetailPage() {
     [product],
   );
 
-  useEffect(() => { if (product) addRecent(product.slug); }, [product?.slug]);
+  useEffect(() => { if (product) { addRecent(product.slug); track('product_view', product.slug); } }, [product?.slug]);
   const recent = useRecentlyViewed().filter((p) => p.slug !== product?.slug);
 
   usePageMeta({

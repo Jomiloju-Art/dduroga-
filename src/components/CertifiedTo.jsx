@@ -103,9 +103,14 @@ function Standard({ code, rating }) {
   );
 }
 
+/** Indian (BIS) standards are not CE standards, so they never sit under the CE mark (client, 30 Oct 2026). */
+export const isIndianStandard = (code) => /^IS\s/.test(code || '');
+
 export default function CertifiedTo({ symbols = [], standards = [], ce = false }) {
   const shown = symbols.filter((s) => glossaryIcon(s));
   if (!shown.length && !standards.length) return null;
+  const european = standards.filter((s) => !isIndianStandard(s.code));
+  const indian = standards.filter((s) => isIndianStandard(s.code));
   return (
     <div className="detail-taggroup pr">
       <h2>Performance ratings</h2>
@@ -119,11 +124,19 @@ export default function CertifiedTo({ symbols = [], standards = [], ce = false }
           ))}
         </ul>
       )}
-      {standards.length > 0 && (
+      {european.length > 0 && (
         <div className="pr-certs">
           {ce && <img className="pr-ce" src="/accreditations/ce.png" alt="CE marked" />}
           <ul className="pr-stds">
-            {standards.map((s) => <Standard key={s.code} {...s} />)}
+            {european.map((s) => <Standard key={s.code} {...s} />)}
+          </ul>
+        </div>
+      )}
+      {indian.length > 0 && (
+        <div className="pr-certs pr-certs--bis">
+          <span className="pr-bis">Indian standard (BIS)</span>
+          <ul className="pr-stds">
+            {indian.map((s) => <Standard key={s.code} {...s} />)}
           </ul>
         </div>
       )}

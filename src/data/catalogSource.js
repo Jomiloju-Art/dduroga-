@@ -71,10 +71,25 @@ const RANGE_OVERRIDES = {
   'manul-7': 'high-boots',
 };
 
+/**
+ * A standard every product of a type carries, as the client confirmed (30 Oct
+ * 2026: "CE EN 397 is the correct rating" for all helmets; some showed only
+ * the Indian IS 2925, and four showed nothing). Added first and CE-marked;
+ * any Indian standard the catalogue gives stays, shown apart (CertifiedTo.jsx).
+ */
+const RANGE_STANDARD = {
+  helmets: 'EN 397',
+};
+const withRangeStandard = (standards, range) => {
+  const code = RANGE_STANDARD[range];
+  return code && !standards.some((s) => s.code === code) ? [{ code }, ...standards] : standards;
+};
+
 const enrich = (p, r = productRanges[p.slug] || {}, key = p.slug) => {
   const localImage = localizer(p, key);
   // An official datasheet replaces the catalogue's ratings (datasheets.js).
   const sheet = DATASHEETS[key];
+  const range = RANGE_OVERRIDES[key] || r.range || null;
   return {
     ...p,
     tags: WRONG_TAGS[key] ? (p.tags || []).filter((t) => !WRONG_TAGS[key].includes(t)) : p.tags,
@@ -82,12 +97,12 @@ const enrich = (p, r = productRanges[p.slug] || {}, key = p.slug) => {
     variants: p.variants ? p.variants.map((v) => (v.img ? { ...v, img: localImage(v.img) } : v)) : p.variants,
     key,
     slug: sheet?.slug || SLUG_RENAMES[p.slug] || p.slug,
-    range: RANGE_OVERRIDES[key] || r.range || null,
+    range,
     rangeSource: r.source || null,
     collection: r.collection || null,
-    catalogueStandards: (sheet || r).standards || [],
+    catalogueStandards: withRangeStandard((sheet || r).standards || [], range),
     catalogueSymbols: (sheet || r).symbols || [],
-    ce: Boolean((sheet || r).ce),
+    ce: Boolean((sheet || r).ce || RANGE_STANDARD[range]),
     datasheets: sheet?.files || [],
     inCatalogue: Boolean(r.inCatalogue || sheet?.show || SHOWN[key]),
     cataloguePage: r.page ?? null,

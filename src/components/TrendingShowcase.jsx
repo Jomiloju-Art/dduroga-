@@ -4,6 +4,7 @@ import { findProduct, zoneOf, rangeLabel } from '../data/products.js';
 import { TRENDING } from '../data/trending.js';
 import { useQuote } from '../quote/QuoteContext.jsx';
 import { IconArrowRight } from './Icons.jsx';
+import { firstStandard } from '../lib/productSpecs.js';
 
 /**
  * Homepage "Trending now", as stories (Instagram-style). The client liked the
@@ -27,11 +28,10 @@ const DURATION = 3500; // ms per product
 const typeOf = (p) => rangeLabel(p) || zoneOf(p)?.label || '';
 const reduceMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-/** The one rating a buyer scans for: "CE · EN 397" or "EN 388 4133X". */
+/** The one rating a buyer scans for: "CE · EN 397" or "EN 388 4133X". Never "CE" before an Indian (IS) standard. */
 function keyRating(p) {
-  const s = (p.catalogueStandards || [])[0];
-  const std = s ? [s.code, s.rating].filter(Boolean).join(' ') : '';
-  return [p.ce && 'CE', std].filter(Boolean).join(' · ');
+  const std = firstStandard(p);
+  return [p.ce && std && !/^IS\s/.test(std) && 'CE', std].filter(Boolean).join(' · ');
 }
 
 export default function TrendingShowcase() {

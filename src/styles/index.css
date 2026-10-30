@@ -4130,6 +4130,8 @@ a.pdp-datasheet, a.pdp-bar__datasheet { text-decoration: none; box-sizing: borde
 .pr-symbol span { font-size: 0.72rem; line-height: 1.2; color: #3D4247; }
 .pr-certs { display: flex; align-items: flex-start; gap: 14px; padding: 12px 14px; border: 1px solid #DEE0E3; }
 .pr-ce { height: 30px; width: auto; flex: none; margin-top: 2px; }
+.pr-certs + .pr-certs { margin-top: 8px; }
+.pr-bis { flex: none; width: 74px; font-size: 0.66rem; font-weight: 700; line-height: 1.25; letter-spacing: 0.04em; text-transform: uppercase; color: #767A7F; margin-top: 3px; }
 .pr-stds { flex: 1; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
 .pr-std { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .pr-std__code { font-family: var(--font-display); font-weight: 700; font-size: 1rem; letter-spacing: 0.01em; color: var(--ddu-black); }

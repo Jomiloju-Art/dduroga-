@@ -16,10 +16,10 @@ export const colourPart = (c) => {
   return parts[0] && !SIZE_RE.test(parts[0]) ? parts[0] : null;
 };
 
-/** The headline standard: one with a performance code, else an EN/ISO one, else the first. */
+/** The headline standard: one with a performance code, else an EN/ISO one, else any non-Indian one, else the first. */
 export const firstStandard = (p) => {
   const list = p.catalogueStandards || [];
-  const s = list.find((x) => x.rating) || list.find((x) => /^EN/.test(x.code)) || list[0];
+  const s = list.find((x) => x.rating) || list.find((x) => /^EN/.test(x.code)) || list.find((x) => !/^IS\s/.test(x.code)) || list[0];
   return s ? (s.rating ? `${s.code} ${s.rating}` : s.code) : '';
 };
 

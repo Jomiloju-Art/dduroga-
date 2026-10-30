@@ -8,7 +8,7 @@ import { displayType } from '../lib/display.js';
 import { useQuote } from '../quote/QuoteContext.jsx';
 import ProductArt from './ProductArt.jsx';
 import { IconCheck } from './Icons.jsx';
-import { standardStrings } from './CertifiedTo.jsx';
+import { firstStandard } from '../lib/productSpecs.js';
 
 /**
  * Product card, restyled to Gymshark's collection-card anatomy (measured from
@@ -45,7 +45,9 @@ export default function ProductCard({ product }) {
   const type = rangeLabel(product) || displayType(product, zone?.label);
   const options = (product.variants || []).filter((v) => v.c);
   // Key spec from the 2025 catalogue, so buyers can compare without opening each product.
-  const spec = standardStrings(product.catalogueStandards)[0];
+  // An EN standard first; "CE" never goes in front of an Indian (IS) one.
+  const spec = firstStandard(product);
+  const ceSpec = product.ce && spec && !/^IS\s/.test(spec);
 
   return (
     <Link to={`/products/${product.slug}`} className="plp-card" aria-label={product.title}>
@@ -106,7 +108,7 @@ export default function ProductCard({ product }) {
       <div className="plp-card__info">
         <h3 className="plp-card__title">{product.title}</h3>
         {type && <p className="plp-card__meta">{type}</p>}
-        {spec && <p className="plp-card__spec">{product.ce ? 'CE · ' : ''}{spec}</p>}
+        {spec && <p className="plp-card__spec">{ceSpec ? 'CE · ' : ''}{spec}</p>}
         <button
           type="button"
           className="plp-card__quote"

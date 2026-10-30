@@ -12,6 +12,8 @@ import { IconArrowRight, IconCheck, IconDocument } from '../components/Icons.jsx
 import { brand } from '../data/brand.js';
 import { useQuote } from '../quote/QuoteContext.jsx';
 import { loadDetails } from '../lib/details.js';
+import { useEditedDesc } from '../lib/editedCopy.js';
+import { cleanCopy } from '../lib/copySheet.js';
 import { productTitle, productDescription } from '../lib/seoText.js';
 import QtyInput, { QTY_MAX } from '../components/QtyInput.jsx';
 import { usePageMeta } from '../lib/seo.js';
@@ -104,7 +106,14 @@ function FeatureDiagram({ img, title, features, banner }) {
 
 export default function ProductDetailPage() {
   const { slug } = useParams();
-  const product = findProduct(slug);
+  const found = findProduct(slug);
+  // The client edits descriptions in a Google Sheet (lib/copySheet.js); an
+  // edit made since the last build replaces the built-in text.
+  const edited = useEditedDesc(found?.key);
+  const product = useMemo(
+    () => (found && edited && edited !== cleanCopy(found.desc) ? { ...found, desc: edited, hasDesc: true, descEdited: true } : found),
+    [found, edited],
+  );
   const [failedMain, setFailedMain] = useState(false);
   const [colorIdx, setColorIdx] = useState(0);
   /** Chosen size. No default: a quote for the wrong size is worse than a prompt. */
@@ -311,7 +320,7 @@ export default function ProductDetailPage() {
   //  - Storefront descriptions were stored cut at 600 characters, often
   //    mid-word ("a secure yet comfo"). Those 35 are finished in
   //    src/data/textFixes.js; any still cut lose their unfinished last
-  //    sentence here.
+  //    sentence here. Text the client wrote (descEdited) is never cut.
   //  - Sentences end in full stops in some descriptions and run together with
   //    only a capital in others (toSentences); split on both.
   //  - A sentence the key features already state word for word is left out,
@@ -319,7 +328,7 @@ export default function ProductDetailPage() {
   const overview = (() => {
     if (!product.hasDesc) return [];
     const text = String(product.desc).replace(/\s+/g, ' ').trim();
-    const cut = text.length >= 600 && !/[.!?)]$/.test(text);
+    const cut = !product.descEdited && text.length >= 600 && !/[.!?)]$/.test(text);
     const norm = (x) => x.toLowerCase().replace(/[^a-z0-9%]+/g, ' ').trim();
     // Only once the spec data has loaded: before that, featList is a stand-in
     // built from the description itself and is not shown.

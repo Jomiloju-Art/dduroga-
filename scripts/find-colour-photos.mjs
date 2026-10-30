@@ -75,11 +75,19 @@ async function features(rel) {
 const hueGap = (a, b) => { const d = Math.abs(a - b) % 360; return Math.min(d, 360 - d); };
 
 /** Photos sorted by eye where the measures cannot decide: { key: { path: colour } }. */
+const byEye = (key, colour, ns) => Object.fromEntries(ns.map((n) => [`/products/gallery/${key}/${n}.webp`, colour]));
 const BY_EYE = {
   'diamond-iii': {
     '/products/gallery/diamond-iii/2.webp': 'Blue',    // poster of the blue helmet
     '/products/gallery/diamond-iii/10.webp': 'White',  // close crop of the white helmet
   },
+  // People at work and posters, by the helmet they show (30 Oct 2026: with
+  // White picked, scenes of yellow helmets were still showing).
+  'diamond-xiii': { ...byEye('diamond-xiii', 'White', [6, 7, 8, 9]), ...byEye('diamond-xiii', 'Yellow', [14, 15, 17, 18]) },
+  'jasper-xv': { ...byEye('jasper-xv', 'Yellow', [4, 6, 8, 9, 10, 11, 12, 13]), ...byEye('jasper-xv', 'White', [17, 18, 19, 20]) },
+  'jasper-iii': byEye('jasper-iii', 'Yellow', [2, 5, 6]),
+  'jasper-iv': byEye('jasper-iv', 'Yellow', [2, 4, 6]),
+  'jasper-1-yellow': byEye('jasper-1-yellow', 'Yellow', [3, 5]),
 };
 
 const result = {};

@@ -163,7 +163,11 @@
   "Yellow": [
    "/products/gallery/diamond-xiii/11.webp",
    "/products/gallery/diamond-xiii/12.webp",
-   "/products/gallery/diamond-xiii/13.webp"
+   "/products/gallery/diamond-xiii/13.webp",
+   "/products/gallery/diamond-xiii/14.webp",
+   "/products/gallery/diamond-xiii/15.webp",
+   "/products/gallery/diamond-xiii/17.webp",
+   "/products/gallery/diamond-xiii/18.webp"
   ],
   "White": [
    "/products/gallery/diamond-xiii/1.webp",
@@ -172,6 +176,10 @@
    "/products/gallery/diamond-xiii/3.webp",
    "/products/gallery/diamond-xiii/4.webp",
    "/products/gallery/diamond-xiii/5.webp",
+   "/products/gallery/diamond-xiii/6.webp",
+   "/products/gallery/diamond-xiii/7.webp",
+   "/products/gallery/diamond-xiii/8.webp",
+   "/products/gallery/diamond-xiii/9.webp",
    "/products/gallery/diamond-xiii/10.webp"
   ]
  },
@@ -180,8 +188,11 @@
    "/products/gallery/jasper-iii/9.webp",
    "/products/jasper-iii.webp",
    "/products/gallery/jasper-iii/1.webp",
+   "/products/gallery/jasper-iii/2.webp",
    "/products/gallery/jasper-iii/3.webp",
    "/products/gallery/jasper-iii/4.webp",
+   "/products/gallery/jasper-iii/5.webp",
+   "/products/gallery/jasper-iii/6.webp",
    "/products/gallery/jasper-iii/7.webp",
    "/products/gallery/jasper-iii/8.webp",
    "/products/gallery/jasper-iii/10.webp",
@@ -203,7 +214,9 @@
    "/products/jasper-1-yellow.webp",
    "/products/gallery/jasper-1-yellow/1.webp",
    "/products/gallery/jasper-1-yellow/2.webp",
+   "/products/gallery/jasper-1-yellow/3.webp",
    "/products/gallery/jasper-1-yellow/4.webp",
+   "/products/gallery/jasper-1-yellow/5.webp",
    "/products/gallery/jasper-1-yellow/6.webp",
    "/products/gallery/jasper-1-yellow/7.webp",
    "/products/gallery/jasper-1-yellow/8.webp",
@@ -217,21 +230,36 @@
    "/products/jasper-xv.webp",
    "/products/gallery/jasper-xv/2.webp",
    "/products/gallery/jasper-xv/3.webp",
+   "/products/gallery/jasper-xv/4.webp",
    "/products/gallery/jasper-xv/5.webp",
-   "/products/gallery/jasper-xv/7.webp"
+   "/products/gallery/jasper-xv/6.webp",
+   "/products/gallery/jasper-xv/7.webp",
+   "/products/gallery/jasper-xv/8.webp",
+   "/products/gallery/jasper-xv/9.webp",
+   "/products/gallery/jasper-xv/10.webp",
+   "/products/gallery/jasper-xv/11.webp",
+   "/products/gallery/jasper-xv/12.webp",
+   "/products/gallery/jasper-xv/13.webp"
   ],
   "White": [
    "/products/gallery/jasper-xv/14.webp",
    "/products/gallery/jasper-xv/15.webp",
-   "/products/gallery/jasper-xv/16.webp"
+   "/products/gallery/jasper-xv/16.webp",
+   "/products/gallery/jasper-xv/17.webp",
+   "/products/gallery/jasper-xv/18.webp",
+   "/products/gallery/jasper-xv/19.webp",
+   "/products/gallery/jasper-xv/20.webp"
   ]
  },
  "jasper-iv": {
   "Yellow": [
    "/products/gallery/jasper-iv/1.webp",
    "/products/jasper-iv.webp",
+   "/products/gallery/jasper-iv/2.webp",
    "/products/gallery/jasper-iv/3.webp",
+   "/products/gallery/jasper-iv/4.webp",
    "/products/gallery/jasper-iv/5.webp",
+   "/products/gallery/jasper-iv/6.webp",
    "/products/gallery/jasper-iv/12.webp",
    "/products/gallery/jasper-iv/13.webp",
    "/products/gallery/jasper-iv/14.webp",

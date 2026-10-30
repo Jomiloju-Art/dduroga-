@@ -293,12 +293,15 @@ export default function ProductDetailPage() {
   const pushImg = (u) => { if (u && !gallery.includes(u)) gallery.push(u); };
   if (selectedImg) pushImg(selectedImg);
   // Products whose photos are sorted by colour (product.colourPhotos) show
-  // only the chosen colour's, then any tied to no colour (a poster, a group
-  // shot). Picking yellow used to change the first photo only.
+  // only the chosen colour's. Photos tied to no colour (close-ups that could
+  // be any colour, mixed group shots) come after, with the first colour only,
+  // so another colour never shows the wrong one. Picking yellow used to
+  // change the first photo only.
   const ownPhotos = colour && product.colourPhotos?.[colour];
   if (ownPhotos) {
     const tied = new Set(Object.values(product.colourPhotos).flat());
-    [...ownPhotos, product.img, ...(product.imgs || [])].filter((u) => ownPhotos.includes(u) || !tied.has(u)).forEach(pushImg);
+    const untied = colour === colourOptions[0]?.name ? [product.img, ...(product.imgs || [])].filter((u) => !tied.has(u)) : [];
+    [...ownPhotos, ...untied].forEach(pushImg);
   } else {
     pushImg(product.img);
     (product.imgs || []).forEach(pushImg);

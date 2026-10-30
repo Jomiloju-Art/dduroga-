@@ -10,7 +10,7 @@
  *
  * `error` is a sentence for the visitor. An empty field returns
  * { ok: false, empty: true } with no error, so the caller decides whether the
- * field is required (an email OR a phone is enough to reply to).
+ * field is required (checkContact requires all three).
  */
 
 /* ---------- name ---------- */
@@ -213,8 +213,9 @@ export function checkMessage(raw, { required = false } = {}) {
 /* ---------- together ---------- */
 
 /**
- * The quote and contact forms' rules: a name, and an email or a phone (either
- * is enough to reply to), each valid if given.
+ * The quote and contact forms' rules: a name, an email and a phone, each
+ * valid. Both contact details are required (client's request, 30 Oct 2026):
+ * sales emails the quote and follows up by phone or WhatsApp.
  */
 export function checkContact({ name, email, phone }) {
   const n = checkName(name);
@@ -223,9 +224,10 @@ export function checkContact({ name, email, phone }) {
   const errors = {};
   if (n.empty) errors.name = 'Please enter your name.';
   else if (!n.ok) errors.name = n.error;
-  if (e.empty && p.empty) errors.email = 'Enter an email or a phone number so we can reply.';
-  if (!e.empty && !e.ok) errors.email = e.error;
-  if (!p.empty && !p.ok) errors.phone = p.error;
+  if (e.empty) errors.email = 'Please enter your work email.';
+  else if (!e.ok) errors.email = e.error;
+  if (p.empty) errors.phone = 'Please enter your phone or WhatsApp number.';
+  else if (!p.ok) errors.phone = p.error;
   return {
     ok: Object.keys(errors).length === 0,
     errors,

@@ -38,7 +38,8 @@ export default function ContactPage() {
 
   const formRef = useRef(null);
   // Name, email and phone rules (lib/validate.js, shared with the server).
-  // Email or phone: many buyers here prefer a call or WhatsApp.
+  // Email and phone are both required: sales replies by email and follows up
+  // by phone or WhatsApp.
   const checks = useContactChecks(form, {
     prefix: 'cf',
     formRef,
@@ -161,7 +162,7 @@ export default function ContactPage() {
 
                 <div className="form-row">
                   <div className="field">
-                    <label htmlFor="cf-email">Work email</label>
+                    <label htmlFor="cf-email">Work email <span className="req">*</span></label>
                     <input id="cf-email" type="email" inputMode="email" autoCapitalize="none" spellCheck={false} placeholder="name@company.com" value={form.email} onChange={set('email')} onBlur={checks.blur('email')} autoComplete="email" maxLength={254} aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'cf-email-err' : undefined} />
                     {errors.email && <p className="form-error" id="cf-email-err">{errors.email}</p>}
                     {checks.suggestion && (
@@ -172,12 +173,12 @@ export default function ContactPage() {
                     )}
                   </div>
                   <div className="field">
-                    <label htmlFor="cf-phone">Phone / WhatsApp</label>
+                    <label htmlFor="cf-phone">Phone / WhatsApp <span className="req">*</span></label>
                     <input id="cf-phone" type="tel" inputMode="tel" placeholder="0803 123 4567" value={form.phone} onChange={set('phone')} onBlur={checks.blur('phone')} autoComplete="tel" maxLength={24} aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? 'cf-phone-err' : undefined} />
                     {errors.phone && <p className="form-error" id="cf-phone-err">{errors.phone}</p>}
                   </div>
                 </div>
-                <p className="form-note" style={{ marginTop: -6, marginBottom: 14 }}>Give an email or a phone number, or both, so we can reply.</p>
+                <p className="form-note" style={{ marginTop: -6, marginBottom: 14 }}>We need both, so we can reply by email and reach you on WhatsApp.</p>
 
                 <div className="field">
                   <label htmlFor="cf-interest">I am interested in</label>

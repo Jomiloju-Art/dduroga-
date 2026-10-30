@@ -11,7 +11,7 @@
  *      in total (Resend's free plan sends 100 emails a day, and each enquiry
  *      with an email address sends two: ours and the customer's receipt).
  *   4. field checks, the same rules as the forms (src/lib/validate.js): a
- *      name, a valid email or Nigerian/international phone number, length
+ *      name, a valid email and Nigerian/international phone number, length
  *      limits, no more than 2 web links (spam is mostly links), and an email
  *      domain that can actually receive mail (DNS lookup).
  *
@@ -176,8 +176,8 @@ async function mailDomainOk(email) {
 function clean(body) {
   const f = {};
   for (const [k, n] of Object.entries(LIMITS)) f[k] = str(body[k], n);
-  // The forms' own rules (src/lib/validate.js): a name, an email or a phone,
-  // each valid if given. The phone comes back as +234…
+  // The forms' own rules (src/lib/validate.js): a name, an email and a phone,
+  // each valid. The phone comes back as +234…
   const c = checkContact({ name: f.name, email: f.email, phone: f.phone });
   if (!c.ok) return { error: Object.values(c.errors)[0] };
   Object.assign(f, { name: c.values.name, email: c.values.email, phone: c.values.phone, phoneKind: c.values.phoneKind });
@@ -289,7 +289,7 @@ export default async function handler(req, res) {
   const c = clean(body);
   if (c.error) return send(422, { ok: false, message: c.error });
   if (!(await mailDomainOk(c.f.email))) {
-    return send(422, { ok: false, message: 'We could not find that email address’s domain, so a reply would not reach you. Please check it, or give a phone number instead.' });
+    return send(422, { ok: false, message: 'We could not find that email address’s domain, so a reply would not reach you. Please check it and try again.' });
   }
 
   // 3. Limits.

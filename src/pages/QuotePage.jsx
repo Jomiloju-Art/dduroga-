@@ -24,7 +24,8 @@ export default function QuotePage() {
   const [sendError, setSendError] = useState('');
   const formRef = useRef(null);
   // Name, email and phone rules (lib/validate.js, shared with the server).
-  // Many buyers here answer by phone or WhatsApp, so either one is enough.
+  // Email and phone are both required: the quote goes by email, follow-up by
+  // phone or WhatsApp.
   const checks = useContactChecks(form, { prefix: 'q', formRef, extra: (f) => ({ notes: checkMessage(f.notes).error }) });
   const errors = checks.errors;
   const spam = useSpamGuard();
@@ -167,7 +168,7 @@ export default function QuotePage() {
                     </div>
                     <div className="form-row">
                       <div className="field">
-                        <label htmlFor="q-email">Work email</label>
+                        <label htmlFor="q-email">Work email <span className="req">*</span></label>
                         <input id="q-email" type="email" inputMode="email" autoCapitalize="none" spellCheck={false} value={form.email} onChange={set('email')} onBlur={checks.blur('email')} autoComplete="email" maxLength={254} placeholder="name@company.com" {...field('q-email', errors.email)} />
                         {errors.email && <p className="form-error" id="q-email-err">{errors.email}</p>}
                         {checks.suggestion && (
@@ -178,12 +179,12 @@ export default function QuotePage() {
                         )}
                       </div>
                       <div className="field">
-                        <label htmlFor="q-phone">Phone / WhatsApp</label>
+                        <label htmlFor="q-phone">Phone / WhatsApp <span className="req">*</span></label>
                         <input id="q-phone" type="tel" inputMode="tel" value={form.phone} onChange={set('phone')} onBlur={checks.blur('phone')} autoComplete="tel" maxLength={24} placeholder="0803 123 4567" {...field('q-phone', errors.phone)} />
                         {errors.phone && <p className="form-error" id="q-phone-err">{errors.phone}</p>}
                       </div>
                     </div>
-                    <p className="form-note" style={{ marginTop: -6, marginBottom: 14 }}>Give an email or a phone number, or both, so we can send your quote.</p>
+                    <p className="form-note" style={{ marginTop: -6, marginBottom: 14 }}>We need both, so we can email your quote and reach you on WhatsApp.</p>
                     <div className="field">
                       <label htmlFor="q-notes">Notes (volumes, deadlines, specifications)</label>
                       <textarea id="q-notes" value={form.notes} onChange={set('notes')} onBlur={checks.blur('notes')} maxLength={5000} placeholder="e.g. 500 pairs, need ISO certificates…" {...field('q-notes', errors.notes)} />

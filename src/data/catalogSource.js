@@ -14,7 +14,7 @@ import { catalog as storefront, zoneMeta } from './catalog.generated.js';
 import { rangeMeta, productRanges, addedProducts } from './productRanges.generated.js';
 import { localImageCounts } from './localImages.generated.js';
 import { DATASHEETS } from './datasheets.js';
-import { SHOWN, NEW_PRODUCTS } from './extraProducts.js';
+import { SHOWN, NEW_PRODUCTS, MERGED } from './extraProducts.js';
 
 
 /**
@@ -55,6 +55,20 @@ export const SLUG_RENAMES = {
   'selkrik-rex': 'selkirk-rex',
   'doxle-gold-copy': 'doxle',
   'jasper-1-yellow': 'jasper-xiv',
+  // Merged into one product (extraProducts.js MERGED).
+  ...Object.fromEntries(MERGED.flatMap((m) => m.from.map((k) => [k, m.slug]))),
+};
+
+/**
+ * Product type set by the client where it differs from the one inferred from
+ * the catalogue text (scripts/build-product-ranges.mjs). Every MANUL is a
+ * tactical boot (30 Oct 2026); the catalogue text had them as shoes or boots.
+ */
+const RANGE_OVERRIDES = {
+  'manul-1': 'high-boots',
+  'manul-3': 'high-boots',
+  manul5: 'high-boots',
+  'manul-7': 'high-boots',
 };
 
 const enrich = (p, r = productRanges[p.slug] || {}, key = p.slug) => {
@@ -67,7 +81,7 @@ const enrich = (p, r = productRanges[p.slug] || {}, key = p.slug) => {
     variants: p.variants ? p.variants.map((v) => (v.img ? { ...v, img: localImage(v.img) } : v)) : p.variants,
     key,
     slug: sheet?.slug || SLUG_RENAMES[p.slug] || p.slug,
-    range: r.range || null,
+    range: RANGE_OVERRIDES[key] || r.range || null,
     rangeSource: r.source || null,
     collection: r.collection || null,
     catalogueStandards: (sheet || r).standards || [],
@@ -79,11 +93,62 @@ const enrich = (p, r = productRanges[p.slug] || {}, key = p.slug) => {
   };
 };
 
+/**
+ * Main photo replaced by one from the product's own gallery, so every shoe in
+ * the listing is shown from the same angle: Mallcom's pair shot, one shoe
+ * upright and the other tipped to show the sole (client's request, 30 Oct
+ * 2026). The old main photo becomes the first gallery photo. Shoes with no
+ * such shot in their gallery need new photos from Mallcom.
+ */
+const MAIN_PHOTO = {
+  jaguar: '/products/gallery/jaguar/6.webp',
+  korat: '/products/gallery/korat/3.webp',
+  malkin: '/products/gallery/malkin/7.webp',
+  'vik-classic': '/products/gallery/vik-classic/6.webp',
+};
+const withMainPhoto = (p) => {
+  const main = MAIN_PHOTO[p.key];
+  if (!main) return p;
+  return { ...p, img: main, imgs: [p.img, ...(p.imgs || []).filter((u) => u !== main && u !== p.img)] };
+};
+
+/**
+ * One product built from several storefront ones (extraProducts.js MERGED):
+ * the first source's catalogue data, each colour's photos in turn, and
+ * "size / colour" variants so the product page offers the colours as swatches.
+ */
+const mergedFrom = new Set(MERGED.flatMap((m) => m.from));
+const buildMerged = (m) => {
+  const byKey = new Map(Object.values(storefront).flat().map((p) => [p.slug, p]));
+  const src = Object.fromEntries(m.from.map((k) => [k, enrich(byKey.get(k))]));
+  const base = src[m.from[0]];
+  const imgs = [...new Set(m.colours.flatMap((c) => [src[c.from].img, ...src[c.from].imgs]))];
+  const sizes = [...new Set((base.variants || []).map((v) => String(v.c).split('/')[0].trim()))];
+  return {
+    ...base,
+    slug: m.slug,
+    key: m.slug,
+    title: m.title,
+    fullTitle: m.title,
+    tags: [m.title, ...base.tags.filter((t) => !/^dalfon/i.test(t))],
+    img: imgs[0],
+    imgs: imgs.slice(1),
+    variants: m.colours.flatMap((c) => sizes.map((s) => ({ c: `${s} / ${c.name}`, img: src[c.from].img }))),
+    desc: m.desc,
+    hasDesc: true,
+    choices: m.choices,
+    detailsFrom: m.from[0],
+    photosFrom: m.colours.map((c) => c.from),
+    keyFeatures: m.keyFeatures,
+  };
+};
+
 const catalog = Object.fromEntries(
   Object.entries(storefront).map(([zone, list]) => [
     zone,
     [
-      ...list.map((p) => enrich(p)).filter((p) => p.inCatalogue),
+      ...list.filter((p) => !mergedFrom.has(p.slug)).map((p) => withMainPhoto(enrich(p))).filter((p) => p.inCatalogue),
+      ...MERGED.filter((m) => m.zone === zone).map(buildMerged),
       // Their own key namespace: a hidden storefront product may share the
       // slug (the old jasper-iv page showed JASPER XVII), and its reviews and
       // spec data must not attach to the real catalogue product.

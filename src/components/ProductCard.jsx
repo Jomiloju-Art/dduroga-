@@ -36,7 +36,10 @@ export default function ProductCard({ product }) {
   // back to the second photo, unless that one is listed in cardHoverExclusions.js.
   const picked = Object.prototype.hasOwnProperty.call(hoverChoices, product.key) ? hoverChoices[product.key] : undefined;
   const fallback = product.imgs && product.imgs.length > 1 && !NO_HOVER_IMAGE.has(product.key) ? product.imgs[1] : null;
-  const altImg = !failed && !altFailed ? (picked !== undefined ? picked : fallback) : null;
+  // A photo picked for hover may since have become the main photo
+  // (catalogSource.js MAIN_PHOTO); hover then shows the old main photo.
+  const hover = picked !== undefined ? picked : fallback;
+  const altImg = !failed && !altFailed ? (hover && hover === product.img ? product.imgs?.[0] || null : hover) : null;
   // The catalogue range ("Welder gloves") is consistent across the range; the raw
   // storefront type is "Safety Gloves" / "HAND PROTECTION" / blank for most.
   const type = rangeLabel(product) || displayType(product, zone?.label);

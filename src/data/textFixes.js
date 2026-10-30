@@ -197,6 +197,8 @@ export function fixProduct(p) {
     if (d.endsWith(end)) out.desc = d.slice(0, d.length - end.length) + tail[1];
   }
   for (const k of ['title', 'fullTitle', 'type', 'desc']) if (typeof out[k] === 'string') out[k] = fixText(out[k]);
+  // Every product name in capitals, as most already are (client, 30 Oct 2026).
+  for (const k of ['title', 'fullTitle']) if (typeof out[k] === 'string') out[k] = out[k].toUpperCase().replace(/\s+/g, ' ').trim();
   if (Array.isArray(out.tags)) out.tags = [...new Set(out.tags.filter((t) => !DROP_TAGS.has(String(t).toLowerCase())).map(fixText))];
   if (Array.isArray(out.catalogueSymbols)) out.catalogueSymbols = out.catalogueSymbols.map(fixText);
   return out;

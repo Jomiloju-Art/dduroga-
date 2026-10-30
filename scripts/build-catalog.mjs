@@ -30,7 +30,8 @@ const { fixProduct, fixDetails } = await import(pathToFileURL(path.join(root, 's
 const repeats = JSON.parse(fs.readFileSync(path.join(root, 'src/data/duplicatePhotos.generated.json'), 'utf8'));
 let removedPhotos = 0;
 const dedupe = (p) => {
-  const map = repeats[p.key];
+  // A merged product's photos are its sources' (catalogSource.js), so are their repeats.
+  const map = p.photosFrom ? Object.assign({}, ...p.photosFrom.map((k) => repeats[k])) : repeats[p.key];
   if (!map) return p;
   const imgs = (p.imgs || []).filter((u) => !map[u]);
   removedPhotos += (p.imgs || []).length - imgs.length;
@@ -38,8 +39,10 @@ const dedupe = (p) => {
   return { ...p, imgs, variants };
 };
 
-/** Fields no component reads. `inCatalogue` is true for everything kept. */
-const DROP = new Set(['vendor', 'hasVariants', 'rangeSource', 'inCatalogue']);
+/** Fields no component reads. `inCatalogue` is true for everything kept.
+ *  `detailsFrom` and `keyFeatures` (merged products) go into the detail file;
+ *  `photosFrom` is only for dedupe. */
+const DROP = new Set(['vendor', 'hasVariants', 'rangeSource', 'inCatalogue', 'detailsFrom', 'keyFeatures', 'photosFrom']);
 
 const slimVariant = (v) => Object.fromEntries(
   Object.entries(v).filter(([, val]) => val !== '' && val !== 0 && val !== null && val !== undefined),
@@ -83,11 +86,13 @@ const detailDir = path.join(root, 'public/data/details');
 fs.rmSync(detailDir, { recursive: true, force: true });
 fs.mkdirSync(detailDir, { recursive: true });
 let detailFiles = 0;
-for (const p of Object.values(slim).flat()) {
-  const d = productDetails[p.key] || {};
+for (const p of Object.values(catalog).flat()) {
+  // A merged product (extraProducts.js MERGED) uses its first source's data.
+  const from = p.detailsFrom || p.key;
+  const d = productDetails[from] || {};
   const rec = fixDetails({
-    keyFeatures: d.keyFeatures, design: d.design, remarks: d.remarks, tests: d.tests,
-    diagram: diagramImages[p.key], banner: calloutBanners[p.key],
+    keyFeatures: p.keyFeatures || d.keyFeatures, design: d.design, remarks: d.remarks, tests: d.tests,
+    diagram: diagramImages[from], banner: calloutBanners[from],
   });
   if (!Object.values(rec).some((v) => v && (!Array.isArray(v) || v.length))) continue;
   fs.writeFileSync(path.join(detailDir, p.key.replace(/[^a-z0-9_-]/gi, '_') + '.json'), JSON.stringify(rec));

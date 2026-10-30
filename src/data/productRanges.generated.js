@@ -159,7 +159,7 @@ export const rangeMeta = [
  {
   "zone": "feet",
   "id": "high-boots",
-  "label": "Tactical & high boots"
+  "label": "Tactical boots"
  },
  {
   "zone": "feet",

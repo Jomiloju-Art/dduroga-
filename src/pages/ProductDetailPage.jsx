@@ -111,6 +111,10 @@ export default function ProductDetailPage() {
   const [size, setSize] = useState(null);
   const [sizeError, setSizeError] = useState(false);
   const sizeGroupRef = useRef(null);
+  /** Other picks a merged product offers (product.choices, e.g. length), by
+   *  name. No defaults either, for the same reason as size. */
+  const [picks, setPicks] = useState({});
+  const [choiceError, setChoiceError] = useState(false);
   const [copied, setCopied] = useState(false);
   /** Quantity for the single quote action. */
   const [qty, setQty] = useState(1);
@@ -123,7 +127,7 @@ export default function ProductDetailPage() {
   const topRef = useRef(null);
 
   // A new product starts with nothing picked.
-  useEffect(() => { setColorIdx(0); setSize(null); setSizeError(false); }, [slug]);
+  useEffect(() => { setColorIdx(0); setSize(null); setSizeError(false); setPicks({}); setChoiceError(false); }, [slug]);
 
   useEffect(() => {
     const el = topRef.current;
@@ -273,6 +277,8 @@ export default function ProductDetailPage() {
       || null;
   const selectedImg = selected?.img || colourOptions.find((o) => o.name === colour)?.img || null;
   const sizeText = size ? (sizing?.kind === 'footwear' ? `EU ${size}` : size) : '';
+  const choices = product.choices || [];
+  const missingChoice = choices.find((c) => !picks[c.name]);
 
   const gallery = [];
   const pushImg = (u) => { if (u && !gallery.includes(u)) gallery.push(u); };
@@ -343,16 +349,21 @@ export default function ProductDetailPage() {
 
   const { add } = useQuote();
   const quoteItem = {
-    slug: product.slug, title: product.title, img: product.img,
+    slug: product.slug, title: product.title, img: selectedImg || product.img,
     sku: (sizing ? size && selected?.s : selected?.s) || '',
-    option: legacyPicker ? selected?.c || '' : [sizeText, colour].filter(Boolean).join(' / '),
+    option: legacyPicker ? selected?.c || '' : [sizeText, colour, ...choices.map((c) => picks[c.name] && `${c.name}: ${picks[c.name]}`)].filter(Boolean).join(' / '),
   };
-  /** Every "add" path goes through here: a sized product needs a size first. */
+  /** Every "add" path goes through here: a sized product needs a size first,
+   *  and a product with choices needs each one picked. */
   const addToQuote = (n = qty) => {
-    if (sizing && !size) {
-      setSizeError(true);
-      sizeGroupRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-      sizeGroupRef.current?.querySelector('[aria-labelledby="size-label"] button')?.focus({ preventScroll: true });
+    const noSize = sizing && !size;
+    if (missingChoice || noSize) {
+      if (missingChoice) setChoiceError(true);
+      if (noSize) setSizeError(true);
+      // The first unanswered group on the page: choices sit above size.
+      const group = missingChoice ? document.querySelector(`[data-choice="${missingChoice.name}"]`) : sizeGroupRef.current;
+      group?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      group?.querySelector('[role="group"] button')?.focus({ preventScroll: true });
       return false;
     }
     add(quoteItem, n);
@@ -496,6 +507,31 @@ export default function ProductDetailPage() {
                   </div>
                 </div>
               )}
+
+              {choices.map((c, i) => {
+                const missing = choiceError && !picks[c.name];
+                return (
+                  <div key={c.name} className={`detail-taggroup${missing ? ' has-error' : ''}`} data-choice={c.name}>
+                    <div className="detail-taggroup__head">
+                      <h2 id={`choice-${i}-label`}>Select {c.name.toLowerCase()} <span className="detail-pick">{picks[c.name] || ''}</span></h2>
+                    </div>
+                    <div className="color-row color-row--text" role="group" aria-labelledby={`choice-${i}-label`} aria-describedby={missing ? `choice-${i}-error` : undefined}>
+                      {c.values.map((v) => (
+                        <button
+                          key={v}
+                          type="button"
+                          className={`color-swatch color-swatch--text${picks[c.name] === v ? ' active' : ''}`}
+                          onClick={() => setPicks((p) => ({ ...p, [c.name]: v }))}
+                          aria-pressed={picks[c.name] === v}
+                        >
+                          {v}
+                        </button>
+                      ))}
+                    </div>
+                    {missing && <p className="detail-size-error" id={`choice-${i}-error`} role="alert">Choose a {c.name.toLowerCase()} to add this to your quote.</p>}
+                  </div>
+                );
+              })}
 
               {sizing && (
                 <div className={`detail-taggroup${sizeError ? ' has-error' : ''}`} ref={sizeGroupRef}>

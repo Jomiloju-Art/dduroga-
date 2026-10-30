@@ -74,7 +74,7 @@ export const RANGES = [
   // feet
   ['feet', 'shoes', 'Safety shoes'],
   ['feet', 'boots', 'Safety boots'],
-  ['feet', 'high-boots', 'Tactical & high boots'],
+  ['feet', 'high-boots', 'Tactical boots'], // was "Tactical & high boots" (client, 30 Oct 2026)
   ['feet', 'gumboots', 'PVC gumboots'],
   ['feet', 'occupational-shoes', 'Occupational shoes'],
 ];

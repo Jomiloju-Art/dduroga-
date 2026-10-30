@@ -41,6 +41,16 @@
       "source": "/products/jasper-1-yellow",
       "destination": "/products/jasper-xiv",
       "permanent": true
+    },
+    {
+      "source": "/products/:old(dalfon-black|dalfon-j116|dalfon-yellow|dalfon-white)",
+      "destination": "/products/dalfon",
+      "permanent": true
+    },
+    {
+      "source": "/products/:old(bamaco|dunedin)",
+      "destination": "/products?range=shoes",
+      "permanent": true
     }
   ],
   "rewrites": [

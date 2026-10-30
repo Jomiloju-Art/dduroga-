@@ -30,7 +30,11 @@ const manifestFile = path.join(root, 'src/data/localImages.generated.js');
 const { allProducts: listed } = await import(pathToFileURL(path.join(root, 'src/data/products.js')).href);
 const { catalog: storefront } = await import(pathToFileURL(path.join(root, 'src/data/catalog.generated.js')).href);
 const rawByKey = new Map(Object.values(storefront).flat().map((p) => [p.slug, p]));
-const allProducts = listed.map((p) => rawByKey.get(p.key)).filter(Boolean).map((p) => ({ ...p, key: p.slug }));
+// A merged product (extraProducts.js MERGED) shows its sources' photos, so
+// they count as listed although the sources themselves are not.
+const { MERGED } = await import(pathToFileURL(path.join(root, 'src/data/extraProducts.js')).href);
+const keys = [...listed.map((p) => p.key), ...MERGED.flatMap((m) => m.from)];
+const allProducts = keys.map((k) => rawByKey.get(k)).filter(Boolean).map((p) => ({ ...p, key: p.slug }));
 
 /** Shopify URLs differ only by a &width= hint; key on the URL without it. */
 export const baseUrl = (u) => u.replace(/[?&]width=\d+/, '').replace(/\?$/, '');

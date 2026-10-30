@@ -14,7 +14,7 @@ import { catalog as storefront, zoneMeta } from './catalog.generated.js';
 import { rangeMeta, productRanges, addedProducts } from './productRanges.generated.js';
 import { localImageCounts } from './localImages.generated.js';
 import { DATASHEETS } from './datasheets.js';
-import { SHOWN, NEW_PRODUCTS, MERGED } from './extraProducts.js';
+import { SHOWN, NEW_PRODUCTS, MERGED, WRONG_TAGS } from './extraProducts.js';
 
 
 /**
@@ -77,6 +77,7 @@ const enrich = (p, r = productRanges[p.slug] || {}, key = p.slug) => {
   const sheet = DATASHEETS[key];
   return {
     ...p,
+    tags: WRONG_TAGS[key] ? (p.tags || []).filter((t) => !WRONG_TAGS[key].includes(t)) : p.tags,
     imgs: (p.imgs || []).map(localImage),
     variants: p.variants ? p.variants.map((v) => (v.img ? { ...v, img: localImage(v.img) } : v)) : p.variants,
     key,
@@ -134,11 +135,13 @@ const buildMerged = (m) => {
     img: imgs[0],
     imgs: imgs.slice(1),
     variants: m.colours.flatMap((c) => sizes.map((s) => ({ c: `${s} / ${c.name}`, img: src[c.from].img }))),
+    // The product page shows only the chosen colour's photos.
+    colourPhotos: Object.fromEntries(m.colours.map((c) => [c.name, [src[c.from].img, ...src[c.from].imgs]])),
     desc: m.desc,
     hasDesc: true,
+    catalogueSymbols: m.symbols || base.catalogueSymbols,
     choices: m.choices,
     detailsFrom: m.from[0],
-    photosFrom: m.colours.map((c) => c.from),
     keyFeatures: m.keyFeatures,
   };
 };

@@ -283,8 +283,17 @@ export default function ProductDetailPage() {
   const gallery = [];
   const pushImg = (u) => { if (u && !gallery.includes(u)) gallery.push(u); };
   if (selectedImg) pushImg(selectedImg);
-  pushImg(product.img);
-  (product.imgs || []).forEach(pushImg);
+  // Products whose photos are sorted by colour (product.colourPhotos) show
+  // only the chosen colour's, then any tied to no colour (a poster, a group
+  // shot). Picking yellow used to change the first photo only.
+  const ownPhotos = colour && product.colourPhotos?.[colour];
+  if (ownPhotos) {
+    const tied = new Set(Object.values(product.colourPhotos).flat());
+    [...ownPhotos, product.img, ...(product.imgs || [])].filter((u) => ownPhotos.includes(u) || !tied.has(u)).forEach(pushImg);
+  } else {
+    pushImg(product.img);
+    (product.imgs || []).forEach(pushImg);
+  }
 
   const [activeImg, setActiveImg] = useState(0);
 

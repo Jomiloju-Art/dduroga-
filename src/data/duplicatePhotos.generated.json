@@ -27,6 +27,12 @@
  "diamond-iv": {
   "/products/gallery/diamond-iv/1.webp": "/products/diamond-iv.webp"
  },
+ "diamond-x": {
+  "/products/gallery/diamond-x/1.webp": "/products/diamond-x.webp"
+ },
+ "diamond-xi": {
+  "/products/gallery/diamond-xi/1.webp": "/products/diamond-xi.webp"
+ },
  "diamond-xii": {
   "/products/gallery/diamond-xii/1.webp": "/products/diamond-xii.webp"
  },
@@ -40,6 +46,15 @@
  },
  "jasper-v": {
   "/products/gallery/jasper-v/1.webp": "/products/jasper-v.webp"
+ },
+ "jasper-1-yellow": {
+  "/products/gallery/jasper-1-yellow/1.webp": "/products/jasper-1-yellow.webp"
+ },
+ "jasper-xv": {
+  "/products/gallery/jasper-xv/1.webp": "/products/jasper-xv.webp"
+ },
+ "jasper-iv": {
+  "/products/gallery/jasper-iv/1.webp": "/products/jasper-iv.webp"
  },
  "l2102pv-facemask": {
   "/products/gallery/l2102pv-facemask/1.webp": "/products/l2102pv-facemask.webp"
@@ -206,6 +221,9 @@
  "h33nbg": {
   "/products/gallery/h33nbg/1.webp": "/products/h33nbg.webp",
   "/products/gallery/h33nbg/6.webp": "/products/gallery/h33nbg/3.webp"
+ },
+ "h33tdl": {
+  "/products/gallery/h33tdl/1.webp": "/products/h33tdl.webp"
  },
  "h-468": {
   "/products/gallery/h-468/1.webp": "/products/h-468.webp"
@@ -536,18 +554,6 @@
  "cymric-k03": {
   "/products/gallery/cymric-k03/1.webp": "/products/cymric-k03.webp"
  },
- "dalfon-j116": {
-  "/products/gallery/dalfon-j116/1.webp": "/products/dalfon-j116.webp"
- },
- "dalfon-black": {
-  "/products/gallery/dalfon-black/1.webp": "/products/dalfon-black.webp"
- },
- "dalfon-yellow": {
-  "/products/gallery/dalfon-yellow/1.webp": "/products/dalfon-yellow.webp"
- },
- "dalfon-white": {
-  "/products/gallery/dalfon-white/1.webp": "/products/dalfon-white.webp"
- },
  "devon": {
   "/products/gallery/devon/1.webp": "/products/devon.webp"
  },
@@ -556,6 +562,15 @@
  },
  "doxle-gold-copy": {
   "/products/gallery/doxle-gold-copy/1.webp": "/products/doxle-gold-copy.webp"
+ },
+ "felix-s01": {
+  "/products/gallery/felix-s01/1.webp": "/products/felix-s01.webp"
+ },
+ "felix-s03": {
+  "/products/gallery/felix-s03/1.webp": "/products/felix-s03.webp"
+ },
+ "felix-s04": {
+  "/products/gallery/felix-s04/1.webp": "/products/felix-s04.webp"
  },
  "freddie-g03": {
   "/products/gallery/freddie-g03/1.webp": "/products/freddie-g03.webp"
@@ -715,5 +730,10 @@
  },
  "vivvera": {
   "/products/gallery/vivvera/1.webp": "/products/vivvera.webp"
+ },
+ "dalfon": {
+  "/products/gallery/dalfon-black/1.webp": "/products/dalfon-black.webp",
+  "/products/gallery/dalfon-yellow/1.webp": "/products/dalfon-yellow.webp",
+  "/products/gallery/dalfon-white/1.webp": "/products/dalfon-white.webp"
  }
 }

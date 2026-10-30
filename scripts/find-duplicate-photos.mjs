@@ -82,6 +82,17 @@ for (const p of products) {
     keepOf[first.rel] = main.rel;
     mainRepeats++;
   }
+  // A product can show several products' photos (a merged product, or one
+  // whose main photo was swapped, see catalogSource.js): pair each original
+  // main photo /products/<x>.webp with its own gallery photo 1 too.
+  for (const m of fps) {
+    const x = m.rel.match(/^\/products\/([^/]+)\.webp$/)?.[1];
+    const g1 = x && fps.find((f) => f.rel === `/products/gallery/${x}/1.webp`);
+    if (g1 && g1.rel !== p.img && !keepOf[g1.rel] && compare(m, g1).shape <= MAIN_SHAPE_LIMIT) {
+      keepOf[g1.rel] = m.rel;
+      mainRepeats++;
+    }
+  }
   for (let i = 0; i < fps.length; i++) {
     if (keepOf[fps[i].rel]) continue;
     for (let j = i + 1; j < fps.length; j++) {

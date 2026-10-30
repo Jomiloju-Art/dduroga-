@@ -67,6 +67,9 @@ export const glossaryIcons = {
   "Wide Toecap": "/icons/glossary/wide-toecap.png",
   "PU": "/icons/glossary/pu.png",
   "PU/Rubber": "/icons/glossary/pu-rubber.png",
+  // Not in the glossary: DALFON's sole, captioned as the client wrote it, with
+  // the artwork they circled in the catalogue (30 Oct 2026).
+  "PU/PVC": "/icons/glossary/pu-rubber.png",
   "Impact Resistant": "/icons/glossary/impact-resistant.png",
   "Energy Absorbent": "/icons/glossary/energy-absorbent.png",
   "Anti Static": "/icons/glossary/anti-static.png",

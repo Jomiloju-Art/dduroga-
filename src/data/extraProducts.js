@@ -25,6 +25,20 @@ export const SHOWN = {
   'felix-s04': true,
 };
 
+/**
+ * Storefront tags that are wrong for the product, dropped at build time. The
+ * FELIX pages were copied from MALLARD 18 in Mallcom's store and kept its tags
+ * ("mallard", "high ankle shoe", "Heat"); with no catalogue data the product
+ * page showed them as a heat rating. "slip" goes too, so S01 and S04 show no
+ * rating until their datasheets arrive (30 Oct 2026).
+ */
+const COPIED_FROM_MALLARD = ['mallard', 'high ankle shoe', 'Heat', 'slip'];
+export const WRONG_TAGS = {
+  'felix-s01': COPIED_FROM_MALLARD,
+  'felix-s03': COPIED_FROM_MALLARD,
+  'felix-s04': COPIED_FROM_MALLARD,
+};
+
 const driveShoe = (slug, title, photos) => ({
   zone: 'feet',
   product: {
@@ -54,10 +68,11 @@ export const NEW_PRODUCTS = [];
  * and colour, and the picks go into the quote request.
  * The old pages redirect to the merged one (SLUG_RENAMES and vercel.json).
  *
- * DALFON (30 Oct 2026): J116 and J126 are the black boot with a composite and
- * a steel toe cap (identical photos, so J116's are not repeated); J226 is
- * yellow and J326 white. Ratings and materials are as Mallcom's own pages
- * state them; the toe-cap material is still to be confirmed by Mallcom.
+ * DALFON (30 Oct 2026): J116 and J126 are the black boot (identical photos, so
+ * J116's are not repeated); J226 is yellow and J326 white. The client
+ * confirmed a steel toe cap and a PU sole on a PVC boot, replacing Mallcom's
+ * storefront text and symbols (E-com, Fibreglass Toecap, PU/PU); the impact
+ * figures are Mallcom's.
  */
 export const MERGED = [
   {
@@ -72,14 +87,13 @@ export const MERGED = [
     ],
     choices: [
       { name: 'Length', values: ['12 in', '14 in', '16 in'] },
-      { name: 'Toe cap', values: ['Steel', 'Composite'] },
     ],
-    desc: 'PVC gumboots with an impact-resistant toe cap and an excellent-fitting, non-slip sole, available in black, yellow and white. '
-      + 'Black: 200J impact-resistant toe cap and a double density rubber outsole. '
-      + 'Yellow and white: 100J impact-resistant toe cap and a double density PU outsole. '
-      + 'Vamp and quarter lining in nylon fabric. Available with a steel or composite toe cap, in 12, 14 and 16 inch lengths. '
-      + 'Mallcom model codes: J116 (black, composite toe cap), J126 (black, steel toe cap), J226 (yellow) and J326 (white).',
-    // The storefront's features say "Steel Toe Cap"; the merged boot comes with either.
-    keyFeatures: ['Highly comfortable', 'Impact Resistant', 'Steel or Composite Toe Cap', 'Non-Slip Sole'],
+    symbols: ['Steel Toecap', 'PU/PVC'],
+    desc: 'PVC gumboots with a steel toe cap and an excellent-fitting, non-slip PU sole, available in black, yellow and white. '
+      + 'Black: 200J impact-resistant steel toe cap. '
+      + 'Yellow and white: 100J impact-resistant steel toe cap. '
+      + 'Vamp and quarter lining in nylon fabric. Available in 12, 14 and 16 inch lengths. '
+      + 'Mallcom model codes: J116 and J126 (black), J226 (yellow) and J326 (white).',
+    keyFeatures: ['Highly comfortable', 'Impact Resistant', 'Steel Toe Cap', 'Non-Slip Sole'],
   },
 ];

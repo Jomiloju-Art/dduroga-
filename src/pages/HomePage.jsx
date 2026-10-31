@@ -36,7 +36,7 @@ export default function HomePage() {
       <section className="hx-hero hx-hero--blend" aria-label="DDUROGA Safety">
         <div className="hx-hero__inner">
           <div className="hx-hero__lockup">
-            <h1 className="hx-hero__tagline">Certified Industrial PPE &amp; Safety Equipment Supplied Across Nigeria</h1>
+            <h1 className="hx-hero__tagline">Certified Industrial PPE &amp; Safety Equipment Supplied Across Africa</h1>
             <p className="hx-hero__lead">
               Head-to-toe protection for oil &amp; gas, construction, manufacturing and ports, stocked in Lagos, delivered nationwide.
             </p>

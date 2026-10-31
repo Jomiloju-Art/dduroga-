@@ -91,6 +91,7 @@ export default function ContactPage() {
         eyebrow="Contact"
         title="Talk to our safety specialist"
         lead="Whether you're kitting out a plant in Port Harcourt or a construction site in Lagos, tell us what you need and we'll quote it."
+        image="/contact-hero.jpg"
       />
 
       <section className="section">

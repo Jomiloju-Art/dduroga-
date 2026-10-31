@@ -44,6 +44,9 @@ export default function AboutPage() {
               {aboutLede.map((p) => <p className="ax-story__lede" key={p.slice(0, 24)}>{p}</p>)}
             </div>
           </div>
+          {/* The page's main picture (client's photo, Oct 2026). No caption: it
+              shows PPE on display in general, not a particular showroom. */}
+          <img className="ax-photo" src="/about/team.jpg" alt="Two staff in hi-vis vests in front of helmets, gloves, coveralls and safety boots" decoding="async" width="1600" height="800" />
           <div className="ax-story__cols">
             {aboutColumns.map((c) => (
               <div key={c.title}>

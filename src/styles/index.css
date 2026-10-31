@@ -776,7 +776,7 @@ i.performance-icon { font-size: 32px; line-height: 1; }
 /* utility bar (shared with Navbar) */
 
 /* hero */
-.hx-hero { --hero-image: url('/hero.jpg'); position: relative; overflow: hidden; min-height: 440px; background-color: var(--ddu-black); background-image: var(--hero-image); background-size: cover; background-position: center 20%; background-repeat: no-repeat; color: var(--ddu-white); }
+.hx-hero { --hero-image: url('/hero.jpg'); position: relative; overflow: hidden; min-height: 440px; background-color: var(--ddu-black); background-image: var(--hero-image); background-size: cover; background-position: right center; background-repeat: no-repeat; color: var(--ddu-white); }
 /* soft vignette for depth */
 .hx-hero::before {
   content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
@@ -818,12 +818,31 @@ i.performance-icon { font-size: 32px; line-height: 1; }
   color: var(--ddu-black);
 }
 .hx-hero__cta:focus-visible { outline: 3px solid var(--ddu-orange); outline-offset: 3px; }
-/* the wide shot crops badly on phones — swap to a portrait crop focused on the worker */
-@media (max-width: 900px) {
-  .hx-hero { background-image: url('/hero-mobile.jpg'); background-position: center 32%; min-height: 340px; }
-  .hx-hero__inner { padding: 52px 0; }
-}
 .hx-hero__inner { position: relative; z-index: 1; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 40px; align-items: center; padding: 66px 0 34px; width: min(var(--page-max) - 2 * var(--gutter), 100% - 2 * var(--gutter)); margin-inline: auto; }
+/* Phones: the portrait banner (Oct 2026: three workers under the brand name)
+   sits below the headline and buttons instead of behind them, where the
+   buttons covered the faces. It is drawn at the foot of .hx-hero__inner, not
+   of the hero: the certification band sits inside the hero at its bottom
+   (.hp-marks--hero) and would cover the workers. Full width (out past the
+   gutters), above the hero's own scrims; the hero above it is the photo's sky
+   colour, so the two meet without a seam. The bottom padding is the share of
+   the photo (from the helmets down) that must stay clear of the text: 62% of
+   its height, which is 108.3% of its width. After the rule above, which
+   would otherwise win. */
+@media (max-width: 900px) {
+  .hx-hero { background-image: none; background-color: #08021e; min-height: 340px; }
+  .hx-hero__inner { padding: 52px 0 67vw; }
+  .hx-hero__inner::before {
+    content: ''; position: absolute; z-index: -1; bottom: 0;
+    left: calc(-1 * var(--gutter)); right: calc(-1 * var(--gutter)); height: 108.3vw;
+    background: url('/hero-mobile.jpg') center bottom / 100% auto no-repeat;
+    /* Fade the photo's top (empty sky) into the hero, which is darkened by
+       its own scrims, so no edge shows behind the text. */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 32%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 32%);
+    pointer-events: none;
+  }
+}
 /* Sized here, not on .hx-hero__tagline: this selector is (0,1,1) and therefore
    wins over the class. It was 5vw/3.9rem = 62.4px, which suited a two-word
    headline but forced the current 63-character one onto five lines (321px tall).
@@ -4899,18 +4918,6 @@ body:has(.site-header--hidden) .pdp-bar { top: 0; }
   .hp-marks--hero { background: #fff; -webkit-backdrop-filter: none; backdrop-filter: none; border-top: 0; }
 }
 
-/* Outlined wordmark behind the headline, in the open left part of the photo
-   (desktop only). It sits under the headline and buttons (z-index 2) and over
-   the left scrim. */
-.hx-hero__word {
-  position: absolute; z-index: 1; left: 0; right: 0; top: 14px; margin-inline: auto; text-align: right;
-  width: min(var(--page-max) - 2 * var(--gutter), 100% - 2 * var(--gutter));
-  font-family: var(--font-display); font-weight: 800; font-size: clamp(110px, 12.5vw, 200px); line-height: 0.8;
-  letter-spacing: 0.02em; white-space: nowrap; color: transparent;
-  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.2);
-  pointer-events: none; user-select: none;
-}
-@media (max-width: 1023px) { .hx-hero__word { display: none; } }
 
 /* Spec lines on the trending cards (lib/productSpecs.js). */
 /* How ordering works, with the delivery map beside the steps. */
@@ -5167,6 +5174,8 @@ body:has(.site-header--hidden) .pdp-bar { top: 0; }
 .ax-story__lede { margin: 0; font-size: 1.05rem; line-height: 1.7; color: rgba(14, 18, 22, 0.78); }
 .ax-story__cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin-top: clamp(40px, 5vw, 72px); padding-top: 28px; border-top: 1px solid rgba(14, 18, 22, 0.12); }
 .ax-story__cols h2 { margin: 0 0 10px; font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; color: var(--ddu-black); text-transform: none; }
+.ax-photo { display: block; width: 100%; height: auto; aspect-ratio: 2 / 1; object-fit: cover; border-radius: 16px; margin-top: clamp(32px, 4vw, 56px); }
+@media (max-width: 640px) { .ax-photo { aspect-ratio: 4 / 3; object-position: 70% center; } }
 .ax-story__cols p { margin: 0; font-size: 0.92rem; line-height: 1.65; color: rgba(14, 18, 22, 0.7); }
 @media (max-width: 900px) {
   .ax-story__top, .ax-story__cols { grid-template-columns: minmax(0, 1fr); }

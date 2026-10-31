@@ -55,9 +55,8 @@ export default function HomePage() {
         </div>
         {/* Darkens the photo's lower edge under the certification band. */}
         <div className="hx-hero__blend" aria-hidden="true" />
-        {/* The brand name as a large outline, quietly behind the headline in
-            the open part of the photo (desktop only). */}
-        <span className="hx-hero__word" aria-hidden="true">DDUROGA</span>
+        {/* No outlined "DDUROGA" wordmark here any more: the client's banner
+            photos (Oct 2026) carry the brand name in the picture itself. */}
 
         {/* ================= 2. TRUST BAND =================
             Inside the hero: frosted across the photo's foot on desktop, a

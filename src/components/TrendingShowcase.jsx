@@ -7,24 +7,28 @@ import { IconArrowRight } from './Icons.jsx';
 import { firstStandard } from '../lib/productSpecs.js';
 
 /**
- * Homepage "Trending now", as stories (Instagram-style). The client liked the
- * earlier product stage but asked for something quicker to take in for people
- * who scroll fast (Oct 2026), so it is now one short card that plays itself:
+ * Homepage "Trending now", as a card slider (clients' request, Oct 2026): the
+ * current product in the middle at full size, the previous and next ones
+ * smaller and dimmed on either side, so three can be seen at once. It replaced
+ * the stories card, which showed one product at a time.
  *
- *   top     one progress segment per product; the active one fills over
- *           DURATION, then the next product shows
- *   card    the product photo, its trending rank, type, name, one key rating
- *           and View product / Add to quote. Nothing else: the spec table, the
- *           big outline rank, the zone tabs and the thumbnail rail are gone.
+ *   middle  photo, trending rank, type, name, one key rating, View / Add to
+ *           quote
+ *   sides   photo and name; tap one (or swipe, or use the arrows or arrow
+ *           keys) to slide it to the middle
  *
- * Tap the left or right third of the photo (or swipe) to go back or skip, as
- * in stories; arrows and the arrow keys do the same. Playback pauses while the
- * pointer is over the card or focus is inside it, while the section is off
- * screen, and never starts for people who ask for reduced motion.
+ * Every card sits in the same grid cell and is moved by its offset from the
+ * current one, so a change slides all of them at once. Cards two or more
+ * away wait just outside, invisible, so the next one slides in rather than
+ * appearing. The list loops.
+ *
+ * It moves on by itself every DURATION (the active dot fills meanwhile), and
+ * pauses while the pointer is over it or focus is inside it, while it is off
+ * screen, and for people who ask for reduced motion.
  * Products and order come from trending.js.
  */
 
-const DURATION = 3500; // ms per product
+const DURATION = 4000; // ms per product
 const typeOf = (p) => rangeLabel(p) || zoneOf(p)?.label || '';
 const reduceMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
@@ -46,6 +50,12 @@ export default function TrendingShowcase() {
   const go = (i) => setAt(((i % n) + n) % n);
   const next = () => go(at + 1);
   const prev = () => go(at - 1);
+  /** A card's place relative to the current one, the short way round: -1 previous, 0 current, 1 next. */
+  const offsetOf = (i) => {
+    let d = (((i - at) % n) + n) % n;
+    if (d > n / 2) d -= n;
+    return d;
+  };
 
   // Only play while the section is on screen.
   const ref = useRef(null);
@@ -76,8 +86,7 @@ export default function TrendingShowcase() {
   };
 
   if (!n) return null;
-  const { p, rank } = list[at];
-  const rating = keyRating(p);
+  const current = list[at].p;
 
   return (
     <section className="tr" aria-labelledby="trending-heading" ref={ref}>
@@ -91,7 +100,7 @@ export default function TrendingShowcase() {
         </div>
 
         <div
-          className="st"
+          className="tc"
           role="region"
           aria-roledescription="carousel"
           aria-label="Trending products"
@@ -101,52 +110,76 @@ export default function TrendingShowcase() {
           onFocus={() => setHold(true)}
           onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setHold(false); }}
         >
-          <div className="st__bars" aria-hidden="true">
-            {list.map((x, i) => (
-              <span key={x.p.slug} className={`st__bar${i < at ? ' is-done' : ''}`}>
-                {i === at && (
-                  <i
-                    key={`${at}`}
-                    style={{ animationDuration: `${DURATION}ms`, animationPlayState: playing ? 'running' : 'paused' }}
-                    onAnimationEnd={next}
-                  />
-                )}
-              </span>
-            ))}
+          <div className="tc__stage" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+            {list.map(({ p, rank }, i) => {
+              const o = offsetOf(i);
+              const place = o === 0 ? 'is-current' : Math.abs(o) === 1 ? 'is-side' : 'is-away';
+              const rating = keyRating(p);
+              return (
+                <article
+                  key={p.slug}
+                  className={`tc__card ${place}`}
+                  style={{ '--o': Math.max(-2, Math.min(2, o)) }}
+                  aria-roledescription="slide"
+                  aria-label={`${rank} of ${n}`}
+                >
+                  {/* Content of the cards that are not current is inert, so
+                      their links and buttons cannot be tabbed to; the side
+                      cards get one button of their own to bring them in. */}
+                  <div className="tc__body" {...(o !== 0 ? { inert: '' } : {})}>
+                    <Link to={`/products/${p.slug}`} className="tc__media" tabIndex={-1} aria-hidden="true">
+                      <img src={p.img} alt="" decoding="async" loading={Math.abs(o) > 2 ? 'lazy' : undefined} />
+                    </Link>
+                    <div className="tc__info">
+                      <span className="tc__badge">#{rank} trending</span>
+                      <span className="tc__type">{typeOf(p)}</span>
+                      <h3 className="tc__name"><Link to={`/products/${p.slug}`}>{p.title}</Link></h3>
+                      <span className="tc__more">
+                        {rating && <span className="tc__rating">{rating}</span>}
+                        <span className="tc__cta">
+                          <Link to={`/products/${p.slug}`} className="tr-btn tr-btn--white">View <IconArrowRight width="16" height="16" /></Link>
+                          <button type="button" className="tr-btn tr-btn--orange" onClick={() => add(p)} aria-label={`Add ${p.title} to quote`}>Add to quote</button>
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                  {Math.abs(o) === 1 && (
+                    <button
+                      type="button"
+                      className="tc__pick"
+                      onClick={() => go(i)}
+                      aria-label={`${o < 0 ? 'Previous' : 'Next'} product: ${p.title}`}
+                    />
+                  )}
+                </article>
+              );
+            })}
           </div>
 
-          <div className="st__card" key={p.slug}>
-            <div className="st__media" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-              <Link to={`/products/${p.slug}`} tabIndex={-1} aria-hidden="true">
-                <img src={p.img} alt="" decoding="async" />
-              </Link>
-              <button type="button" className="st__tap st__tap--prev" onClick={prev} aria-label="Previous product" />
-              <button type="button" className="st__tap st__tap--next" onClick={next} aria-label="Next product" />
-            </div>
-
-            <div className="st__info">
-              <span className="st__badge">#{rank} trending</span>
-              <span className="st__type">{typeOf(p)}</span>
-              <h3 className="st__name"><Link to={`/products/${p.slug}`}>{p.title}</Link></h3>
-              {rating && <span className="st__rating">{rating}</span>}
-              <span className="st__cta">
-                <Link to={`/products/${p.slug}`} className="tr-btn tr-btn--white">View <IconArrowRight width="16" height="16" /></Link>
-                <button type="button" className="tr-btn tr-btn--orange" onClick={() => add(p)} aria-label={`Add ${p.title} to quote`}>Add to quote</button>
-              </span>
-              <span className="st__nav">
-                <button type="button" className="st__arrow" onClick={prev} aria-label="Previous product">
-                  <IconArrowRight width="18" height="18" style={{ transform: 'rotate(180deg)' }} />
+          <div className="tc__nav">
+            <button type="button" className="st__arrow" onClick={prev} aria-label="Previous product">
+              <IconArrowRight width="18" height="18" style={{ transform: 'rotate(180deg)' }} />
+            </button>
+            <div className="tc__dots" aria-hidden="true">
+              {list.map(({ p }, i) => (
+                <button key={p.slug} type="button" tabIndex={-1} className={`tc__dot${i === at ? ' is-on' : ''}`} onClick={() => go(i)}>
+                  {i === at && (
+                    <i
+                      key={`${at}`}
+                      style={{ animationDuration: `${DURATION}ms`, animationPlayState: playing ? 'running' : 'paused' }}
+                      onAnimationEnd={next}
+                    />
+                  )}
                 </button>
-                <span className="st__count">{at + 1} / {n}</span>
-                <button type="button" className="st__arrow" onClick={next} aria-label="Next product">
-                  <IconArrowRight width="18" height="18" />
-                </button>
-              </span>
+              ))}
             </div>
+            <button type="button" className="st__arrow" onClick={next} aria-label="Next product">
+              <IconArrowRight width="18" height="18" />
+            </button>
           </div>
         </div>
 
-        <p className="sr-only" aria-live={playing ? 'off' : 'polite'}>{`${at + 1} of ${n}: ${p.title}, ${typeOf(p)}`}</p>
+        <p className="sr-only" aria-live={playing ? 'off' : 'polite'}>{`${at + 1} of ${n}: ${current.title}, ${typeOf(current)}`}</p>
       </div>
     </section>
   );

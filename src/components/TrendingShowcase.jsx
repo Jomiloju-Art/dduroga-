@@ -32,6 +32,19 @@ const DURATION = 4000; // ms per product
 const typeOf = (p) => rangeLabel(p) || zoneOf(p)?.label || '';
 const reduceMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
+/** A rising line, for the "#1 trending" label. */
+const TrendIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M3 17l6-6 4 4 8-8" /><path d="M15 7h6v6" />
+  </svg>
+);
+/** A shield with a tick, for the rating pill. */
+const ShieldIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M12 3l8 3v6c0 4.6-3.4 8.2-8 9-4.6-.8-8-4.4-8-9V6l8-3z" /><path d="M8.5 12l2.5 2.5 4.5-5" />
+  </svg>
+);
+
 /** The one rating a buyer scans for: "CE · EN 397" or "EN 388 4133X". Never "CE" before an Indian (IS) standard. */
 function keyRating(p) {
   const std = firstStandard(p);
@@ -129,18 +142,22 @@ export default function TrendingShowcase() {
                       their links and buttons cannot be tabbed to; the side
                       cards get one button of their own to bring them in. */}
                   <div className="tc__body" {...(o !== 0 ? { inert: '' } : {})}>
-                    <Link to={`/products/${p.slug}`} className="tc__media" tabIndex={-1} aria-hidden="true">
-                      <img src={p.img} alt="" decoding="async" loading={Math.abs(o) > 2 ? 'lazy' : undefined} />
-                    </Link>
+                    {/* The stage: rank and type over a lit backdrop. */}
+                    <div className="tc__photo">
+                      <span className="tc__rank" aria-hidden="true">{String(rank).padStart(2, '0')}</span>
+                      <span className="tc__chip">{typeOf(p)}</span>
+                      <Link to={`/products/${p.slug}`} className="tc__media" tabIndex={-1} aria-hidden="true">
+                        <img src={p.img} alt="" decoding="async" loading={Math.abs(o) > 2 ? 'lazy' : undefined} />
+                      </Link>
+                    </div>
                     <div className="tc__info">
-                      <span className="tc__badge">#{rank} trending</span>
-                      <span className="tc__type">{typeOf(p)}</span>
+                      <span className="tc__badge"><TrendIcon /> #{rank} trending</span>
                       <h3 className="tc__name"><Link to={`/products/${p.slug}`}>{p.title}</Link></h3>
                       <span className="tc__more">
-                        {rating && <span className="tc__rating">{rating}</span>}
+                        {rating && <span className="tc__rating"><ShieldIcon /> {rating}</span>}
                         <span className="tc__cta">
-                          <Link to={`/products/${p.slug}`} className="tr-btn tr-btn--white">View <IconArrowRight width="16" height="16" /></Link>
                           <button type="button" className="tr-btn tr-btn--orange" onClick={() => add(p)} aria-label={`Add ${p.title} to quote`}>Add to quote</button>
+                          <Link to={`/products/${p.slug}`} className="tc__view" aria-label={`View ${p.title}`}><IconArrowRight width="18" height="18" /></Link>
                         </span>
                       </span>
                     </div>

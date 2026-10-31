@@ -4993,42 +4993,91 @@ body:has(.site-header--hidden) .pdp-bar { top: 0; }
    all together.
    ============================================================ */
 .tc { --card: clamp(280px, 30vw, 400px); --step: calc(var(--card) * 0.91 + 28px); }
-.tc__stage { display: grid; justify-items: center; align-items: center; padding-block: 8px; touch-action: pan-y; }
+/* Perspective so the side cards can tilt in towards the middle, like a
+   fanned-out deck. */
+.tc__stage { display: grid; justify-items: center; align-items: center; padding-block: 8px 24px; touch-action: pan-y; perspective: 1600px; }
 .tc__card {
   grid-area: 1 / 1; position: relative; width: var(--card);
-  transform: translateX(calc(var(--o) * var(--step))) scale(0.82);
-  opacity: 0.5; filter: saturate(0.7);
-  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s ease, filter 0.45s ease;
+  transform: translateX(calc(var(--o) * var(--step))) scale(0.82) rotateY(calc(var(--o) * -16deg));
+  opacity: 0.55; filter: saturate(0.6) brightness(0.85);
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s ease, filter 0.45s ease;
 }
-.tc__card.is-current { transform: translateX(0) scale(1); opacity: 1; filter: none; z-index: 2; }
+.tc__card.is-current { transform: translateX(0) scale(1) rotateY(0deg); opacity: 1; filter: none; z-index: 2; }
 .tc__card.is-side { z-index: 1; }
 /* Two or more away: waiting just outside, unseen, to slide in. */
 .tc__card.is-away { opacity: 0; pointer-events: none; }
-.tc__card.is-side:hover { opacity: 0.75; }
+.tc__card.is-side:hover { opacity: 0.8; }
 
-.tc__body { border-radius: 24px; overflow: hidden; background: #171c22; border: 1px solid rgba(255, 255, 255, 0.09); }
-.tc__card.is-current .tc__body { border-color: rgba(242, 138, 26, 0.55); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); }
-.tc__media { position: relative; display: block; aspect-ratio: 1; background: #fff; }
-.tc__media img { position: absolute; inset: 10%; width: 80%; height: 80%; object-fit: contain; }
-.tc__info { display: flex; flex-direction: column; gap: 8px; padding: 20px 22px 22px; min-width: 0; }
-.tc__badge {
-  align-self: flex-start; padding: 5px 11px; border-radius: 999px; background: var(--ddu-orange); color: var(--ddu-black);
-  font-weight: 800; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+/* The card: a dark plate holding a lit "stage" for the product. */
+.tc__body {
+  position: relative; border-radius: 28px; overflow: hidden;
+  background: linear-gradient(165deg, #222932 0%, #12171c 100%); border: 1px solid rgba(255, 255, 255, 0.08);
 }
-.tc__type { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #C9CED4; }
-.tc__name { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: clamp(24px, 2.2vw, 32px); line-height: 1.05; text-transform: none; }
+.tc__card.is-current .tc__body {
+  border-color: rgba(242, 138, 26, 0.6);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), 0 0 70px rgba(242, 138, 26, 0.16);
+}
+
+/* The stage: a warm spotlight with a floor shadow and a hazard stripe along
+   its foot. Product photos are cut out on white, which multiply blends away. */
+.tc__photo {
+  position: relative; isolation: isolate; overflow: hidden; margin: 10px 10px 0; border-radius: 20px; aspect-ratio: 1 / 0.9;
+  background: radial-gradient(120% 95% at 50% 38%, #ffffff 0%, #f8f1e7 42%, #ead8c0 100%);
+}
+.tc__photo::before {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; height: 7px;
+  background: repeating-linear-gradient(135deg, var(--ddu-orange) 0 9px, #0e1216 9px 18px);
+}
+.tc__photo::after {
+  content: ''; position: absolute; left: 20%; right: 20%; bottom: 9%; height: 16px; z-index: 0; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(14, 18, 22, 0.28), transparent);
+}
+/* The trending rank, large and outlined behind the product. */
+.tc__rank {
+  position: absolute; left: 14px; top: 2px; z-index: 0;
+  font-family: var(--font-display); font-weight: 800; font-size: clamp(64px, 6.6vw, 104px); line-height: 1; letter-spacing: -0.02em;
+  color: transparent; -webkit-text-stroke: 2px rgba(242, 138, 26, 0.6);
+}
+.tc__chip {
+  position: absolute; right: 12px; top: 12px; z-index: 2; max-width: 60%; padding: 6px 11px; border-radius: 999px;
+  background: rgba(14, 18, 22, 0.88); color: #fff;
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* No z-index here: one would wall the photo off in its own layer, and the
+   multiply blend would no longer reach the stage behind it. Being later in
+   the markup is enough to sit over the rank. */
+.tc__media { position: absolute; inset: 0; display: block; }
+.tc__media img { position: absolute; left: 12%; top: 12%; width: 76%; height: 74%; object-fit: contain; mix-blend-mode: multiply; }
+/* The product on the middle card floats gently. */
+.tc__card.is-current .tc__media img { animation: tcFloat 4.5s ease-in-out infinite; }
+@keyframes tcFloat { 50% { transform: translateY(-7px); } }
+
+.tc__info { display: flex; flex-direction: column; gap: 10px; padding: 18px 20px 20px; min-width: 0; }
+.tc__badge { display: inline-flex; align-items: center; gap: 7px; font-weight: 800; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ddu-orange); }
+.tc__name { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: clamp(26px, 2.4vw, 34px); line-height: 1.02; text-transform: none; }
 .tc__name a { color: #fff; text-decoration: none; }
 .tc__name a:hover { color: var(--ddu-orange); }
-.tc__rating { display: block; font-size: 14px; font-weight: 700; color: #fff; }
-.tc__cta { display: flex; gap: 10px; margin-top: 12px; }
-.tc__cta .tr-btn { flex: 1 1 0; height: 44px; padding: 0 12px; }
-/* Side cards show the photo and name only. The extras keep their space, so
-   every card is the same height and the row does not jump. */
-.tc__more { display: block; transition: opacity 0.3s ease; }
+.tc__more { display: flex; flex-direction: column; gap: 14px; transition: opacity 0.3s ease; }
+.tc__rating {
+  align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 13px; font-weight: 700; color: #fff;
+}
+.tc__rating svg { color: var(--ddu-orange); }
+.tc__cta { display: flex; align-items: center; gap: 10px; }
+.tc__cta .tr-btn { flex: 1 1 auto; height: 48px; padding: 0 16px; }
+.tc__view {
+  flex: none; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%;
+  background: #fff; color: var(--ddu-black); transition: background 0.2s, transform 0.2s;
+}
+.tc__view:hover { background: var(--ddu-orange); transform: rotate(-45deg); }
+/* Side cards show the stage and the name only. The extras keep their space,
+   so every card is the same height and the row does not jump. */
 .tc__card:not(.is-current) .tc__badge,
 .tc__card:not(.is-current) .tc__more { visibility: hidden; opacity: 0; }
 /* A side card is one big button that brings it to the middle. */
-.tc__pick { position: absolute; inset: 0; z-index: 3; width: 100%; padding: 0; border: 0; border-radius: 24px; background: none; cursor: pointer; }
+.tc__pick { position: absolute; inset: 0; z-index: 3; width: 100%; padding: 0; border: 0; border-radius: 28px; background: none; cursor: pointer; }
 
 .tc__nav { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 28px; }
 .tc__dots { display: flex; align-items: center; gap: 8px; }
@@ -5047,15 +5096,19 @@ body:has(.site-header--hidden) .pdp-bar { top: 0; }
    in at the edges, tucked behind it. */
 @media (max-width: 700px) {
   .tc { --card: min(72vw, 320px); --step: calc(var(--card) * 0.74); }
-  .tc__info { padding: 16px 16px 18px; }
+  .tc__info { padding: 14px 16px 18px; }
   .tc__name { font-size: 24px; }
+  .tc__rank { font-size: 60px; }
   .tc__cta { gap: 8px; }
+  .tc__cta .tr-btn { height: 46px; }
+  .tc__view { width: 46px; height: 46px; }
   .tc__nav { margin-top: 20px; gap: 12px; }
   .tc__dots { gap: 6px; }
   .tc__dot.is-on { width: 26px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .tc__card, .tc__more, .tc__dot, .st__arrow { transition: none; }
+  .tc__card, .tc__more, .tc__dot, .tc__view, .st__arrow { transition: none; }
+  .tc__card.is-current .tc__media img { animation: none; }
 }
 
 /* ============================================================

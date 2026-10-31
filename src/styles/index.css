@@ -4177,9 +4177,33 @@ a.pdp-datasheet, a.pdp-bar__datasheet { text-decoration: none; box-sizing: borde
 /* Same full-width 40px gutter as the other homepage sections (.hx-bleed). */
 .tr__inner { width: 100%; max-width: var(--page-max); margin-inline: auto; padding-inline: var(--gutter); }
 .tr__head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px 32px; margin-bottom: 32px; }
-.tr__eyebrow { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ddu-orange); }
-.tr__eyebrow::before { content: ""; width: 24px; height: 2px; background: currentColor; }
-.tr__head h2 { margin: 10px 0 0; font-family: var(--font-display); font-weight: 800; font-size: clamp(30px, 4vw, 52px); line-height: 1.05; letter-spacing: -0.01em; color: #fff; }
+/* "Trending now" as the heading (Oct 2026; it used to be a small label over
+   "What sites are ordering"): a pulsing "live" dot, TRENDING in solid white,
+   NOW as an orange outline like the DDUROGA wordmark in the banner photos,
+   and a short hazard stripe under it like the one along their foot. */
+.tr__title {
+  position: relative; display: inline-flex; align-items: center; gap: 0.28em; margin: 0; padding-bottom: 0.42em;
+  font-family: var(--font-display); font-weight: 800; font-size: clamp(34px, 5vw, 68px); line-height: 1;
+  letter-spacing: 0.01em; text-transform: uppercase; color: #fff;
+}
+.tr__title::after {
+  content: ""; position: absolute; left: 0; bottom: 0; width: min(150px, 40%); height: 7px; border-radius: 2px;
+  background: repeating-linear-gradient(135deg, var(--ddu-orange) 0 9px, rgba(255, 255, 255, 0.08) 9px 18px);
+}
+.tr__now { color: var(--ddu-orange); }
+@supports (-webkit-text-stroke: 1px) {
+  .tr__now { color: transparent; -webkit-text-stroke: clamp(1.5px, 0.04em, 2.5px) var(--ddu-orange); }
+}
+.tr__live {
+  flex: none; width: 0.26em; height: 0.26em; margin-right: 0.12em; border-radius: 50%; background: var(--ddu-orange);
+  animation: trLive 1.8s ease-out infinite;
+}
+@keyframes trLive {
+  0% { box-shadow: 0 0 0 0 rgba(242, 138, 26, 0.7); }
+  70% { box-shadow: 0 0 0 0.32em rgba(242, 138, 26, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(242, 138, 26, 0); }
+}
+@media (prefers-reduced-motion: reduce) { .tr__live { animation: none; } }
 .tr__all { color: #fff; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
 .tr__all:hover { color: var(--ddu-orange); }
 
@@ -4814,7 +4838,7 @@ body:has(.site-header--hidden) .pdp-bar { top: 0; }
    ============================================================ */
 
 /* Trending: the same title size as the other sections (was up to 52px). */
-.tr__head h2 { font-size: clamp(28px, 3.4vw, 44px); line-height: 1.08; }
+.tr__head .tr__title { font-size: clamp(34px, 5vw, 68px); }
 
 /* Catalogue: same rhythm as the other light sections. */
 .hp-catalogue { padding-block: clamp(64px, 7vw, 104px); }

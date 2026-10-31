@@ -92,10 +92,12 @@ export default function TrendingShowcase() {
     <section className="tr" aria-labelledby="trending-heading" ref={ref}>
       <div className="tr__inner">
         <div className="tr__head">
-          <div>
-            <span className="tr__eyebrow">Trending now</span>
-            <h2 id="trending-heading">What sites are ordering</h2>
-          </div>
+          {/* "Trending now" is the heading itself; the "What sites are
+              ordering" line under it was removed (client, Oct 2026). */}
+          <h2 id="trending-heading" className="tr__title">
+            <span className="tr__live" aria-hidden="true" />
+            <span>Trending</span> <span className="tr__now">now</span>
+          </h2>
           <Link to="/products" className="tr__all">All products <IconArrowRight width="16" height="16" /></Link>
         </div>
 

@@ -41,19 +41,23 @@ export default function ProductsPage() {
     return () => clearTimeout(t);
   }, [hash]);
 
-  // Back to the top whenever the filter or sort changes. ScrollToTop only
-  // fires on a new pathname, and filters change just the query string, so a
+  // Back to the top whenever the filter, sort or page changes. ScrollToTop only
+  // fires on a new pathname, and these change just the query string, so a
   // filter picked halfway down the page left the visitor in the middle of the
   // new results. While the phone filter drawer is open this waits until it
   // closes, so the drawer does not jump under the visitor's finger.
+  // Pages used to scroll the old grid into view before the new page rendered;
+  // the grid is replaced on each page, so phones dropped the scroll and left
+  // the visitor at the bottom (client's report, 31 Oct 2026).
   const filterKey = [params.get('cat'), params.get('range'), industry, sort].join('|');
-  const lastKey = useRef(filterKey);
+  const scrollKey = `${filterKey}|${params.get('page') || '1'}`;
+  const lastKey = useRef(scrollKey);
   const pendingTop = useRef(false);
   useEffect(() => {
-    if (lastKey.current === filterKey) return;
-    lastKey.current = filterKey;
+    if (lastKey.current === scrollKey) return;
+    lastKey.current = scrollKey;
     pendingTop.current = true;
-  }, [filterKey]);
+  }, [scrollKey]);
   useEffect(() => {
     if (!pendingTop.current || filtersOpen) return;
     pendingTop.current = false;
@@ -101,12 +105,11 @@ export default function ProductsPage() {
   const page = Math.min(Math.max(1, pageParam), pageCount);
   const shown = visible.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
-  const gridRef = useRef(null);
+  // The scroll back to the top happens once the new page has rendered (above).
   const goToPage = (n) => {
     const next = new URLSearchParams(params);
     if (n <= 1) next.delete('page'); else next.set('page', String(n));
     setParams(next, { replace: true });
-    gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   // Keep the page behind the filter offcanvas still, and close it on Escape.
@@ -250,7 +253,7 @@ export default function ProductsPage() {
               <>
                 {/* Keeps the outline h1 > h2 > h3 on phones, where the filter heading is in a closed drawer. */}
                 <h2 className="sr-only">Products</h2>
-                <div className="plp-grid plp-grid--cascade" ref={gridRef} key={`${filterKey}|${page}`}>
+                <div className="plp-grid plp-grid--cascade" key={`${filterKey}|${page}`}>
                   {shown.map((p) => (
                     <ProductCard key={p.slug} product={p} />
                   ))}

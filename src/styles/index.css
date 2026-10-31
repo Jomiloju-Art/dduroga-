@@ -5152,10 +5152,10 @@ body:has(.site-header--hidden) .pdp-bar { top: 0; }
 
 .ax-story { background: #fff; }
 .ax-story__top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px clamp(32px, 6vw, 96px); }
-.ax-story__title { margin: 10px 0 0; font-family: Georgia, 'Times New Roman', serif; font-weight: 400; font-size: clamp(2rem, 3.4vw, 3rem); line-height: 1.12; color: var(--ddu-black); }
+.ax-story__title { margin: 10px 0 0; font-family: var(--font-display); font-weight: 800; font-size: clamp(2rem, 3.4vw, 3rem); line-height: 1.12; color: var(--ddu-black); }
 .ax-story__lede { margin: 0; font-size: 1.05rem; line-height: 1.7; color: rgba(14, 18, 22, 0.78); }
 .ax-story__cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin-top: clamp(40px, 5vw, 72px); padding-top: 28px; border-top: 1px solid rgba(14, 18, 22, 0.12); }
-.ax-story__cols h2 { margin: 0 0 10px; font-family: Georgia, 'Times New Roman', serif; font-weight: 400; font-size: 1.25rem; color: var(--ddu-black); text-transform: none; }
+.ax-story__cols h2 { margin: 0 0 10px; font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; color: var(--ddu-black); text-transform: none; }
 .ax-story__cols p { margin: 0; font-size: 0.92rem; line-height: 1.65; color: rgba(14, 18, 22, 0.7); }
 @media (max-width: 900px) {
   .ax-story__top, .ax-story__cols { grid-template-columns: minmax(0, 1fr); }

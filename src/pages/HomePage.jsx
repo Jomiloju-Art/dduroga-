@@ -38,7 +38,7 @@ export default function HomePage() {
           <div className="hx-hero__lockup">
             <h1 className="hx-hero__tagline">Certified Industrial PPE &amp; Safety Equipment Supplied Across Africa</h1>
             <p className="hx-hero__lead">
-              Head-to-toe protection for oil &amp; gas, construction, manufacturing and ports, stocked in Lagos, delivered nationwide.
+              Head-to-toe protection for oil &amp; gas, construction, manufacturing and ports.
             </p>
             <div className="hx-hero__actions">
               <Link to="/products" className="btn hx-btn hx-hero__primary">

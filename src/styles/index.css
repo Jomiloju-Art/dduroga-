@@ -621,6 +621,12 @@ body.user-is-tabbing .mega-wrap:focus-within .mega-panel {
    still lands on the six entries above. Extra specificity to beat `.mega-col a`. */
 .mega-col a.mega-col__all { margin-top: 8px; font-size: 0.78rem; font-weight: 700; color: var(--orange-600); }
 
+/* Learning menu: a count beside a zone, and the FAQ column, whose questions
+   are sentences and wrap inside a fixed width. */
+.mega-col__n { margin-left: 4px; font-size: 0.75rem; font-weight: 500; color: var(--slate-500); }
+.mega-col--text { width: 250px; }
+.mega-col--text a { line-height: 1.35; padding: 6px 0; }
+
 /* One CTA for the whole panel on its own footer rule, instead of an orphan link
    at the foot of the last column. It carried inline styles before, which is the
    one thing this stylesheet exists to avoid. */
@@ -4422,6 +4428,11 @@ a.pdp-datasheet, a.pdp-bar__datasheet { text-decoration: none; box-sizing: borde
   font-family: var(--font-display); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ddu-black);
 }
 .lc-std__zone span { font-size: 0.75rem; color: rgba(14, 18, 22, 0.5); letter-spacing: 0; }
+.lc-tests { margin-top: 36px; }
+.lc-tests .lc-std__zone { margin-bottom: 14px; }
+.lc-tests .lc-topic { text-decoration: none; }
+/* Section links from the header's Learning menu land below the sticky header. */
+#guides, #standards, #tests, #faq, [id^='standards-'], [id^='faq-'] { scroll-margin-top: 96px; }
 .lc-std__col ul { list-style: none; margin: 0; padding: 0; }
 .lc-std__col li + li { border-top: 1px solid rgba(14, 18, 22, 0.07); }
 .lc-std__row {

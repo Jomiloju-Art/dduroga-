@@ -1,20 +1,15 @@
-import { Link, useSearchParams } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import Reveal from '../components/Reveal.jsx';
 import CtaBand from '../components/CtaBand.jsx';
 import StandardsSearch from '../components/StandardsSearch.jsx';
 import { guides } from '../data/guides.js';
 import { standards, standardHref, zoneLabels } from '../data/standards.js';
+import { TEST_FAMILIES, testsHref } from '../data/standardTests.js';
+import { faqs } from '../data/faqs.js';
 import { IconArrowRight } from '../components/Icons.jsx';
 import { usePageMeta } from '../lib/seo.js';
 import { pageMeta } from '../data/pageMeta.js';
-
-const faqs = [
-  { q: 'What standards do you test against?', a: 'Our PPE is tested against the relevant EN, ISO, IS and ANSI standards for each product line. Product pages list the applicable standards and certificates are available on request.' },
-  { q: 'Can I get custom branding or private-label products?', a: 'Yes. We support custom branding, colourways, packaging and private-label programmes on volume orders. Share your requirements via the quote form and we will scope it.' },
-  { q: 'How do I get samples before ordering?', a: 'Request samples via the contact form and our specialists will arrange certified samples for evaluation before you commit to volume.' },
-  { q: 'What are your lead times?', a: 'Lead time depends on the product line, the quantity and any customisation. We confirm it in writing with your quotation.' },
-  { q: 'Do you supply larger corporate or distributed teams?', a: 'Yes. We support multi-site programmes with consolidated ordering, documentation and repeatable quality across sites.' },
-];
 
 /** Topics come from the guides themselves, so a new guide with a new tag adds a chip. */
 const topics = [...new Set(guides.map((g) => g.tag))];
@@ -39,6 +34,15 @@ export default function LearningPage() {
 
   const shown = active ? guides.filter((g) => g.tag === active) : guides;
   const [lead, ...rest] = shown;
+
+  // The header's Learning menu links to a single answer (#faq-2): open it.
+  // ScrollToTop does the scrolling.
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (!/^#faq-\d+$/.test(hash)) return;
+    const el = document.querySelector(hash);
+    if (el && el.tagName === 'DETAILS') el.open = true;
+  }, [hash]);
 
   return (
     <>
@@ -66,7 +70,7 @@ export default function LearningPage() {
       </section>
 
       {/* Guides, filterable by topic. */}
-      <section className="lc-guides" aria-labelledby="lc-guides-title">
+      <section className="lc-guides" id="guides" aria-labelledby="lc-guides-title">
         <div className="lc-wrap">
           <div className="lc-head">
             <h2 id="lc-guides-title" className="lc-head__title">Guides</h2>
@@ -137,7 +141,7 @@ export default function LearningPage() {
       </section>
 
       {/* Every indexed standard, grouped by the body part it protects. */}
-      <section className="lc-std" aria-labelledby="lc-std-title">
+      <section className="lc-std" id="standards" aria-labelledby="lc-std-title">
         <div className="lc-wrap">
           <div className="lc-head lc-head--stack">
             <span className="zb__eyebrow">Reference</span>
@@ -152,7 +156,7 @@ export default function LearningPage() {
               const list = standards.filter((s) => s.zone === z);
               if (!list.length) return null;
               return (
-                <div className="lc-std__col" key={z}>
+                <div className="lc-std__col" id={`standards-${z}`} key={z}>
                   <h3 className="lc-std__zone">{zoneLabels[z]} <span>{list.length}</span></h3>
                   <ul>
                     {list.map((s) => (
@@ -168,6 +172,15 @@ export default function LearningPage() {
               );
             })}
           </div>
+          {/* Each standard's tests, explained in its guide. */}
+          <div className="lc-tests" id="tests">
+            <h3 className="lc-std__zone">How each standard is tested</h3>
+            <div className="lc-topics">
+              {TEST_FAMILIES.map((f) => (
+                <Link key={f.id} className="lc-topic" to={testsHref(f)}>{f.label}</Link>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -181,8 +194,8 @@ export default function LearningPage() {
             <Link to="/contact" className="zb__all">Ask our specialist <IconArrowRight width="14" height="14" /></Link>
           </div>
           <div className="detail-accordions lc-faq__list">
-            {faqs.map((f) => (
-              <details key={f.q}>
+            {faqs.map((f, i) => (
+              <details key={f.q} id={`faq-${i + 1}`}>
                 <summary>{f.q}</summary>
                 <div className="acc-body"><p>{f.a}</p></div>
               </details>

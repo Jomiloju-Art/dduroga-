@@ -3,12 +3,21 @@ import { NavLink, Link, useLocation } from 'react-router-dom';
 import Logo from './Logo.jsx';
 import SearchModal from './SearchModal.jsx';
 import { categories, industryCatalog } from '../data/products.js';
+import { guides } from '../data/guides.js';
+import { standards, zoneLabels } from '../data/standards.js';
+import { faqs } from '../data/faqs.js';
 import { IconArrowRight, IconSearch, IconBag, IconClose, IconChevronLeft, IconChevronRight } from './Icons.jsx';
 import { useQuote } from '../quote/QuoteContext.jsx';
 import { useScrollLock } from '../lib/scrollLock.js';
 
 /** Entries shown per column in the Products mega panel before the "All …" link. */
 const MEGA_ITEMS = 6;
+
+/* The Learning mega panel (client's request, 31 Oct 2026): guides, standards
+   and tests, FAQs. A guide's menu label is its title up to the colon
+   ("Cut resistance explained: EN 388 vs …" -> "Cut resistance explained"). */
+const guideLabel = (g) => g.title.split(':')[0];
+const STANDARD_ZONES = ['head', 'hand', 'body', 'feet'].map((z) => ({ id: z, label: zoneLabels[z], count: standards.filter((s) => s.zone === z).length }));
 
 /* The homepage header used to sit see-through over the hero photo, which left
    the navy half of the logo hard to read on the dark image. It is now the same
@@ -185,7 +194,7 @@ export default function Navbar() {
                   <IconChevronLeft width="20" height="20" />
                 </button>
                 <span className="nav-mobile-head__title">
-                  {sub === 'products' ? 'Products' : 'Industries'}
+                  {{ products: 'Products', industries: 'Industries', learning: 'Learning' }[sub]}
                 </span>
               </div>
             )}
@@ -257,10 +266,67 @@ export default function Navbar() {
                   About Us
                 </NavLink>
               </li>
-              <li>
+              {/* Learning mega menu (desktop hover), built like Products. */}
+              <li
+                className="mega-wrap"
+                onMouseEnter={() => setMenuOpen(true)}
+                onMouseLeave={() => setMenuOpen(false)}
+                onFocus={() => setMenuOpen(true)}
+                onBlur={() => setMenuOpen(false)}
+              >
                 <NavLink to="/learning" className={({ isActive }) => (isActive ? 'active' : undefined)}>
                   Learning
                 </NavLink>
+                <div className="mega-panel" aria-label="Learning submenu">
+                  <div className="mega-cols">
+                    <div className="mega-col">
+                      <h4>Guides</h4>
+                      <ul>
+                        {guides.slice(0, MEGA_ITEMS).map((g) => (
+                          <li key={g.slug}>
+                            <Link to={`/learning/${g.slug}`}>{guideLabel(g)}</Link>
+                          </li>
+                        ))}
+                      </ul>
+                      <Link className="mega-col__all" to="/learning#guides">
+                        All {guides.length} guides
+                      </Link>
+                    </div>
+
+                    <div className="mega-col">
+                      <h4>Standards &amp; tests</h4>
+                      <ul>
+                        {STANDARD_ZONES.map((z) => (
+                          <li key={z.id}>
+                            <Link to={`/learning#standards-${z.id}`}>{z.label} protection <span className="mega-col__n">{z.count}</span></Link>
+                          </li>
+                        ))}
+                        <li><Link to="/learning#tests">How products are tested</Link></li>
+                      </ul>
+                      <Link className="mega-col__all" to="/learning#standards">
+                        All {standards.length} standards
+                      </Link>
+                    </div>
+
+                    <div className="mega-col mega-col--text">
+                      <h4>FAQs</h4>
+                      <ul>
+                        {faqs.map((f, i) => (
+                          <li key={f.q}>
+                            <Link to={`/learning#faq-${i + 1}`}>{f.q}</Link>
+                          </li>
+                        ))}
+                      </ul>
+                      <Link className="mega-col__all" to="/learning#faq">
+                        All FAQs
+                      </Link>
+                    </div>
+                  </div>
+
+                  <Link className="mega-foot" to="/learning">
+                    Visit the Learning centre <IconArrowRight width="14" height="14" />
+                  </Link>
+                </div>
               </li>
               <li>
                 <NavLink to="/contact" className={({ isActive }) => (isActive ? 'active' : undefined)}>
@@ -283,7 +349,10 @@ export default function Navbar() {
                     <IconChevronRight width="18" height="18" />
                   </button>
                   <Link className="nav-mobile-item" to="/about">About Us</Link>
-                  <Link className="nav-mobile-item" to="/learning">Learning</Link>
+                  <button type="button" className="nav-mobile-item" onClick={() => setSub('learning')}>
+                    <span>Learning</span>
+                    <IconChevronRight width="18" height="18" />
+                  </button>
                   <Link className="nav-mobile-item" to="/contact">Contact</Link>
                   <Link className="nav-mobile-item nav-mobile-item--cta" to="/contact">Request a quote</Link>
                 </nav>
@@ -300,6 +369,14 @@ export default function Navbar() {
                   {sub === 'industries' && industryCatalog.map((i) => (
                     <Link className="nav-mobile-item" to={`/products?industry=${i.slug}`} key={i.slug}>{i.label}</Link>
                   ))}
+                  {sub === 'learning' && (
+                    <>
+                      <Link className="nav-mobile-item" to="/learning">Learning centre</Link>
+                      <Link className="nav-mobile-item" to="/learning#guides">Guides</Link>
+                      <Link className="nav-mobile-item" to="/learning#standards">Standards &amp; tests</Link>
+                      <Link className="nav-mobile-item" to="/learning#faq">FAQs</Link>
+                    </>
+                  )}
                 </nav>
               )}
             </div>

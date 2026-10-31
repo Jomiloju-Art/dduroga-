@@ -5008,15 +5008,19 @@ body:has(.site-header--hidden) .pdp-bar { top: 0; }
 
 /* Creative but simple (client, Oct 2026): one idea, the arch, and nothing
    else competing with the product. */
-.tc__body { position: relative; border-radius: 28px; overflow: hidden; background: #171c22; border: 1px solid rgba(255, 255, 255, 0.08); }
-.tc__card.is-current .tc__body { border-color: rgba(242, 138, 26, 0.5); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); }
+/* No plate round the card (client, Oct 2026: "the arch is still encompassed
+   by a square"): the arch is the card's shape, and the details sit on the
+   section's dark background under it. */
+.tc__body { position: relative; }
+/* The middle card: a thin orange line round the arch itself. */
+.tc__card.is-current .tc__photo { box-shadow: 0 0 0 2px rgba(242, 138, 26, 0.75), 0 24px 60px rgba(0, 0, 0, 0.45); }
 
 /* The stage: an arch like the one behind the workers in the home banners,
    softly lit, with a floor shadow. The top is a half circle: 50% of the
    width across, which is 50/1.08 = 46.3% of the height down. Product photos
    are cut out on white, which multiply blends away. */
 .tc__photo {
-  position: relative; isolation: isolate; overflow: hidden; margin: 12px 12px 0; aspect-ratio: 1 / 1.08;
+  position: relative; isolation: isolate; overflow: hidden; margin: 2px 2px 0; aspect-ratio: 1 / 1.08;
   border-radius: 50% 50% 16px 16px / 46.3% 46.3% 16px 16px;
   background: radial-gradient(95% 70% at 50% 30%, #ffffff 0%, #faf3ea 50%, #f0dfc9 100%);
 }
@@ -5029,7 +5033,7 @@ body:has(.site-header--hidden) .pdp-bar { top: 0; }
 .tc__media { position: absolute; inset: 0; display: block; }
 .tc__media img { position: absolute; left: 12%; top: 16%; width: 76%; height: 68%; object-fit: contain; mix-blend-mode: multiply; }
 
-.tc__info { display: flex; flex-direction: column; gap: 8px; padding: 18px 20px 20px; min-width: 0; }
+.tc__info { display: flex; flex-direction: column; gap: 8px; padding: 18px 4px 4px; min-width: 0; }
 .tc__meta { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #9aa3ad; }
 .tc__meta b { margin-right: 6px; color: var(--ddu-orange); font-weight: 800; }
 .tc__name { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: clamp(26px, 2.4vw, 34px); line-height: 1.02; text-transform: none; }
@@ -5048,7 +5052,7 @@ body:has(.site-header--hidden) .pdp-bar { top: 0; }
    space, so every card is the same height and the row does not jump. */
 .tc__card:not(.is-current) .tc__more { visibility: hidden; opacity: 0; }
 /* A side card is one big button that brings it to the middle. */
-.tc__pick { position: absolute; inset: 0; z-index: 3; width: 100%; padding: 0; border: 0; border-radius: 28px; background: none; cursor: pointer; }
+.tc__pick { position: absolute; inset: 0; z-index: 3; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; }
 
 .tc__nav { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 28px; }
 .tc__dots { display: flex; align-items: center; gap: 8px; }
@@ -5067,7 +5071,7 @@ body:has(.site-header--hidden) .pdp-bar { top: 0; }
    in at the edges, tucked behind it. */
 @media (max-width: 700px) {
   .tc { --card: min(72vw, 320px); --step: calc(var(--card) * 0.74); }
-  .tc__info { padding: 14px 16px 18px; }
+  .tc__info { padding: 14px 2px 2px; }
   .tc__name { font-size: 24px; }
   .tc__cta { gap: 8px; }
   .tc__cta .tr-btn { height: 46px; }
